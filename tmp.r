@@ -24,3 +24,4 @@ plotAltVsRef <- function ( ref, alt, title = "Alt vs Ref",
     points(ref[potentialOutliers], alt[potentialOutliers], col="black", pch="x", cex = 2)
   }
 }
+
