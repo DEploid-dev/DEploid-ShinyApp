@@ -1,11 +1,12 @@
 library(DEploid)
-
+source("tmp.r")
 function(input, output) {
   output$plot <- renderPlot({
 
     input$newplot
 
-    vcfFile = "~/DEploid-ShinyApp/Data/PG0390-C.test.vcf.gz"
+    tmpDir = getwd()
+    vcfFile = paste(tmpDir, "/Data/PG0390-C.test.vcf.gz", sep="")
 #    vcfFile <- input$vcfFile
 
 #    if (is.null(vcfFile))
@@ -13,7 +14,6 @@ function(input, output) {
 
     coverage <- extractCoverageFromVcf(vcfFile)
 
-    plot(coverage$refCount, coverage$altCount)
-
+    plotAltVsRef(coverage$refCount, coverage$altCount)
   })
 }
