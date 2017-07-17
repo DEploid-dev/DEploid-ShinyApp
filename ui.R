@@ -1,9 +1,11 @@
 
 library(shinythemes)
+library(plotly)
+library(ggplot2)
 
 navbarPage("DEploid-R",
            theme = shinytheme("flatly"),
-           ########## tabPanel 1.
+           ########## tabPanel 1. Data Display
            tabPanel("Raw Data",          
              fluidPage(
                sidebarPanel(
@@ -22,7 +24,7 @@ navbarPage("DEploid-R",
 
              )),
            
-           ########## tabPanel 2.           
+           ########## tabPanel 2. Total Coverage           
            tabPanel("Total Coverage",
                     fluidPage(
                       sidebarLayout(
@@ -41,7 +43,7 @@ navbarPage("DEploid-R",
 
 
            
-           ########## tabPanel 3.           
+           ########## tabPanel 3. ALT vs REF          
            tabPanel("ALT vs REF",
              fluidPage(
                sidebarLayout(
@@ -56,7 +58,7 @@ navbarPage("DEploid-R",
                  )
                )
              ),
-           ########## tabPanel 4.
+           ########## tabPanel 4. WSAF
            tabPanel("Allele Frequency",
              fluidPage(
                sidebarLayout(
@@ -68,9 +70,9 @@ navbarPage("DEploid-R",
                  mainPanel(
                    tabsetPanel(type = "tabs", 
                                tabPanel("WSAF", 
-                                        fluidRow(column(6, plotOutput("wsaf")))),
+                                        fluidRow(column(6, plotlyOutput("wsaf")))),
                                tabPanel("WSAF v.s.PLAF", 
-                                        fluidRow(column(6, plotOutput("wsvspl"))))
+                                        fluidRow(column(6, plotlyOutput("wsvspl"))))
                    
                          ))
                         )

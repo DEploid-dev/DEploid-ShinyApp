@@ -11,7 +11,8 @@ histWSAF <- function ( obsWSAF, exclusive = TRUE,
   if ( exclusive ){
     tmpWSAFIndex <- which( ( (obsWSAF < 1) * (obsWSAF > 0) ) == 1)
   }
-  return (hist(obsWSAF[tmpWSAFIndex], main = title,
-               breaks = seq(0, 1, by = 0.1), xlab = "WSAF", col = "grey",
-               cex.lab = cex.lab, cex.main = cex.main, cex.axis = cex.axis))
+  # return (hist(obsWSAF[tmpWSAFIndex], main = title,
+  #              breaks = seq(0, 1, by = 0.1), xlab = "WSAF", col = "grey",
+  #              cex.lab = cex.lab, cex.main = cex.main, cex.axis = cex.axis))
+  return (plot_ly(x = obsWSAF[tmpWSAFIndex], type = "histogram", color = "grey"))
 }

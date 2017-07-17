@@ -1,5 +1,7 @@
 
 library(DEploid)
+library(plotly)
+library(ggplot2)
 source("tmp.r")
 source("histWSAF.R")
 source("plotWSAFvsPLAF.R")
@@ -19,7 +21,7 @@ function(input, output, session) {
     }
   })
 
-  ########## tabPanel 1.
+  ########## tabPanel 1. Data Display
   output$orig_data <-renderTable({
     vcfFile <- input$File1$datapath
     coverage <- extractCoverageFromVcf(vcfFile)
@@ -36,7 +38,7 @@ function(input, output, session) {
     head(combine, n = 20)
   })
   
-  ########## tabPanel 2.  
+  ########## tabPanel 2. Total Coverage 
   output$text <- renderText({
     HTML(paste("Description", "Red dots represent ouliars being eliminated",
                sep="<br/>"))
@@ -52,7 +54,7 @@ function(input, output, session) {
                         threshold = 0.995, window.size = 10)
   })  
   
-  ########## tabPanel 3.  
+  ########## tabPanel 3. ALT vs REF 
   output$text1 <- renderText({
     HTML(paste("Description", "Scatter Plot demonstrates relationship between ref and alt",
                sep="<br/>")
@@ -65,7 +67,7 @@ function(input, output, session) {
   })
   
 
-  ########## tabPanel 4. 
+  ########## tabPanel 4. WSAF
   output$text2 <- renderText({
     HTML(paste("WSAF Description", "Allele Frequency within sample.",
                sep="<br/>")
@@ -76,14 +78,15 @@ function(input, output, session) {
                sep="<br/>")
     )})
   
-  output$wsaf <- renderPlot({
+  output$wsaf <- renderPlotly({
     vcfFile <- input$File1$datapath
     coverage <- extractCoverageFromVcf(vcfFile)
     obsWSAF = computeObsWSAF(coverage$altCount, coverage$refCount )
     histWSAF(obsWSAF)
+    # plot_ly(mtcars, x = ~mpg, y = ~wt)
   })
   
-  output$wsvspl <- renderPlot({
+  output$wsvspl <- renderPlotly({
     vcfFile <- input$File1$datapath
     coverage <- extractCoverageFromVcf(vcfFile)
     obsWSAF = computeObsWSAF(coverage$altCount, coverage$refCount )
