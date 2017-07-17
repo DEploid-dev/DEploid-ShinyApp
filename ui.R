@@ -7,9 +7,9 @@ navbarPage("DEploid-R",
            tabPanel("Raw Data",          
              fluidPage(
                sidebarPanel(
-                 fileInput("vcfFile", "Choose VCF file",
+                 fileInput("File1", "Choose VCF file",
                            accept=c('text', 'ref', 'txt')),
-                 fileInput("plafFile", "Choose PLAF file",
+                 fileInput("File2", "Choose PLAF file",
                            accept=c('text', 'ref', 'txt'))
                  
                ),
@@ -17,44 +17,64 @@ navbarPage("DEploid-R",
                  tabsetPanel(
                    tabPanel("First 20 Rows of Original Data", tableOutput("orig_data")),
                    tabPanel("First 20 Rows of PLAF Data", tableOutput("plaf_data"))
-                 )
-               )
+                 ))
+
+
              )),
+           
            ########## tabPanel 2.           
+           tabPanel("Total Coverage",
+                    fluidPage(
+                      sidebarLayout(
+                        sidebarPanel(
+                          htmlOutput("text")
+                        ),
+                        fluidRow(
+                          column(7,
+                                 mainPanel(
+                                   plotOutput("total")
+                                 ))
+                          
+                        )
+                      )
+                   )),
+
+
+           
+           ########## tabPanel 3.           
            tabPanel("ALT vs REF",
              fluidPage(
                sidebarLayout(
                   sidebarPanel(
-                   actionButton("newplot", "Scatter Plot")
+                    htmlOutput("text1")
                   ),
-                  mainPanel(
-                    #      tableOutput(head('contents'))
-                    #      plot(
-                    #      print(head(coverage))
-                    plotOutput("plot")
+                  column(6,
+                         mainPanel(
+                           plotOutput("plot")
+                           ), column(4))
+
                  )
                )
-             )),
-           ########## tabPanel 3.
+             ),
+           ########## tabPanel 4.
            tabPanel("Allele Frequency",
              fluidPage(
                sidebarLayout(
                  sidebarPanel(
-                   actionButton("af1", "WSAF"),
-                   textOutput("text1"),
-                   hr(),
-                   actionButton("af2", "WSAF v.s.PLAF")
+                    htmlOutput("text2"),
+                    hr(),
+                    htmlOutput("text3")
                  ),
                  mainPanel(
                    tabsetPanel(type = "tabs", 
-                               tabPanel("WSAF", plotOutput("wsaf")),
-                               tabPanel("WSAF v.s.PLAF", plotOutput("wsvspl")),
-                               tabPanel("MCMC proportion", plotOutput("prop")),
-                               tabPanel("WSAF (observed vs expected", plotOutput("obex"))
+                               tabPanel("WSAF", 
+                                        fluidRow(column(6, plotOutput("wsaf")))),
+                               tabPanel("WSAF v.s.PLAF", 
+                                        fluidRow(column(6, plotOutput("wsvspl"))))
                    
-                 ))
-               )
-             ))
+                         ))
+                        )
+                   ))
            
                     
              

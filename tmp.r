@@ -1,3 +1,4 @@
+
 plotAltVsRef <- function ( ref, alt, title = "Alt vs Ref",
                            exclude.ref = c(), exclude.alt = c(), potentialOutliers = c(),
                            cex.lab = 1, cex.main = 1, cex.axis = 1 ){
