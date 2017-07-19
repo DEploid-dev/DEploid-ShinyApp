@@ -2,9 +2,9 @@
 library(DEploid)
 library(plotly)
 library(ggplot2)
-source("tmp.r")
-source("histWSAF.R")
-source("plotWSAFvsPLAF.R")
+source("plotAltVsRef.plotly.R")
+source("histWSAF.plotly.R")
+source("plotWSAFvsPLAF.plotly.R")
 source("plot.total.coverage.R")
 
 function(input, output, session) {
@@ -60,10 +60,12 @@ function(input, output, session) {
                sep="<br/>")
     )})
   
-  output$plot <- renderPlot({
+  output$plot <- renderPlotly({
     vcfFile <- input$File1$datapath
     coverage <- extractCoverageFromVcf(vcfFile)
-    plotAltVsRef(coverage$refCount, coverage$altCount)
+    ref <- coverage$refCount
+    alt <- coverage$altCount
+    plotAltVsRef.plotly(ref, alt)
   })
   
 
@@ -81,9 +83,7 @@ function(input, output, session) {
   output$wsaf <- renderPlotly({
     vcfFile <- input$File1$datapath
     coverage <- extractCoverageFromVcf(vcfFile)
-    obsWSAF = computeObsWSAF(coverage$altCount, coverage$refCount )
-    histWSAF(obsWSAF)
-    # plot_ly(mtcars, x = ~mpg, y = ~wt)
+    histWSAF.plotly(obsWSAF)
   })
   
   output$wsvspl <- renderPlotly({
@@ -95,7 +95,7 @@ function(input, output, session) {
     # PG0390CoverageVcf.deconv = dEploid(paste("-vcf", vcfFile, "-plaf", plafFile, "-noPanel"))
     # prop = PG0390CoverageVcf.deconv$Proportions[dim(PG0390CoverageVcf.deconv$Proportions)[1],]
     # expWSAF = t(PG0390CoverageVcf.deconv$Haps) %*% prop
-    plotWSAFvsPLAF(plaf, obsWSAF)
+    plotWSAFvsPLAF.plotly(plaf, obsWSAF)
   })
   
 

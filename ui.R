@@ -13,15 +13,12 @@ navbarPage("DEploid-R",
                            accept=c('text', 'ref', 'txt')),
                  fileInput("File2", "Choose PLAF file",
                            accept=c('text', 'ref', 'txt'))
-                 
                ),
                mainPanel(
                  tabsetPanel(
                    tabPanel("First 20 Rows of Original Data", tableOutput("orig_data")),
                    tabPanel("First 20 Rows of PLAF Data", tableOutput("plaf_data"))
                  ))
-
-
              )),
            
            ########## tabPanel 2. Total Coverage           
@@ -36,7 +33,6 @@ navbarPage("DEploid-R",
                                  mainPanel(
                                    plotOutput("total")
                                  ))
-                          
                         )
                       )
                    )),
@@ -47,16 +43,15 @@ navbarPage("DEploid-R",
            tabPanel("ALT vs REF",
              fluidPage(
                sidebarLayout(
-                  sidebarPanel(
-                    htmlOutput("text1")
-                  ),
-                  column(6,
-                         mainPanel(
-                           plotOutput("plot")
-                           ), column(4))
+                 sidebarPanel(
+                   htmlOutput("text1")
+                 ),
+                 column(8,
+                        mainPanel(
+                          plotlyOutput("plot")
+                        ))
 
-                 )
-               )
+                 ))
              ),
            ########## tabPanel 4. WSAF
            tabPanel("Allele Frequency",
