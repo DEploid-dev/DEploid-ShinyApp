@@ -1,7 +1,4 @@
-
 library(DEploid)
-library(plotly)
-library(ggplot2)
 library(dplyr)
 
 source("plotAltVsRef.plotly.R")
@@ -32,7 +29,7 @@ function(input, output, session) {
     coverage <- extractCoverageFromVcf(vcfFile)
     head(coverage, n = 20)
   })
-  
+
   output$plaf_data <-renderTable({
     vcfFile <- input$File1$datapath
     coverage <- extractCoverageFromVcf(vcfFile)
@@ -42,33 +39,33 @@ function(input, output, session) {
     colnames(combine) <- c("CHROM", "POS", "PLAF")
     head(combine, n = 20)
   })
-  
-  ########## tabPanel 2. Total Coverage 
+
+  ########## tabPanel 2. Total Coverage
   output$text <- renderText({
     HTML(paste("Description", "Red dots represent ouliars being eliminated",
                sep="<br/>"))
     })
-  
+
   output$total <- renderPlot({
     vcfFile <- input$File1$datapath
     coverage <- extractCoverageFromVcf(vcfFile)
     ref <- coverage$refCount
     alt <- coverage$altCount
     chroms = coverage$CHROM
-    plot.total.coverage(ref, alt, chroms, cex.lab = 1, cex.main = 1, cex.axis = 1,  
+    plot.total.coverage(ref, alt, chroms, cex.lab = 1, cex.main = 1, cex.axis = 1,
                         threshold = 0.995, window.size = 10)
-  })  
-  
+  })
+
   ########## tabPanel 3. WSAF across Chromosome
   output$text4 <- renderText({
     HTML(paste("Description", "Allele frequency across different chromosome.",
                sep="<br/>")
-    )})  
-  
+    )})
+
   output$chromo <- renderPlotly({
     vcfFile <- input$File1$datapath
     coverage <- extractCoverageFromVcf(vcfFile)
-    coverage2 = merge(coverage, location, 
+    coverage2 = merge(coverage, location,
                       by.x = "CHROM", by.y = "CHROM",
                       all.x = T)
     coverage2$WSAF = coverage2$altCount/(coverage2$altCount + coverage2$refCount)
@@ -77,10 +74,10 @@ function(input, output, session) {
     # replace = append(location$size2[1:13], replace)
     # replace = append(0,replace)
     # location$size3 = replace
-    # coverage2 = merge(coverage2, location, 
+    # coverage2 = merge(coverage2, location,
     #                   by.x = "CHROM", by.y = "CHROM", all.x = TRUE)
     # coverage2$POS2 = coverage2$POS + coverage2$size3
-    
+
     checkft = c("Pf3D7_01_v3", "Pf3D7_02_v3", "Pf3D7_03_v3", "Pf3D7_04_v3",
                 "Pf3D7_05_v3", "Pf3D7_06_v3", "Pf3D7_07_v3", "Pf3D7_08_v3",
                 "Pf3D7_09_v3", "Pf3D7_10_v3", "Pf3D7_11_v3", "Pf3D7_12_v3",
@@ -118,17 +115,17 @@ function(input, output, session) {
     }
     coverage3 = filter(coverage2, CHROM %in% type)
     plot.wsaf.vs.chromosome.plotly(coverage3)
-  }) 
-  
+  })
 
-  
-  
-  ########## tabPanel 4. ALT vs REF 
+
+
+
+  ########## tabPanel 4. ALT vs REF
   output$text1 <- renderText({
     HTML(paste("Description", "Scatter Plot demonstrates relationship between ref and alt",
                sep="<br/>")
     )})
-  
+
   output$plot <- renderPlotly({
     vcfFile <- input$File1$datapath
     coverage <- extractCoverageFromVcf(vcfFile)
@@ -136,26 +133,26 @@ function(input, output, session) {
     alt <- coverage$altCount
     plotAltVsRef.plotly(ref, alt)
   })
-  
+
 
   ########## tabPanel 5. WSAF
   output$text2 <- renderText({
     HTML(paste("WSAF Description", "Allele Frequency within sample.",
                sep="<br/>")
     )})
-  
+
   output$text3 <- renderText({
     HTML(paste("WSAF v.s.PLAF Description", "Allele Frequency within sample vs within population.",
                sep="<br/>")
     )})
-  
+
   output$wsaf <- renderPlotly({
     vcfFile <- input$File1$datapath
     coverage <- extractCoverageFromVcf(vcfFile)
     obsWSAF = computeObsWSAF(coverage$altCount, coverage$refCount)
     histWSAF.plotly(obsWSAF)
   })
-  
+
   output$wsvspl <- renderPlotly({
     vcfFile <- input$File1$datapath
     coverage <- extractCoverageFromVcf(vcfFile)
@@ -167,7 +164,7 @@ function(input, output, session) {
     # expWSAF = t(PG0390CoverageVcf.deconv$Haps) %*% prop
     plotWSAFvsPLAF.plotly(plaf, obsWSAF)
   })
-  
+
 
 }
 
