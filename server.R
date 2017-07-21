@@ -1,6 +1,5 @@
 library(DEploid)
 library(dplyr)
-library(dygraphs)
 library(quantmod)
 
 source("plotAltVsRef.plotly.R")
@@ -74,6 +73,8 @@ function(input, output, session) {
 
   output$dygraph <- renderDygraph ({
     vcfFile <- input$File1$datapath
+    plafFile <- input$File2$datapath
+
     coverage <- extractCoverageFromVcf(vcfFile)
 
     checkft = as.character(unique(coverage$CHROM))
@@ -83,7 +84,23 @@ function(input, output, session) {
         type = paste(type,checkft[as.integer(i)], sep = "")
     }
 
-    plot.wsaf.vs.pos.dygraph (coverage, chrom = type)
+    obsWSAF = computeObsWSAF( coverage$altCount, coverage$refCount )
+
+    ### ADD ACTION FOR DECONVOLUTION
+    deconvoluted = dEploid(paste("-vcf", vcfFile, "-plaf", plafFile, "-noPanel"))
+    prop = deconvoluted$Proportions[dim(deconvoluted$Proportions)[1],]
+    expWSAF = t(deconvoluted$Haps) %*% prop
+
+    chroms = unique(coverage$CHROM)
+
+    wsaf.list = list()
+    for (chromi in 1:length(chroms)){
+        idx = which(coverage$CHROM == chroms[chromi])
+        wsaf.list[[as.character(chroms[chromi])]] = data.frame(
+          pos = coverage$POS[idx], obsWSAF = obsWSAF[idx], expWSAF = expWSAF[idx])
+    }
+
+    plot.wsaf.vs.pos.dygraph (wsaf.list[[type]], chrom = type)
   })
 
 
@@ -91,7 +108,7 @@ function(input, output, session) {
 
   ########## tabPanel 4. ALT vs REF
   output$text1 <- renderText({
-    HTML(paste("Description", "Scatter Plot demonstrates relationship between ref and alt",
+    HTML(paste("Description", "Scatter plot demonstrates relationship between numbers of reference and alternative alleles",
                sep="<br/>")
     )})
 

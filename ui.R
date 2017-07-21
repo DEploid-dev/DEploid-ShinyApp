@@ -65,12 +65,12 @@ navbarPage("DEploid-R",
            ########## tabPanel 4. ALT vs REF
            tabPanel("ALT vs REF",
              fluidPage(
-               fluidRow(
+               fixedRow(
                  column(width = 7,
                    htmlOutput("text1")
                  ),
-                 column(width = 12,
-                        mainPanel(
+                 column(width = 12, height = 12,
+                        mainPanel(width = 8, height = 12,
                           plotlyOutput("plot")
                         ))
 
