@@ -1,12 +1,14 @@
 library(DEploid)
 library(dplyr)
+library(dygraphs)
+library(quantmod)
 
 source("plotAltVsRef.plotly.R")
 source("histWSAF.plotly.R")
 source("plotWSAFvsPLAF.plotly.R")
 source("plot.total.coverage.R")
 source("chromosome.plotly.R")
-
+source("chromosome.dygraphs.R")
 
 function(input, output, session) {
 
@@ -62,59 +64,26 @@ function(input, output, session) {
                sep="<br/>")
     )})
 
-  output$chromo <- renderPlotly({
+  output$chromList <- renderUI({
+  vcfFile <- input$File1$datapath
+    coverage <- extractCoverageFromVcf(vcfFile)
+
+    checkft = as.character(unique(coverage$CHROM))
+    return(checkft)
+  })
+
+  output$dygraph <- renderDygraph ({
     vcfFile <- input$File1$datapath
     coverage <- extractCoverageFromVcf(vcfFile)
-    coverage2 = merge(coverage, location,
-                      by.x = "CHROM", by.y = "CHROM",
-                      all.x = T)
-    coverage2$WSAF = coverage2$altCount/(coverage2$altCount + coverage2$refCount)
-    # location$size2 = cumsum(location$CHROMSIZE)
-    # replace = c()
-    # replace = append(location$size2[1:13], replace)
-    # replace = append(0,replace)
-    # location$size3 = replace
-    # coverage2 = merge(coverage2, location,
-    #                   by.x = "CHROM", by.y = "CHROM", all.x = TRUE)
-    # coverage2$POS2 = coverage2$POS + coverage2$size3
 
-    checkft = c("Pf3D7_01_v3", "Pf3D7_02_v3", "Pf3D7_03_v3", "Pf3D7_04_v3",
-                "Pf3D7_05_v3", "Pf3D7_06_v3", "Pf3D7_07_v3", "Pf3D7_08_v3",
-                "Pf3D7_09_v3", "Pf3D7_10_v3", "Pf3D7_11_v3", "Pf3D7_12_v3",
-                "Pf3D7_13_v3", "Pf3D7_14_v3")
+    checkft = as.character(unique(coverage$CHROM))
+
     type=""
     for(i in input$select){
-      if(i==1){
-        type = paste(type,checkft[1], sep = "")  }
-      if(i==2){
-        type = paste(type,checkft[2], sep = "")  }
-      if(i==3){
-        type = paste(type,checkft[3], sep = "")  }
-      if(i==4){
-        type = paste(type,checkft[4], sep = "")  }
-      if(i==5){
-        type = paste(type,checkft[5], sep = "")  }
-      if(i==6){
-        type = paste(type,checkft[6], sep = "")  }
-      if(i==7){
-        type = paste(type,checkft[7], sep = "")  }
-      if(i==8){
-        type = paste(type,checkft[8], sep = "")  }
-      if(i==9){
-        type = paste(type,checkft[9], sep = "")  }
-      if(i==10){
-        type = paste(type,checkft[10], sep = "")  }
-      if(i==11){
-        type = paste(type,checkft[11], sep = "")  }
-      if(i==12){
-        type = paste(type,checkft[12], sep = "")  }
-      if(i==13){
-        type = paste(type,checkft[13], sep = "")  }
-      if(i==14){
-        type = paste(type,checkft[14], sep = "")  }
+        type = paste(type,checkft[as.integer(i)], sep = "")
     }
-    coverage3 = filter(coverage2, CHROM %in% type)
-    plot.wsaf.vs.chromosome.plotly(coverage3)
+
+    plot.wsaf.vs.pos.dygraph (coverage, chrom = type)
   })
 
 

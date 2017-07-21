@@ -1,4 +1,5 @@
 library(shinythemes)
+library(DEploid)
 
 navbarPage("DEploid-R",
            theme = shinytheme("flatly"),
@@ -45,15 +46,16 @@ navbarPage("DEploid-R",
                                                  "Pf3D7_07_v3" = 7, "Pf3D7_08_v3" = 8, "Pf3D7_09_v3" = 9,
                                                  "Pf3D7_10_v3" = 10, "Pf3D7_11_v3" = 11, "Pf3D7_12_v3" = 12,
                                                  "Pf3D7_13_v3" = 13, "Pf3D7_14_v3" = 14),
-                                  selected = c(1))),
+                                        selected = c(1))
+                                  ),
 
                                  #)),
 
 
 
-                         column(8,
+                         column(12,
                                mainPanel(
-                                 plotlyOutput("chromo"))))
+                                 dygraphOutput("dygraph"))))
                               # ))
                      # )
                     #)
