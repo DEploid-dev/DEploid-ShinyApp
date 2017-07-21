@@ -11,6 +11,9 @@ navbarPage("DEploid-R",
                            accept=c('text', 'ref', 'txt')),
                  fileInput("File2", "Choose PLAF file",
                            accept=c('text', 'ref', 'txt'))
+
+
+#                  data.cache(loadWeatherData, cache.name='NRT', station_id='NRT')
                ),
                mainPanel(
                  tabsetPanel(
@@ -69,7 +72,7 @@ navbarPage("DEploid-R",
                  column(width = 7,
                    htmlOutput("text1")
                  ),
-                 column(width = 12, height = 12,
+                 column(width = 8,
                         mainPanel(width = 8, height = 12,
                           plotlyOutput("plot")
                         ))

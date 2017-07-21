@@ -21,14 +21,14 @@ fun.find.more <- function (outliers.idx, window.size){
   return(unique(idx.out))
 }
 
-plot.total.coverage <- function(ref, alt, chroms, cex.lab = 1, 
+plot.total.coverage <- function(ref, alt, chroms, cex.lab = 1,
                                 cex.main = 1, cex.axis = 1,  threshold, window.size){
   totalDepth = ref + alt
   x = 1:length(totalDepth)
   tmpQ = quantile(totalDepth, threshold)
   outliers.idx = which((totalDepth > tmpQ ))
   potentialOutliers = fun.find.more(outliers.idx, window.size)
-  
+
   chromCol = (as.numeric(chroms) %% 2 )
   chromCol[chromCol==1] = NA
   chromCol[chromCol==0] = 8
