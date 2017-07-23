@@ -1,4 +1,3 @@
-library(DEploid)
 library(dplyr)
 library(quantmod)
 
@@ -9,9 +8,6 @@ source("plot.total.coverage.R")
 source("chromosome.plotly.R")
 source("chromosome.dygraphs.R")
 
-coverageGlobal = c()
-decovlutedGlobal = list()
-expWSAFGlobal = c()
 
 function(input, output, session) {
   VCF <- reactive({
@@ -60,92 +56,9 @@ function(input, output, session) {
                         threshold = 0.995, window.size = 10)
   })
 
-  ########## tabPanel 3. WSAF across Chromosome
-  output$text4 <- renderText({
-    HTML(paste("Description", "Allele frequency across different chromosome.",
-               sep="<br/>")
-    )})
-
-  output$chromList <- renderUI({
-#    vcfFile <- input$File1$datapath
-#    coverage <- extractCoverageFromVcf(vcfFile)
-
-    checkft = as.character(unique(coverageGlobal$CHROM))
-    return(checkft)
-  })
-
-  output$dygraph <- renderDygraph ({
-#    vcfFile <- input$File1$datapath
-#    plafFile <- input$File2$datapath
-
-    checkft = as.character(unique(coverageGlobal$CHROM))
-
-    type=""
-    for(i in input$select){
-        type = paste(type,checkft[as.integer(i)], sep = "")
-    }
-
-    obsWSAF = computeObsWSAF( coverageGlobal$altCount, coverageGlobal$refCount )
-    ### ADD ACTION FOR DECONVOLUTION
-    chroms = unique(coverageGlobal$CHROM)
-
-    wsaf.list = list()
-    for (chromi in 1:length(chroms)){
-        idx = which(coverageGlobal$CHROM == chroms[chromi])
-        wsaf.list[[as.character(chroms[chromi])]] = data.frame(
-          pos = coverageGlobal$POS[idx], obsWSAF = obsWSAF[idx], expWSAF = expWSAFGlobal[idx])
-    }
-
-    plot.wsaf.vs.pos.dygraph (wsaf.list[[type]], chrom = type)
-  })
-
-
-
-
-  ########## tabPanel 4. ALT vs REF
-  output$text1 <- renderText({
-    HTML(paste("Description", "Scatter plot demonstrates relationship between numbers of reference and alternative alleles",
-               sep="<br/>")
-    )})
 
   output$plot <- renderPlotly({
     plotAltVsRef.plotly(coverageGlobal$refCount, coverageGlobal$altCount)
   })
 
-
-  ########## tabPanel 5. WSAF
-  output$text2 <- renderText({
-    HTML(paste("WSAF Description", "Allele Frequency within sample.",
-               sep="<br/>")
-    )})
-
-  output$text3 <- renderText({
-    HTML(paste("WSAF v.s.PLAF Description", "Allele Frequency within sample vs within population.",
-               sep="<br/>")
-    )})
-
-  output$wsaf <- renderPlotly({
-    vcfFile <- input$File1$datapath
-    coverage <- extractCoverageFromVcf(vcfFile)
-    obsWSAF = computeObsWSAF(coverage$altCount, coverage$refCount)
-    histWSAF.plotly(obsWSAF)
-  })
-
-  output$wsvspl <- renderPlotly({
-    vcfFile <- input$File1$datapath
-    coverage <- extractCoverageFromVcf(vcfFile)
-    obsWSAF = computeObsWSAF(coverage$altCount, coverage$refCount)
-    plafFile <- input$File2$datapath
-    plaf <- extractPLAF(plafFile)
-    # PG0390CoverageVcf.deconv = dEploid(paste("-vcf", vcfFile, "-plaf", plafFile, "-noPanel"))
-    # prop = PG0390CoverageVcf.deconv$Proportions[dim(PG0390CoverageVcf.deconv$Proportions)[1],]
-    # expWSAF = t(PG0390CoverageVcf.deconv$Haps) %*% prop
-    plotWSAFvsPLAF.plotly(plaf, obsWSAF)
-  })
-
-
 }
-
-
-
-
