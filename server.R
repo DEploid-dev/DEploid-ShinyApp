@@ -2,39 +2,24 @@ library(dplyr)
 library(quantmod)
 library(RCurl)
 
+# source("plaf.get.R")
+source("plot.total.coverage.R")
 source("plotAltVsRef.plotly.R")
 source("histWSAF.plotly.R")
 source("plotWSAFvsPLAF.plotly.R")
-source("plot.total.coverage.R")
+
 source("chromosome.plotly.R")
 source("chromosome.dygraphs.R")
 # location=read.csv("location.txt", header = TRUE, sep = "\t")
 
-function(input, output, session) {
-  VCF <- reactive({
-    infile <- input$File1
-    if (is.null(infile)) {
-      return(NULL)
-    }
-  }
-  )
+# plaf <<- plafFile$PLAF
+# decovlutedGlobal <<- dEploid(paste("-vcf", vcfFile, "-plaf", plafFile, "-noPanel", "-nSample 100"))
+# propGlobal <<- decovlutedGlobal$Proportions[dim(decovlutedGlobal$Proportions)[1],]
+# expWSAFGlobal <<- t(decovlutedGlobal$Haps) %*% propGlobal
 
-  PLAF <- reactive({
-    infile <- input$File2
-    if (is.null(infile)) {
-      return(NULL)
-    }
-  }
-  )
-  ########## tabPanel 1. Sample Info
-  # one radio button group
-  # one dropdown box
-  # take data above to generate map
-  # maybe also display data
+function(input, output, session) {
   
-  # output$infosource = renderText({
-  #   HTML(paste(input$sample, "from", input$origin))
-  # })
+  ########## tabPanel 1. Sample Info
   
   output$ui <- renderUI({
     if (is.null(input$sample))
@@ -52,26 +37,24 @@ function(input, output, session) {
                                 "Bangladesh" = "as7_1", "Myanmar" = "as7_2", "Thailand (Mae Sot)" = "as7_3", "Thailand (Ranong)" = "as7_4")),
            
            "Plasmodium Vivax" = selectInput("origins", "Where is it coming from?", 
-                              c("Thailand" = "pv8",
-                                "Indonesia" = "pv9_1", "Malaysia" = "pv9_2", "Papua New Guinea" = "pv9_3",
-                                "Cambodia" = "pv10_1", "Vietnam" = "pv10_2", "Laos" = "pv10_3",
-                                "Myanmar (Burma)" = "pv11_1", "China" = "pv11_2", "Sri Lanka" = "pv11_3", "India" = "pv11_4")))
+                              c("Thailand" = "pv1",
+                                "Indonesia" = "pv2_1", "Malaysia" = "pv2_2", "Papua New Guinea" = "pv2_3",
+                                "Cambodia" = "pv3_1", "Vietnam" = "pv3_2", "Laos" = "pv3_3",
+                                "Myanmar (Burma)" = "pv4_1", "China" = "pv4_2", "Sri Lanka" = "pv4_3", "India" = "pv11_4")))
   })
   
-
   output$mymap <- renderLeaflet({
-
-    originlist = c("af1_1","af1_2",
+    originlist <<- c("af1_1","af1_2",
                    "af2",
                    "af3_1","af3_2","af3_3",
                    "af4_1","af4_2","af4_3",
                    "as5_1","as5_2","as5_3",
                    "as6_1","as6_2","as6_3","as6_4",
                    "as7_1","as7_2","as7_3","as7_4",
-                   "pv8",
-                   "pv9_1", "pv9_2", "pv9_3",
-                   "pv10_1", "pv10_2", "pv10_3",
-                   "pv11_1", "pv11_2", "pv11_3", "pv11_4")
+                   "pv1",
+                   "pv2_1", "pv2_2", "pv2_3",
+                   "pv3_1", "pv3_2", "pv3_3",
+                   "pv4_1", "pv4_2", "pv4_3", "pv4_4")
     p = which(originlist == input$origins)
 
     lats = c(-13.950000, -4.316667, 10.884722, 9.066667, 14.666667, 12.650000, 13.466667, 9.516667,
@@ -83,7 +66,6 @@ function(input, output, session) {
               104.680000, 90.350000, 96.100000, 98.574722, 98.635556, 100.483333, 106.828333, 101.683333,
               147.116667, 104.916667, 107.833333, 102.6, 96.1, 116.383333, 79.866667, 77.208333)
       
-    
     p1 = longs[p]
     p2 = lats[p]
     coor = data.frame(lat = p2,lng = p1)
@@ -95,60 +77,69 @@ function(input, output, session) {
       setView(lng = p1, lat = p2, zoom = 4)
     })
   
-  # output$data <- renderTable({
-  #   urls = c("https://ndownloader.figshare.com/files/8916217?private_link=f09830a270360a4fe4a5",
-  #            "https://ndownloader.figshare.com/files/8916220?private_link=f09830a270360a4fe4a5",
-  #            "https://ndownloader.figshare.com/files/8916223?private_link=f09830a270360a4fe4a5",
-  #            "https://ndownloader.figshare.com/files/8916226?private_link=f09830a270360a4fe4a5",
-  #            "https://ndownloader.figshare.com/files/8916229?private_link=f09830a270360a4fe4a5",
-  #            "https://ndownloader.figshare.com/files/8916232?private_link=f09830a270360a4fe4a5",
-  #            "https://ndownloader.figshare.com/files/8916235?private_link=f09830a270360a4fe4a5")
-  #   urls.position = as.numeric(str_sub(input$origins,3,3))
-  #   
-  #   url_content = urls[urls.position]
-  #   url_content = urls[3]
-  #   figfile <- getURL(url_content)
-  #   plaf <- read.table(textConnection(figfile), header=T)
-  #   head(plaf, 20)
-    # paste("URL of PLAF Data Matched is", url, sep = ":")
-    
- #  })
-  
-  
-  
-  ########## tabPanel 1. Data Display
-  # output$orig_data <-renderTable({
-  #   vcfFile <- input$File1$datapath
-  #   coverageGlobal <<- extractCoverageFromVcf(vcfFile)
-  #   head(coverageGlobal, n = 20)
-  # })
 
-  # output$plaf_data <-renderTable({
-  #   vcfFile <- input$File1$datapath
-  #   plafFile <- input$File2$datapath
-  #   plaf <- read.table(plafFile, header=T)
-  #   decovlutedGlobal <<- dEploid(paste("-vcf", vcfFile, "-plaf", plafFile, "-noPanel", "-nSample 100"))
-  #   propGlobal <<- decovlutedGlobal$Proportions[dim(decovlutedGlobal$Proportions)[1],]
-  #   expWSAFGlobal <<- t(decovlutedGlobal$Haps) %*% propGlobal
-  #   head(plaf, n = 20)
-  # })
 
-  ########## tabPanel 2. Total Coverage
-  output$text <- renderText({
-    HTML(paste("Description", "Red dots represent ouliars being eliminated",
-               sep="<br/>"))
-    })
+  ########## tabPanel 2. Sample sequence exploration
+  ### check if data is ready
+  output$coverage <-renderTable({
+    vcfFile <- input$File1$datapath
+    coverageGlobal <<- extractCoverageFromVcf(vcfFile)
+    head(coverageGlobal, n = 5)
+  })
+  output$plaf <-renderTable({
+    urls = c("https://ndownloader.figshare.com/files/8916217?private_link=f09830a270360a4fe4a5",
+            "https://ndownloader.figshare.com/files/8916220?private_link=f09830a270360a4fe4a5",
+            "https://ndownloader.figshare.com/files/8916223?private_link=f09830a270360a4fe4a5",
+            "https://ndownloader.figshare.com/files/8916226?private_link=f09830a270360a4fe4a5",
+            "https://ndownloader.figshare.com/files/8916229?private_link=f09830a270360a4fe4a5",
+            "https://ndownloader.figshare.com/files/8916232?private_link=f09830a270360a4fe4a5",
+            "https://ndownloader.figshare.com/files/8916235?private_link=f09830a270360a4fe4a5",
+            "https://ndownloader.figshare.com/files/8947990?private_link=f09830a270360a4fe4a5",
+            "https://ndownloader.figshare.com/files/8947993?private_link=f09830a270360a4fe4a5",
+            "https://ndownloader.figshare.com/files/8947996?private_link=f09830a270360a4fe4a5",
+            "https://ndownloader.figshare.com/files/8947999?private_link=f09830a270360a4fe4a5")
+    p = which(originlist == input$origins)
+    positionlist <- c(1,1,
+                     2,
+                     3,3,3,
+                     4,4,4,
+                     5,5,5,
+                     6,6,6,6,
+                     7,7,7,7,
+                     8,
+                     9,9,9,
+                     10,10,10,
+                     11,11,11,11)
+    # urls.position = as.numeric(str_sub(input$origins,3,3))
+    urls.position = positionlist[p]
+    url_content = urls[urls.position]
+    myfile <- getURL(url_content)
+    plafFile <- read.table(textConnection(myfile), header=T)
+    plaf <<- plafFile$PLAF
+    head(plafFile, 5)
+  })
 
   output$total <- renderPlot({
-    vcfFile <- input$File1$datapath
-    coverage <- extractCoverageFromVcf(vcfFile)
-    plot.total.coverage(coverageGlobal$refCount, coverageGlobal$altCount, coverageGlobal$CHROM, cex.lab = 1, cex.main = 1, cex.axis = 1,
+    plot.total.coverage(coverageGlobal$refCount, coverageGlobal$altCount, 
+                        coverageGlobal$CHROM, cex.lab = 1, cex.main = 1, cex.axis = 1,
                         threshold = 0.995, window.size = 10)
   })
 
-
-  output$plot <- renderPlotly({
+  output$altvsref <- renderPlotly({
     plotAltVsRef.plotly(coverageGlobal$refCount, coverageGlobal$altCount)
   })
+  
+  output$wsafhist <- renderPlotly({
+    obsWSAF <<- computeObsWSAF(coverageGlobal$refCount, coverageGlobal$altCount)
+    histWSAF.plotly(obsWSAF)
+  })
+  
+  ### onlye works when plaf and obsWSAF have same length
+  ### match by CHROM and POS instead???
+  output$wsvspl <- renderPlotly({
+    plaf2 = plaf[1:length(coverageGlobal$CHROM)]
+    plotWSAFvsPLAF.plotly(plaf2, obsWSAF)
+  })
+  
 
 }

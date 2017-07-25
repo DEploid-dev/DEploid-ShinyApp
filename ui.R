@@ -28,43 +28,28 @@ fluidPage(
                                    textOutput("data"))
                                  ),
                           column(9,
-                                 # textOutput("infosource"),
-                                 leafletOutput("mymap", height = "500px")
-                                 # tableOutput("data")
+                                 leafletOutput("mymap", height = "530px")
                                  )
                           
                         ))
              ),
              
              
-             #******** tabPanel 1. would be great to have a map here
-             tabPanel("Sample infos",
-                      fluidPage(
-                        sidebarPanel(
-                          fileInput("File1", "Choose VCF file",
-                                    accept=c('text', 'ref', 'txt')),
-                          fileInput("File2", "Choose PLAF file",
-                                    accept=c('text', 'ref', 'txt'))
-                          
-                        ),
-                        mainPanel(
-                          tabsetPanel(
-                            tabPanel("First 20 Rows of Original Data", tableOutput("orig_data")),
-                            tabPanel("First 20 Rows of PLAF Data", tableOutput("plaf_data"))
-                          ))
-                      )),
-             #******** Backup End   
-             
-             
              ############ tabPanel 2
              tabPanel("Sample sequence exploration",
-                      mainPanel(
-                        plotOutput("total"),
-                        
-                        ##### This display item does not work yet...
-                        plotOutput("plot")
-                      )
-                      
+                      fileInput("File1", "Choose VCF file",
+                                accept=c('text', 'ref', 'txt')),
+                      ### check if data is ready
+                      tableOutput("coverage"),
+                      tableOutput("plaf"),
+                      ### 1. total coverage
+                      fluidRow(column(1), column(10, plotOutput("total"))),
+                      ### 2. Alt VS Ref
+                      fluidRow(column(2), column(7, align = "center", plotlyOutput("altvsref"))),
+                      ### 3. WSAF Histogram
+                      fluidRow(column(2), column(7, align = "center", plotlyOutput("wsafhist"))),
+                      ### 4. WSAF VS PLAF
+                      fluidRow(column(2), column(7, align = "center", plotlyOutput("wsvspl")))
              ),
              
              ############ tabPanel 3

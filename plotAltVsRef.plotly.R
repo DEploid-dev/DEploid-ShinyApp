@@ -4,7 +4,7 @@ plotAltVsRef.plotly <- function (ref, alt){
   ratios <- ref/(ref + alt + 0.0000001)
   tmpRange <- 1.1 * mean(max(alt), max(ref))
   legend.name <- "Ref/(Ref+Alt) Ratio"
-  plot_ly(x = ~ref, y = ~alt, type = "scatter", mode = "markers",
+  plot_ly(x = ref, y = alt, type = "scatter", mode = "markers",
           color = ~ ratios, colors=c("#de2d26", "#2b8cbe"), alpha = 0.8,
           marker = list(size = 3, line = list(color = "black", width = 0.3),
                         colorbar = list(title = legend.name)
