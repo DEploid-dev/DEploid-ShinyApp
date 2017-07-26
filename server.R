@@ -10,12 +10,15 @@ source("plotWSAFvsPLAF.plotly.R")
 
 source("chromosome.plotly.R")
 source("chromosome.dygraphs.R")
-# location=read.csv("location.txt", header = TRUE, sep = "\t")
+rancoor <<- read.csv("C:/Users/Hermosa/Desktop/random.coordinates.csv")
+location <- read.csv("~/GitHub/DEploid-ShinyApp/Data/location.csv")
+
 
 # plaf <<- plafFile$PLAF
 # decovlutedGlobal <<- dEploid(paste("-vcf", vcfFile, "-plaf", plafFile, "-noPanel", "-nSample 100"))
 # propGlobal <<- decovlutedGlobal$Proportions[dim(decovlutedGlobal$Proportions)[1],]
 # expWSAFGlobal <<- t(decovlutedGlobal$Haps) %*% propGlobal
+
 
 function(input, output, session) {
   
@@ -40,8 +43,15 @@ function(input, output, session) {
                               c("Thailand" = "pv1",
                                 "Indonesia" = "pv2_1", "Malaysia" = "pv2_2", "Papua New Guinea" = "pv2_3",
                                 "Cambodia" = "pv3_1", "Vietnam" = "pv3_2", "Laos" = "pv3_3",
-                                "Myanmar (Burma)" = "pv4_1", "China" = "pv4_2", "Sri Lanka" = "pv4_3", "India" = "pv11_4")))
+                                "Myanmar (Burma)" = "pv4_1", "China" = "pv4_2", "Madagascar" = "pv4_3", "Sri Lanka" = "pv4_4", "Brazil" = "pv4_5", "India" = "pv4_6")))
   })
+  
+  
+  output$note1 <- renderText({
+    HTML(paste("Title", "Joe Explain",
+               sep="<br/>"))
+  })
+  
   
   output$mymap <- renderLeaflet({
     originlist <<- c("af1_1","af1_2",
@@ -54,27 +64,60 @@ function(input, output, session) {
                    "pv1",
                    "pv2_1", "pv2_2", "pv2_3",
                    "pv3_1", "pv3_2", "pv3_3",
-                   "pv4_1", "pv4_2", "pv4_3", "pv4_4")
+                   "pv4_1", "pv4_2", "pv4_3", "pv4_4", "pv4_5", "pv4_6")
     p = which(originlist == input$origins)
 
-    lats = c(-13.950000, -4.316667, 10.884722, 9.066667, 14.666667, 12.650000, 13.466667, 9.516667,
-             8.052222, 12.533333, 12.850556, 15.120000, 16.166667, 17.966667, 13.733333, 14.390000, 
-             23.7, 19.75, 16.713056, 9.966944, 13.75, -6.175, 3.133333, -9.5, 11.55, 16.166667,
-             17.966667, 19.75, 39.916667, 6.933333, 28.613333)
-    longs = c(33.700000, 15.316667, -1.090278, 7.483333, -17.416667, -8.000000, -16.600000, -13.700000,
-              -1.734722, 103.916667, 102.609444, 104.321667, 107.833333, 102.600000, 107.000000,
-              104.680000, 90.350000, 96.100000, 98.574722, 98.635556, 100.483333, 106.828333, 101.683333,
-              147.116667, 104.916667, 107.833333, 102.6, 96.1, 116.383333, 79.866667, 77.208333)
+    lats = c(-16.166667, -4.316667, 
+             10.884722, 
+             8.5, 14.783333, 12.650000, 
+             13.466667, 7.75, 8.052222, 
+             12.533333, 12.850556, 15.120000, 
+             11.769167, 14.8, 13.733333, 14.390000, 
+             21.458333, 18.25, 16.713056, 9.966944, 
+             13.75, 
+             -6.175, 3.133333, -9.5, 
+             11.55, 16.166667, 17.966667, 
+             19.75, 39.916667, -18.916667, 6.933333, -15.79, 28.613333)
+    longs = c(34.75, 15.316667, 
+              -1.090278, 
+              4.55, -16.916667, -8.000000, 
+              -16.600000, -8.816667, -1.734722, 
+              103.916667, 102.609444, 104.321667, 
+              107.237222, 106.833, 107.000000, 104.680000, 
+              92.1, 96, 98.574722, 98.635556, 
+              100.483333, 
+              106.828333, 101.683333, 147.116667, 
+              104.916667, 107.833333, 102.6, 
+              96.1, 116.383333, 47.516667, 79.866667, -47.88, 77.208333)
       
     p1 = longs[p]
     p2 = lats[p]
     coor = data.frame(lat = p2,lng = p1)
     
-    leaflet(coor) %>%
+    ###### generate random samples
+    coor.level = str_sub(input$origins,1,3)
+    rancoortmp = rancoor %>%
+      filter(ID == coor.level)
+    x = c()
+    y = c()
+    for (i in 1:nrow(rancoortmp)) {
+      set.seed(321)
+      xtmp = runif(rancoortmp$sample.size[i],rancoortmp$lats.min[i], rancoortmp$lats.max[i])
+      x = append(x, xtmp)
+      set.seed(123)
+      ytmp = runif(rancoortmp$sample.size[i],rancoortmp$longs.min[i], rancoortmp$longs.max[i])
+      y = append(y, ytmp)
+    }
+    df = data.frame(y, x)
+    colnames(df) = c("lng", "lat")
+
+    leaflet(df) %>%
       addProviderTiles(providers$Esri.NatGeoWorldMap) %>%
+      addCircleMarkers(radius = 1.7, color = "#ff0048", stroke = FALSE, fillOpacity = 0.7) %>%
       addMarkers(lng = p1, lat = p2, popup = "Origin") %>%
-      addCircleMarkers(radius = 18, color = c("red")) %>%
-      setView(lng = p1, lat = p2, zoom = 4)
+      addCircleMarkers(lng = p1, lat = p2, radius = 18, color = "blue")
+
+
     })
   
 
@@ -86,6 +129,7 @@ function(input, output, session) {
     coverageGlobal <<- extractCoverageFromVcf(vcfFile)
     head(coverageGlobal, n = 5)
   })
+  
   output$plaf <-renderTable({
     urls = c("https://ndownloader.figshare.com/files/8916217?private_link=f09830a270360a4fe4a5",
             "https://ndownloader.figshare.com/files/8916220?private_link=f09830a270360a4fe4a5",
@@ -125,8 +169,18 @@ function(input, output, session) {
                         threshold = 0.995, window.size = 10)
   })
 
+  output$note2 <- renderText({
+    HTML(paste("Title", "Joe Explain",
+               sep="<br/>"))
+  })
+  
   output$altvsref <- renderPlotly({
     plotAltVsRef.plotly(coverageGlobal$refCount, coverageGlobal$altCount)
+  })
+  
+  output$note3 <- renderText({
+    HTML(paste("Title", "Joe Explain",
+               sep="<br/>"))
   })
   
   output$wsafhist <- renderPlotly({
@@ -134,11 +188,21 @@ function(input, output, session) {
     histWSAF.plotly(obsWSAF)
   })
   
+  output$note4 <- renderText({
+    HTML(paste("Title", "Joe Explain",
+               sep="<br/>"))
+  })
+  
   ### onlye works when plaf and obsWSAF have same length
   ### match by CHROM and POS instead???
   output$wsvspl <- renderPlotly({
     plaf2 = plaf[1:length(coverageGlobal$CHROM)]
     plotWSAFvsPLAF.plotly(plaf2, obsWSAF)
+  })
+  
+  output$note5 <- renderText({
+    HTML(paste("Title", "Joe Explain",
+               sep="<br/>"))
   })
   
 

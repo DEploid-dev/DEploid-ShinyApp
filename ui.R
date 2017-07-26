@@ -25,7 +25,7 @@ fluidPage(
                                    hr(),
                                    uiOutput("ui"),
                                    hr(),
-                                   textOutput("data"))
+                                   htmlOutput("note1"))
                                  ),
                           column(9,
                                  leafletOutput("mymap", height = "530px")
@@ -44,12 +44,16 @@ fluidPage(
                       tableOutput("plaf"),
                       ### 1. total coverage
                       fluidRow(column(1), column(10, plotOutput("total"))),
+                      htmlOutput("note2"),
                       ### 2. Alt VS Ref
-                      fluidRow(column(2), column(7, align = "center", plotlyOutput("altvsref"))),
+                      fluidRow(column(4), column(5, align = "center", plotlyOutput("altvsref"))),
+                      htmlOutput("note3"),
                       ### 3. WSAF Histogram
-                      fluidRow(column(2), column(7, align = "center", plotlyOutput("wsafhist"))),
+                      fluidRow(column(4), column(4, align = "center", plotlyOutput("wsafhist"))),
+                      htmlOutput("note4"),
                       ### 4. WSAF VS PLAF
-                      fluidRow(column(2), column(7, align = "center", plotlyOutput("wsvspl")))
+                      fluidRow(column(4), column(4, align = "center", plotlyOutput("wsvspl"))),
+                      htmlOutput("note5")
              ),
              
              ############ tabPanel 3
