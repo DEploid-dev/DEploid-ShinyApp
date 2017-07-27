@@ -1,3 +1,4 @@
+rm(list=ls())
 library(dplyr)
 library(quantmod)
 library(RCurl)
@@ -7,30 +8,31 @@ source("plot.total.coverage.R")
 source("plotAltVsRef.plotly.R")
 source("histWSAF.plotly.R")
 source("plotWSAFvsPLAF.plotly.R")
-
+source("trimData.R")
 source("chromosome.plotly.R")
 source("chromosome.dygraphs.R")
+
 rancoor <<- read.csv("C:/Users/Hermosa/Desktop/random.coordinates.csv")
 location <- read.csv("~/GitHub/DEploid-ShinyApp/Data/location.csv")
 
 
-# plaf <<- plafFile$PLAF
 # decovlutedGlobal <<- dEploid(paste("-vcf", vcfFile, "-plaf", plafFile, "-noPanel", "-nSample 100"))
 # propGlobal <<- decovlutedGlobal$Proportions[dim(decovlutedGlobal$Proportions)[1],]
 # expWSAFGlobal <<- t(decovlutedGlobal$Haps) %*% propGlobal
 
+coverageGlobal = c()
 
 function(input, output, session) {
   
   ########## tabPanel 1. Sample Info
   
-  output$ui <- renderUI({
-    if (is.null(input$sample))
+  output$inputOriginUI <- renderUI({
+    if (is.null(input$inputSample))
       return()
     # Depending on input$input_type, we'll generate a different
     # UI component and send it to the client.
-    switch(input$sample,
-           "Plasmodium Falciparum" = selectInput("origins", "Where is it coming from?", 
+    switch(input$inputSample,
+           "Plasmodium Falciparum" = selectInput("inputOrigin", "Where is it coming from?", 
                               c("Malawi" = "af1_1", "Congo" = "af1_2",
                                 "Ghana (Kassena)" = "af2",
                                 "Nigeria" = "af3_1", "Senegal" = "af3_2", "Mali" = "af3_3",
@@ -39,7 +41,7 @@ function(input, output, session) {
                                 "Vietnam" = "as6_1", "Laos" = "as6_2", "Cambodia (Ratanakiri)" = "as6_3", "Cambodia (Preah Vihear)" = "as6_4",
                                 "Bangladesh" = "as7_1", "Myanmar" = "as7_2", "Thailand (Mae Sot)" = "as7_3", "Thailand (Ranong)" = "as7_4")),
            
-           "Plasmodium Vivax" = selectInput("origins", "Where is it coming from?", 
+           "Plasmodium Vivax" = selectInput("inputOrigin", "Where is it coming from?", 
                               c("Thailand" = "pv1",
                                 "Indonesia" = "pv2_1", "Malaysia" = "pv2_2", "Papua New Guinea" = "pv2_3",
                                 "Cambodia" = "pv3_1", "Vietnam" = "pv3_2", "Laos" = "pv3_3",
@@ -47,13 +49,13 @@ function(input, output, session) {
   })
   
   
-  output$note1 <- renderText({
+  output$panelSampleInfoExplainSample <- renderText({
     HTML(paste("Title", "Joe Explain",
                sep="<br/>"))
   })
   
   
-  output$mymap <- renderLeaflet({
+  output$panelSampleInfoMap <- renderLeaflet({
     originlist <<- c("af1_1","af1_2",
                    "af2",
                    "af3_1","af3_2","af3_3",
@@ -65,7 +67,7 @@ function(input, output, session) {
                    "pv2_1", "pv2_2", "pv2_3",
                    "pv3_1", "pv3_2", "pv3_3",
                    "pv4_1", "pv4_2", "pv4_3", "pv4_4", "pv4_5", "pv4_6")
-    p = which(originlist == input$origins)
+    p = which(originlist == input$inputOrigin)
 
     lats = c(-16.166667, -4.316667, 
              10.884722, 
@@ -95,7 +97,7 @@ function(input, output, session) {
     coor = data.frame(lat = p2,lng = p1)
     
     ###### generate random samples
-    coor.level = str_sub(input$origins,1,3)
+    coor.level = str_sub(input$inputOrigin, 1, 3)
     rancoortmp = rancoor %>%
       filter(ID == coor.level)
     x = c()
@@ -124,13 +126,16 @@ function(input, output, session) {
 
   ########## tabPanel 2. Sample sequence exploration
   ### check if data is ready
-  output$coverage <-renderTable({
-    vcfFile <- input$File1$datapath
+  output$panelDataCoverageTable <-renderTable({
+    vcfFile <- input$inputVCFfile$datapath
     coverageGlobal <<- extractCoverageFromVcf(vcfFile)
+    print(length(coverageGlobal$refCount))
+    print(length(coverageGlobal$altCount))
+    
     head(coverageGlobal, n = 5)
   })
   
-  output$plaf <-renderTable({
+  output$panelDataPlafTable <-renderTable({
     urls = c("https://ndownloader.figshare.com/files/8916217?private_link=f09830a270360a4fe4a5",
             "https://ndownloader.figshare.com/files/8916220?private_link=f09830a270360a4fe4a5",
             "https://ndownloader.figshare.com/files/8916223?private_link=f09830a270360a4fe4a5",
@@ -142,7 +147,7 @@ function(input, output, session) {
             "https://ndownloader.figshare.com/files/8947993?private_link=f09830a270360a4fe4a5",
             "https://ndownloader.figshare.com/files/8947996?private_link=f09830a270360a4fe4a5",
             "https://ndownloader.figshare.com/files/8947999?private_link=f09830a270360a4fe4a5")
-    p = which(originlist == input$origins)
+    p = which(originlist == input$inputOrigin)
     positionlist <- c(1,1,
                      2,
                      3,3,3,
@@ -158,52 +163,82 @@ function(input, output, session) {
     urls.position = positionlist[p]
     url_content = urls[urls.position]
     myfile <- getURL(url_content)
-    plafFile <- read.table(textConnection(myfile), header=T)
+    plafFile <<- read.table(textConnection(myfile), header=T)
     plaf <<- plafFile$PLAF
     head(plafFile, 5)
   })
 
-  output$total <- renderPlot({
+  output$panelDataTotalCoverage <- renderPlot({
+    vcfFile <- input$inputVCFfile$datapath
+    coverageGlobal <- extractCoverageFromVcf(vcfFile)
+    cat ("log: panelDataTotalCoverage\n")
     plot.total.coverage(coverageGlobal$refCount, coverageGlobal$altCount, 
                         coverageGlobal$CHROM, cex.lab = 1, cex.main = 1, cex.axis = 1,
                         threshold = 0.995, window.size = 10)
   })
 
-  output$note2 <- renderText({
+  output$panelDataExplainTotalCoverage <- renderText({
+    cat ("log: panelDataExplainTotalCoverage\n")
     HTML(paste("Title", "Joe Explain",
                sep="<br/>"))
   })
   
-  output$altvsref <- renderPlotly({
+  output$panelDataAltVsRef <- renderPlotly({
+    vcfFile <- input$inputVCFfile$datapath
+    coverageGlobal <- extractCoverageFromVcf(vcfFile)
+    cat ("log: panelDataAltVsRef\n")
     plotAltVsRef.plotly(coverageGlobal$refCount, coverageGlobal$altCount)
   })
   
-  output$note3 <- renderText({
+  output$panelDataExplainAltVsRef <- renderText({
+    cat ("log: panelDataExplainAltVsRef\n")
     HTML(paste("Title", "Joe Explain",
                sep="<br/>"))
   })
   
-  output$wsafhist <- renderPlotly({
+  output$panelDataHistWSAF <- renderPlotly({
+    vcfFile <- input$inputVCFfile$datapath
+    coverageGlobal <- extractCoverageFromVcf(vcfFile)
+    cat ("log: panelDataHistWSAF\n")
     obsWSAF <<- computeObsWSAF(coverageGlobal$refCount, coverageGlobal$altCount)
     histWSAF.plotly(obsWSAF)
   })
   
-  output$note4 <- renderText({
+  output$panelDataExplainHistWSAF <- renderText({
+    cat ("log: panelDataExplainHistWSAF\n")
     HTML(paste("Title", "Joe Explain",
                sep="<br/>"))
   })
   
-  ### onlye works when plaf and obsWSAF have same length
-  ### match by CHROM and POS instead???
-  output$wsvspl <- renderPlotly({
-    plaf2 = plaf[1:length(coverageGlobal$CHROM)]
-    plotWSAFvsPLAF.plotly(plaf2, obsWSAF)
-  })
+
+  ### match VCF and PLAF by CHROM and POS instead
   
-  output$note5 <- renderText({
+  output$panelDataWSAFVsPLAF <- renderPlotly({
+    vcfFile <- input$inputVCFfile$datapath
+    coverageGlobal <- extractCoverageFromVcf(vcfFile)
+    cat ("log: panelDataWSAFVsPLAF\n")
+
+    trimData(coverageGlobal, plafFile)
+
+    tmpPLAF <<- read.csv("C:/Users/Hermosa/Documents/GitHub/DEploid-ShinyApp/tmpPLAF.txt", sep = "\t")
+    tmpPLAF <<- as.numeric(tmpPLAF[,1])
+    tmpREF <<- read.csv("C:/Users/Hermosa/Documents/GitHub/DEploid-ShinyApp/tmpREF.txt", sep = "\t")
+    tmpREF <<- as.numeric(tmpREF[,1])
+    tmpALT <<- read.csv("C:/Users/Hermosa/Documents/GitHub/DEploid-ShinyApp/tmpALT.txt", sep = "\t")
+    tmpALT <<- as.numeric(tmpALT[,1])
+    tmpobsWSAF <<- tmpALT/(tmpREF + tmpALT)
+
+    decovlutedGlobal <<- dEploid(paste("-ref", "tmpREF.txt", "-alt", "tmpALT.txt", "-plaf", "tmpPLAF.txt", "-noPanel"))
+    propGlobal <<- decovlutedGlobal$Proportions[dim(decovlutedGlobal$Proportions)[1],]
+    expWSAFGlobal <<- t(decovlutedGlobal$Haps) %*% propGlobal   
+    plotWSAFvsPLAF.plotly(tmpPLAF, tmpobsWSAF, tmpREF, tmpALT)
+  })
+
+  output$panelDataExplainWSAFVsPLAF <- renderText({
+    cat ("log: panelDataExplainWSAFVsPLAF\n")
     HTML(paste("Title", "Joe Explain",
                sep="<br/>"))
   })
-  
+
 
 }

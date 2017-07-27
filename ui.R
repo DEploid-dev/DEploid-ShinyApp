@@ -19,16 +19,16 @@ fluidPage(
                         fluidRow(
                           column(3, 
                                  wellPanel(
-                                   radioButtons("sample", "What is this sample?",
+                                   radioButtons("inputSample", "What is this sample?",
                                                 c("Plasmodium Falciparum",
                                                   "Plasmodium Vivax")),
                                    hr(),
-                                   uiOutput("ui"),
+                                   uiOutput("inputOriginUI"),
                                    hr(),
-                                   htmlOutput("note1"))
+                                   htmlOutput("panelSampleInfoExplainSample"))
                                  ),
                           column(9,
-                                 leafletOutput("mymap", height = "530px")
+                                 leafletOutput("panelSampleInfoMap", height = "530px")
                                  )
                           
                         ))
@@ -37,23 +37,27 @@ fluidPage(
              
              ############ tabPanel 2
              tabPanel("Sample sequence exploration",
-                      fileInput("File1", "Choose VCF file",
-                                accept=c('text', 'ref', 'txt')),
-                      ### check if data is ready
-                      tableOutput("coverage"),
-                      tableOutput("plaf"),
+                      fluidRow(
+                        column(4, fileInput("inputVCFfile", "Choose VCF file",
+                                           accept=c('text', 'ref', 'txt'))),
+                        ### check if data is ready
+                        column(4, tableOutput("panelDataCoverageTable")),
+                        column(4, tableOutput("panelDataPlafTable"))),
+                      
+                      
                       ### 1. total coverage
-                      fluidRow(column(1), column(10, plotOutput("total"))),
-                      htmlOutput("note2"),
-                      ### 2. Alt VS Ref
-                      fluidRow(column(4), column(5, align = "center", plotlyOutput("altvsref"))),
-                      htmlOutput("note3"),
-                      ### 3. WSAF Histogram
-                      fluidRow(column(4), column(4, align = "center", plotlyOutput("wsafhist"))),
-                      htmlOutput("note4"),
-                      ### 4. WSAF VS PLAF
-                      fluidRow(column(4), column(4, align = "center", plotlyOutput("wsvspl"))),
-                      htmlOutput("note5")
+                      fluidRow(column(1), column(10, plotOutput("panelDataTotalCoverage"))),
+                      htmlOutput("panelDataExplainTotalCoverage"),
+                      
+                      # ### 2. Alt VS Ref
+                      fluidRow(column(4), column(5, align = "center", plotlyOutput("panelDataAltVsRef"))),
+                      htmlOutput("panelDataExplainAltVsRef"),
+                      # ### 3. WSAF Histogram
+                      fluidRow(column(4), column(4, align = "center", plotlyOutput("panelDataHistWSAF"))),
+                      htmlOutput("panelDataExplainHistWSAF"),
+                      # ### 4. WSAF VS PLAF
+                      fluidRow(column(4), column(4, align = "center", plotlyOutput("panelDataWSAFVsPLAF"))),
+                      htmlOutput("panelDataExplainWSAFVsPLAF")
              ),
              
              ############ tabPanel 3
