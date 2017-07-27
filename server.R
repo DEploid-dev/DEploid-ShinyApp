@@ -33,19 +33,19 @@ function(input, output, session) {
     # UI component and send it to the client.
     switch(input$inputSample,
            "Plasmodium Falciparum" = selectInput("inputOrigin", "Where is it coming from?", 
-                              c("Malawi" = "af1_1", "Congo" = "af1_2",
-                                "Ghana (Kassena)" = "af2",
-                                "Nigeria" = "af3_1", "Senegal" = "af3_2", "Mali" = "af3_3",
-                                "Gambia" = "af4_1", "Guinea" = "af4_2", "Ghana (Kintampo)" = "af4_3",
-                                "Cambodia (Pursat)" = "as5_1", "Cambodia (Pailin)" = "as5_2", "Thailand (Sisakhet)" = "as5_3",
-                                "Vietnam" = "as6_1", "Laos" = "as6_2", "Cambodia (Ratanakiri)" = "as6_3", "Cambodia (Preah Vihear)" = "as6_4",
-                                "Bangladesh" = "as7_1", "Myanmar" = "as7_2", "Thailand (Mae Sot)" = "as7_3", "Thailand (Ranong)" = "as7_4")),
+                                                 c("Malawi" = "af1_1", "Congo" = "af1_2",
+                                                   "Ghana (Kassena)" = "af2",
+                                                   "Nigeria" = "af3_1", "Senegal" = "af3_2", "Mali" = "af3_3",
+                                                   "Gambia" = "af4_1", "Guinea" = "af4_2", "Ghana (Kintampo)" = "af4_3",
+                                                   "Cambodia (Pursat)" = "as5_1", "Cambodia (Pailin)" = "as5_2", "Thailand (Sisakhet)" = "as5_3",
+                                                   "Vietnam" = "as6_1", "Laos" = "as6_2", "Cambodia (Ratanakiri)" = "as6_3", "Cambodia (Preah Vihear)" = "as6_4",
+                                                   "Bangladesh" = "as7_1", "Myanmar" = "as7_2", "Thailand (Mae Sot)" = "as7_3", "Thailand (Ranong)" = "as7_4")),
            
            "Plasmodium Vivax" = selectInput("inputOrigin", "Where is it coming from?", 
-                              c("Thailand" = "pv1",
-                                "Indonesia" = "pv2_1", "Malaysia" = "pv2_2", "Papua New Guinea" = "pv2_3",
-                                "Cambodia" = "pv3_1", "Vietnam" = "pv3_2", "Laos" = "pv3_3",
-                                "Myanmar (Burma)" = "pv4_1", "China" = "pv4_2", "Madagascar" = "pv4_3", "Sri Lanka" = "pv4_4", "Brazil" = "pv4_5", "India" = "pv4_6")))
+                                            c("Thailand" = "pv1",
+                                              "Indonesia" = "pv2_1", "Malaysia" = "pv2_2", "Papua New Guinea" = "pv2_3",
+                                              "Cambodia" = "pv3_1", "Vietnam" = "pv3_2", "Laos" = "pv3_3",
+                                              "Myanmar (Burma)" = "pv4_1", "China" = "pv4_2", "Madagascar" = "pv4_3", "Sri Lanka" = "pv4_4", "Brazil" = "pv4_5", "India" = "pv4_6")))
   })
   
   
@@ -57,18 +57,18 @@ function(input, output, session) {
   
   output$panelSampleInfoMap <- renderLeaflet({
     originlist <<- c("af1_1","af1_2",
-                   "af2",
-                   "af3_1","af3_2","af3_3",
-                   "af4_1","af4_2","af4_3",
-                   "as5_1","as5_2","as5_3",
-                   "as6_1","as6_2","as6_3","as6_4",
-                   "as7_1","as7_2","as7_3","as7_4",
-                   "pv1",
-                   "pv2_1", "pv2_2", "pv2_3",
-                   "pv3_1", "pv3_2", "pv3_3",
-                   "pv4_1", "pv4_2", "pv4_3", "pv4_4", "pv4_5", "pv4_6")
+                     "af2",
+                     "af3_1","af3_2","af3_3",
+                     "af4_1","af4_2","af4_3",
+                     "as5_1","as5_2","as5_3",
+                     "as6_1","as6_2","as6_3","as6_4",
+                     "as7_1","as7_2","as7_3","as7_4",
+                     "pv1",
+                     "pv2_1", "pv2_2", "pv2_3",
+                     "pv3_1", "pv3_2", "pv3_3",
+                     "pv4_1", "pv4_2", "pv4_3", "pv4_4", "pv4_5", "pv4_6")
     p = which(originlist == input$inputOrigin)
-
+    
     lats = c(-16.166667, -4.316667, 
              10.884722, 
              8.5, 14.783333, 12.650000, 
@@ -91,7 +91,7 @@ function(input, output, session) {
               106.828333, 101.683333, 147.116667, 
               104.916667, 107.833333, 102.6, 
               96.1, 116.383333, 47.516667, 79.866667, -47.88, 77.208333)
-      
+    
     p1 = longs[p]
     p2 = lats[p]
     coor = data.frame(lat = p2,lng = p1)
@@ -112,18 +112,18 @@ function(input, output, session) {
     }
     df = data.frame(y, x)
     colnames(df) = c("lng", "lat")
-
+    
     leaflet(df) %>%
       addProviderTiles(providers$Esri.NatGeoWorldMap) %>%
       addCircleMarkers(radius = 1.7, color = "#ff0048", stroke = FALSE, fillOpacity = 0.7) %>%
       addMarkers(lng = p1, lat = p2, popup = "Origin") %>%
       addCircleMarkers(lng = p1, lat = p2, radius = 18, color = "blue")
-
-
-    })
+    
+    
+  })
   
-
-
+  
+  
   ########## tabPanel 2. Sample sequence exploration
   ### check if data is ready
   output$panelDataCoverageTable <-renderTable({
@@ -137,28 +137,28 @@ function(input, output, session) {
   
   output$panelDataPlafTable <-renderTable({
     urls = c("https://ndownloader.figshare.com/files/8916217?private_link=f09830a270360a4fe4a5",
-            "https://ndownloader.figshare.com/files/8916220?private_link=f09830a270360a4fe4a5",
-            "https://ndownloader.figshare.com/files/8916223?private_link=f09830a270360a4fe4a5",
-            "https://ndownloader.figshare.com/files/8916226?private_link=f09830a270360a4fe4a5",
-            "https://ndownloader.figshare.com/files/8916229?private_link=f09830a270360a4fe4a5",
-            "https://ndownloader.figshare.com/files/8916232?private_link=f09830a270360a4fe4a5",
-            "https://ndownloader.figshare.com/files/8916235?private_link=f09830a270360a4fe4a5",
-            "https://ndownloader.figshare.com/files/8947990?private_link=f09830a270360a4fe4a5",
-            "https://ndownloader.figshare.com/files/8947993?private_link=f09830a270360a4fe4a5",
-            "https://ndownloader.figshare.com/files/8947996?private_link=f09830a270360a4fe4a5",
-            "https://ndownloader.figshare.com/files/8947999?private_link=f09830a270360a4fe4a5")
+             "https://ndownloader.figshare.com/files/8916220?private_link=f09830a270360a4fe4a5",
+             "https://ndownloader.figshare.com/files/8916223?private_link=f09830a270360a4fe4a5",
+             "https://ndownloader.figshare.com/files/8916226?private_link=f09830a270360a4fe4a5",
+             "https://ndownloader.figshare.com/files/8916229?private_link=f09830a270360a4fe4a5",
+             "https://ndownloader.figshare.com/files/8916232?private_link=f09830a270360a4fe4a5",
+             "https://ndownloader.figshare.com/files/8916235?private_link=f09830a270360a4fe4a5",
+             "https://ndownloader.figshare.com/files/8947990?private_link=f09830a270360a4fe4a5",
+             "https://ndownloader.figshare.com/files/8947993?private_link=f09830a270360a4fe4a5",
+             "https://ndownloader.figshare.com/files/8947996?private_link=f09830a270360a4fe4a5",
+             "https://ndownloader.figshare.com/files/8947999?private_link=f09830a270360a4fe4a5")
     p = which(originlist == input$inputOrigin)
     positionlist <- c(1,1,
-                     2,
-                     3,3,3,
-                     4,4,4,
-                     5,5,5,
-                     6,6,6,6,
-                     7,7,7,7,
-                     8,
-                     9,9,9,
-                     10,10,10,
-                     11,11,11,11)
+                      2,
+                      3,3,3,
+                      4,4,4,
+                      5,5,5,
+                      6,6,6,6,
+                      7,7,7,7,
+                      8,
+                      9,9,9,
+                      10,10,10,
+                      11,11,11,11)
     # urls.position = as.numeric(str_sub(input$origins,3,3))
     urls.position = positionlist[p]
     url_content = urls[urls.position]
@@ -167,7 +167,7 @@ function(input, output, session) {
     plaf <<- plafFile$PLAF
     head(plafFile, 5)
   })
-
+  
   output$panelDataTotalCoverage <- renderPlot({
     vcfFile <- input$inputVCFfile$datapath
     coverageGlobal <- extractCoverageFromVcf(vcfFile)
@@ -176,7 +176,7 @@ function(input, output, session) {
                         coverageGlobal$CHROM, cex.lab = 1, cex.main = 1, cex.axis = 1,
                         threshold = 0.995, window.size = 10)
   })
-
+  
   output$panelDataExplainTotalCoverage <- renderText({
     cat ("log: panelDataExplainTotalCoverage\n")
     HTML(paste("Title", "Joe Explain",
@@ -210,16 +210,16 @@ function(input, output, session) {
                sep="<br/>"))
   })
   
-
+  
   ### match VCF and PLAF by CHROM and POS instead
   
   output$panelDataWSAFVsPLAF <- renderPlotly({
     vcfFile <- input$inputVCFfile$datapath
     coverageGlobal <- extractCoverageFromVcf(vcfFile)
     cat ("log: panelDataWSAFVsPLAF\n")
-
+    
     trimData(coverageGlobal, plafFile)
-
+    
     tmpPLAF <<- read.csv("C:/Users/Hermosa/Documents/GitHub/DEploid-ShinyApp/tmpPLAF.txt", sep = "\t")
     tmpPLAF <<- as.numeric(tmpPLAF[,1])
     tmpREF <<- read.csv("C:/Users/Hermosa/Documents/GitHub/DEploid-ShinyApp/tmpREF.txt", sep = "\t")
@@ -227,18 +227,37 @@ function(input, output, session) {
     tmpALT <<- read.csv("C:/Users/Hermosa/Documents/GitHub/DEploid-ShinyApp/tmpALT.txt", sep = "\t")
     tmpALT <<- as.numeric(tmpALT[,1])
     tmpobsWSAF <<- tmpALT/(tmpREF + tmpALT)
-
+    
     decovlutedGlobal <<- dEploid(paste("-ref", "tmpREF.txt", "-alt", "tmpALT.txt", "-plaf", "tmpPLAF.txt", "-noPanel"))
     propGlobal <<- decovlutedGlobal$Proportions[dim(decovlutedGlobal$Proportions)[1],]
     expWSAFGlobal <<- t(decovlutedGlobal$Haps) %*% propGlobal   
     plotWSAFvsPLAF.plotly(tmpPLAF, tmpobsWSAF, tmpREF, tmpALT)
   })
-
+  
   output$panelDataExplainWSAFVsPLAF <- renderText({
     cat ("log: panelDataExplainWSAFVsPLAF\n")
     HTML(paste("Title", "Joe Explain",
                sep="<br/>"))
   })
+  
+  output$panelSequenceDeconWSAFVsPOS <- renderDygraph ({
+    vcfFile <- input$inputVCFfile$datapath
+    coverageGlobal <- extractCoverageFromVcf(vcfFile)
+    obsWSAF = computeObsWSAF(coverageGlobal$altCount, coverageGlobal$refCount)
 
+    checkft = as.character(unique(coverageGlobal$CHROM))
+    type=""
+    for(i in input$panelSequenceDeconSelectCHROM){
+      type = paste(type, checkft[as.integer(i)], sep = "")
+    }
+    plot.wsaf.vs.pos.dygraph(coverageGlobal, chrom = type, obsWSAF)
+  })
 
+  output$panelSequenceDeconExplainWSAFVsPOS <- renderText({
+    cat ("log: panelSequenceDeconExplainWSAFVsPOS\n")
+    HTML(paste("Title", "Joe Explain",
+               sep="<br/>"))
+  })
+  #
+  
 }
