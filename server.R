@@ -86,6 +86,7 @@ letsTrimPlafVcf <- function (coverageVCF, plafFile) {
 
   isBothPlafVcfTrimmed <<- TRUE
   coverageTrimmedGlobal <<- extractCoverageFromTxt("tmpREF.txt", "tmpALT.txt")
+  plafTrimmedGlobal <<- plafTrim2
   return (NULL)
 }
 
@@ -321,50 +322,34 @@ function(input, output, session) {
   })
 
 
-#  output$panelDataAltVsRef <- renderPlotly({
-#    if (is.null(input$inputVCFfile)){
-##      emptyVcfReminder()
-#      return (NULL)
-#    } else if (is.null(coverageGlobal)){
-#      return (NULL)
-#    }
+  output$panelDataAltVsRef <- renderPlotly({
+    if (is.null(coverageTrimmedGlobal)){
+      return (NULL)
+    }
 
-#    vcfFile <- input$inputVCFfile$datapath
-#    coverageGlobal <- extractCoverageFromVcf(vcfFile)
-#    cat ("log: panelDataAltVsRef\n")
-#    plotAltVsRef.plotly(coverageGlobal$refCount, coverageGlobal$altCount)
-#  })
+    cat ("log: panelDataAltVsRef\n")
+    plotAltVsRef.plotly(coverageTrimmedGlobal$refCount, coverageTrimmedGlobal$altCount)
+  })
 
 
 
-#  output$panelDataHistWSAF <- renderPlotly({
-#    if (is.null(input$inputVCFfile)){
-##      emptyVcfReminder()
-#      return (NULL)
-#    } else if (is.null(coverageGlobal)){
-#      return (NULL)
-#    }
+  output$panelDataHistWSAF <- renderPlotly({
+    if (is.null(coverageTrimmedGlobal)){
+      return (NULL)
+    }
 
-#    vcfFile <- input$inputVCFfile$datapath
-#    coverageGlobal <- extractCoverageFromVcf(vcfFile)
-#    cat ("log: panelDataHistWSAF\n")
-#    obsWSAF <<- computeObsWSAF(coverageGlobal$refCount, coverageGlobal$altCount)
-#    histWSAF.plotly(obsWSAF)
-#  })
+    cat ("log: panelDataHistWSAF\n")
+    tmpobsWSAF <<- coverageTrimmedGlobal$altCount/(coverageTrimmedGlobal$refCount + coverageTrimmedGlobal$altCount)
+    histWSAF.plotly(tmpobsWSAF)
+  })
 
 #  ### match VCF and PLAF by CHROM and POS instead
 
-#  output$panelDataWSAFVsPLAF <- renderPlotly({
-#    if (is.null(input$inputVCFfile)){
-##      emptyVcfReminder()
-#      return (NULL)
-#    } else if (is.null(coverageGlobal)){
-#      return (NULL)
-#    }
-
-#    vcfFile <- input$inputVCFfile$datapath
-#    coverageGlobal <- extractCoverageFromVcf(vcfFile)
-#    cat ("log: panelDataWSAFVsPLAF\n")
+  output$panelDataWSAFVsPLAF <- renderPlotly({
+    if (is.null(coverageTrimmedGlobal)){
+      return (NULL)
+    }
+    cat ("log: panelDataWSAFVsPLAF\n")
 
 
 #    tmpPLAF <<- read.csv("C:/Users/Hermosa/Documents/GitHub/DEploid-ShinyApp/tmpPLAF.txt", sep = "\t")
@@ -373,13 +358,13 @@ function(input, output, session) {
 #    tmpREF <<- as.numeric(tmpREF[,1])
 #    tmpALT <<- read.csv("C:/Users/Hermosa/Documents/GitHub/DEploid-ShinyApp/tmpALT.txt", sep = "\t")
 #    tmpALT <<- as.numeric(tmpALT[,1])
-#    tmpobsWSAF <<- tmpALT/(tmpREF + tmpALT)
+    tmpobsWSAF <<- coverageTrimmedGlobal$altCount/(coverageTrimmedGlobal$refCount + coverageTrimmedGlobal$altCount)
 
 #    decovlutedGlobal <<- dEploid(paste("-ref", "tmpREF.txt", "-alt", "tmpALT.txt", "-plaf", "tmpPLAF.txt", "-noPanel"))
 #    propGlobal <<- decovlutedGlobal$Proportions[dim(decovlutedGlobal$Proportions)[1],]
 #    expWSAFGlobal <<- t(decovlutedGlobal$Haps) %*% propGlobal
-#    plotWSAFvsPLAF.plotly(tmpPLAF, tmpobsWSAF, tmpREF, tmpALT)
-#  })
+    plotWSAFvsPLAF.plotly(plafTrimmedGlobal[,3], tmpobsWSAF, coverageTrimmedGlobal$refCount, coverageTrimmedGlobal$altCount)
+  })
 
 
 #  output$panelSequenceDeconWSAFVsPOS <- renderDygraph ({

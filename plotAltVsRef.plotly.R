@@ -8,7 +8,7 @@ plotAltVsRef.plotly <- function (ref, alt){
           color = ~ ratios, colors=c("#de2d26", "#2b8cbe"), alpha = 0.8,
           marker = list(size = 3, line = list(color = "black", width = 0.3),
                         colorbar = list(title = legend.name)
-                        )) %>%
+                        )) %>%  #, width = 500, height = 500
     layout(margin = list(l = 65, r = 25, b = 50, t = 80, pad = 0),
            title = "Alt vs Ref", font = list(size = 18, colot = "black"),
            legend = list(font = list(size = 5)),
