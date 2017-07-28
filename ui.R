@@ -1,12 +1,14 @@
 library(shinythemes)
 
 fluidPage(
-  ######################## TITLE IMAGE
-  titlePanel( title = div( img( src = "deploid.png",
+  ####################### Browser icon
+  headerPanel(tags$head(tags$link(rel = "icon", type = "image/png", href = "deploidTransLowSmall.ico")), windowTitle = "DEploid-ShinyApp" ),
+
+  ####################### Head image
+  titlePanel( title = div( img( src = "deploidTrans.png",
                                 height = 93,
                                 width = 209,
-                                style = "margin:1px 1px" )),
-    windowTitle = "DEploid-ShinyApp"),
+                                style = "margin:1px 1px" ))),
 
   ####################### NAV BAR
   navbarPage(title = "", theme = shinytheme("cerulean"),
