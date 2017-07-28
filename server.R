@@ -12,6 +12,31 @@ source("trimData.R")
 source("chromosome.plotly.R")
 source("chromosome.dygraphs.R")
 
+
+plotEmptyVCF <- function(){
+  plot(c(0,1),c(0,1),type="n", xlab = "", ylab = "", bty = "n", xaxt = "n", yaxt = "n")
+  text(.5, .5, labels = "Please provide a VCF file in the \"Sample infos\" page.", cex = 3)
+}
+
+
+plotLoading <- function(){
+  plot(c(0,1),c(0,1),type="n", xlab = "", ylab = "", bty = "n", xaxt = "n", yaxt = "n")
+  text(.5, .5, labels = "Loading ...", cex = 3)
+}
+
+
+
+
+
+
+
+
+
+deconvolutionIsCompleted = FALSE
+
+
+
+
 ################# JOE: this do not need to be global.
 #rancoor <- read.csv("C:/Users/Hermosa/Desktop/random.coordinates.csv")
 #location <- read.csv("~/GitHub/DEploid-ShinyApp/Data/location.csv")
@@ -24,6 +49,11 @@ source("chromosome.dygraphs.R")
 coverageGlobal = c()
 
 function(input, output, session) {
+
+#  extractData <- reactive(
+
+
+#  )
 
   ########## tabPanel 1. Sample Info
 
@@ -128,15 +158,19 @@ function(input, output, session) {
   ########## tabPanel 2. Sample sequence exploration
   ### check if data is ready
   output$panelDataCoverageTable <-renderTable({
-    vcfFile <- input$inputVCFfile$datapath
-    coverageGlobal <<- extractCoverageFromVcf(vcfFile)
-    print(length(coverageGlobal$refCount))
-    print(length(coverageGlobal$altCount))
+#    vcfFile <- input$inputVCFfile$datapath
+#    coverageGlobal <<- extractCoverageFromVcf(vcfFile)
+#    print(length(coverageGlobal$refCount))
+#    print(length(coverageGlobal$altCount))
 
-    head(coverageGlobal, n = 5)
+    if ( is.null(coverageGlobal) ){
+
+    } else {
+      head(coverageGlobal, n = 5)
+    }
   })
 
-  output$panelDataPlafTable <-renderTable({
+  output$panelDataPlafTable <-renderTable({ # set the default to lab,
     urls = c("https://ndownloader.figshare.com/files/8916217?private_link=f09830a270360a4fe4a5",
              "https://ndownloader.figshare.com/files/8916220?private_link=f09830a270360a4fe4a5",
              "https://ndownloader.figshare.com/files/8916223?private_link=f09830a270360a4fe4a5",
@@ -169,35 +203,64 @@ function(input, output, session) {
     head(plafFile, 5)
   })
 
+
   output$panelDataTotalCoverage <- renderPlot({
-    vcfFile <- input$inputVCFfile$datapath
-    coverageGlobal <- extractCoverageFromVcf(vcfFile)
-    cat ("log: panelDataTotalCoverage\n")
-    plot.total.coverage(coverageGlobal$refCount, coverageGlobal$altCount,
-                        coverageGlobal$CHROM, cex.lab = 1, cex.main = 1, cex.axis = 1,
-                        threshold = 0.995, window.size = 10)
+    if (is.null(input$inputVCFfile)){
+      plotEmptyVCF()
+    } else if (is.null(coverageGlobal)){
+      return (NULL)
+    } else {
+
+#    vcfFile <- input$inputVCFfile$datapath
+#    coverageGlobal <- extractCoverageFromVcf(vcfFile)
+      cat ("log: panelDataTotalCoverage\n")
+      return(plot.total.coverage(coverageGlobal$refCount, coverageGlobal$altCount,
+                          coverageGlobal$CHROM, cex.lab = 1, cex.main = 1, cex.axis = 1,
+                          threshold = 0.995, window.size = 10))
+    }
   })
 
   output$panelDataExplainTotalCoverage <- renderText({
+    if (is.null(input$inputVCFfile)){
+      return (NULL)
+    }
     cat ("log: panelDataExplainTotalCoverage\n")
-    HTML(paste("Title", "Joe Explain",
+    HTML(paste("", "The total coverage is computed as the sum of reference and alternative allele counts at every site. Our experience is that heterozygous sites with high counts for both reference allele and alternative allele can cause over-fitting.",
                sep="<br/>"))
   })
 
   output$panelDataAltVsRef <- renderPlotly({
+    if (is.null(input$inputVCFfile)){
+#      plotEmptyVCF()
+      return (NULL)
+    } else if (is.null(coverageGlobal)){
+      return (NULL)
+    }
+
     vcfFile <- input$inputVCFfile$datapath
     coverageGlobal <- extractCoverageFromVcf(vcfFile)
     cat ("log: panelDataAltVsRef\n")
     plotAltVsRef.plotly(coverageGlobal$refCount, coverageGlobal$altCount)
   })
 
+
   output$panelDataExplainAltVsRef <- renderText({
+    if (is.null(input$inputVCFfile)){
+      return (NULL)
+    }
     cat ("log: panelDataExplainAltVsRef\n")
     HTML(paste("Title", "Joe Explain",
                sep="<br/>"))
   })
 
   output$panelDataHistWSAF <- renderPlotly({
+    if (is.null(input$inputVCFfile)){
+#      plotEmptyVCF()
+      return (NULL)
+    } else if (is.null(coverageGlobal)){
+      return (NULL)
+    }
+
     vcfFile <- input$inputVCFfile$datapath
     coverageGlobal <- extractCoverageFromVcf(vcfFile)
     cat ("log: panelDataHistWSAF\n")
@@ -206,6 +269,9 @@ function(input, output, session) {
   })
 
   output$panelDataExplainHistWSAF <- renderText({
+    if (is.null(input$inputVCFfile)){
+      return (NULL)
+    }
     cat ("log: panelDataExplainHistWSAF\n")
     HTML(paste("Title", "Joe Explain",
                sep="<br/>"))
@@ -215,6 +281,13 @@ function(input, output, session) {
   ### match VCF and PLAF by CHROM and POS instead
 
   output$panelDataWSAFVsPLAF <- renderPlotly({
+    if (is.null(input$inputVCFfile)){
+#      plotEmptyVCF()
+      return (NULL)
+    } else if (is.null(coverageGlobal)){
+      return (NULL)
+    }
+
     vcfFile <- input$inputVCFfile$datapath
     coverageGlobal <- extractCoverageFromVcf(vcfFile)
     cat ("log: panelDataWSAFVsPLAF\n")
@@ -236,6 +309,12 @@ function(input, output, session) {
   })
 
   output$panelDataExplainWSAFVsPLAF <- renderText({
+    if (is.null(input$inputVCFfile)){
+      return (NULL)
+    }
+
+    ### need to wait deconvolution finished ...
+
     cat ("log: panelDataExplainWSAFVsPLAF\n")
     HTML(paste("Title", "Joe Explain",
                sep="<br/>"))
@@ -255,10 +334,31 @@ function(input, output, session) {
   })
 
   output$panelSequenceDeconExplainWSAFVsPOS <- renderText({
+    if (is.null(input$inputVCFfile)){
+      return (NULL)
+    }
     cat ("log: panelSequenceDeconExplainWSAFVsPOS\n")
     HTML(paste("Title", "Joe Explain",
                sep="<br/>"))
   })
   #
 
+  output$severDeconvolutionState <- renderText({
+    if (deconvolutionIsCompleted){
+      return (NULL)
+    } else {
+      HTML("Loading ... ")
+    }
+  })
+
+
+  output$severMcMcState <- renderText({
+    if (deconvolutionIsCompleted){
+      return (NULL)
+    } else {
+      HTML("Loading ... ")
+    }
+  })
+
 }
+

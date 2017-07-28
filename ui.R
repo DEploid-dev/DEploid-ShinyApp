@@ -23,7 +23,7 @@ fluidPage(
                                                 c("Plasmodium Falciparum",
                                                   "Plasmodium Vivax")),
                                    hr(),
-                                    fileInput("inputVCFfile", "Choose VCF file",
+                                   fileInput("inputVCFfile", "Choose VCF file",
                                             accept=c('text', 'ref', 'txt')),
                                    hr(),
                                    uiOutput("inputOriginUI"),
@@ -40,6 +40,8 @@ fluidPage(
 
              ############ tabPanel 2
              tabPanel("Sample sequence exploration",
+
+############# Joe: i am inclined not to include the following two lines
 #                      fluidRow(
 #                        column(4, tableOutput("panelDataCoverageTable")),
 #                        column(4, tableOutput("panelDataPlafTable"))
@@ -62,7 +64,9 @@ fluidPage(
              ),
 
              ############ tabPanel 3
-             tabPanel("Sequence deconvolution"#,
+             tabPanel("Sequence deconvolution",
+                      htmlOutput("severDeconvolutionState")#,
+
 #                      selectInput("panelSequenceDeconSelectCHROM", label = h4("Choose a CHROMOSOME"),
 #                                  choices = list("Pf3D7_01_v3" = 1, "Pf3D7_02_v3" = 2, "Pf3D7_03_v3" = 3,
 #                                                 "Pf3D7_04_v3" = 4, "Pf3D7_05_v3" = 5, "Pf3D7_06_v3" = 6,
@@ -76,9 +80,9 @@ fluidPage(
 
 
              ############ tabPanel 4
-             tabPanel("MCMC diagnostic")
-
-
+             tabPanel("MCMC diagnostic",
+                      htmlOutput("severMcMcState")
+             )
 
   )
 )
