@@ -50,14 +50,14 @@ fluidPage(
                       fluidRow(column(1), column(10, plotOutput("panelDataTotalCoverage"))),
                       htmlOutput("panelDataExplainTotalCoverage"),
 
-                      # ### 2. Alt VS Ref
-                      fluidRow(column(4), column(5, align = "center", plotlyOutput("panelDataAltVsRef"))),
+#                      # ### 2. Alt VS Ref
+#                      fluidRow(column(4), column(5, align = "center", plotlyOutput("panelDataAltVsRef"))),
                       htmlOutput("panelDataExplainAltVsRef"),
-                      # ### 3. WSAF Histogram
-                      fluidRow(column(4), column(4, align = "center", plotlyOutput("panelDataHistWSAF"))),
+#                      # ### 3. WSAF Histogram
+#                      fluidRow(column(4), column(4, align = "center", plotlyOutput("panelDataHistWSAF"))),
                       htmlOutput("panelDataExplainHistWSAF"),
-                      # ### 4. WSAF VS PLAF
-                      fluidRow(column(4), column(4, align = "center", plotlyOutput("panelDataWSAFVsPLAF"))),
+#                      # ### 4. WSAF VS PLAF
+#                      fluidRow(column(4), column(4, align = "center", plotlyOutput("panelDataWSAFVsPLAF"))),
                       htmlOutput("panelDataExplainWSAFVsPLAF")
              ),
 

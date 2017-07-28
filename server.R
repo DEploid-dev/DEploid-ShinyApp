@@ -12,9 +12,11 @@ source("plot.total.coverage.R")
 source("plotAltVsRef.plotly.R")
 source("histWSAF.plotly.R")
 source("plotWSAFvsPLAF.plotly.R")
-source("trimData.R")
+#source("trimData.R")
 source("chromosome.plotly.R")
 source("chromosome.dygraphs.R")
+
+rancoor <- read.csv("Data/random.coordinates.csv")
 
 
 emptyVcfReminder <- function(){
@@ -25,7 +27,7 @@ emptyVcfReminder <- function(){
 
 trimmingReminder <- function(){
   plot(c(0,1),c(0,1),type="n", xlab = "", ylab = "", bty = "n", xaxt = "n", yaxt = "n")
-  text(.5, .5, labels = "Processing data.", cex = 3)
+  text(.5, .5, labels = "Working hard on the data.", cex = 3)
 }
 
 
@@ -35,10 +37,62 @@ loadingReminder <- function(){
 }
 
 
-dataIsTrimmed = FALSE
+letsTrimPlafVcf <- function (coverageVCF, plafFile) {
+
+  coverageVCF$MATCH <- paste(coverageVCF$CHROM, coverageVCF$POS, sep = "-")
+  plafFile$MATCH <- paste(plafFile$CHROM, plafFile$POS, sep = "-")
+  ### assertion: take a look at r-package: assertthat
+
+  # Two stage of trimming
+  #  1. trim them so they have the same sites
+  #  2. trim off sites where REF+ALT<5 and PLAF == 0
+
+  ### Trim1
+  # get index of plaf
+  plafIndex <- which(plafFile$MATCH %in% coverageVCF$MATCH)
+  plafFileTrim1 <- plafFile[plafIndex, ]
+  # get index of coverage
+  coverageIndex <- which(coverageVCF$MATCH %in% plafFile$MATCH)
+  coverageTrim1 <- coverageVCF[coverageIndex, ]
+
+
+  ### Trim2
+  plafFileTrim2 <- plafFileTrim1[(plafFileTrim1$PLAF != 0) &
+                                   (coverageTrim1$refCount + coverageTrim1$altCount >= 5), ]
+  coverageTrim2 <- coverageTrim1[(plafFileTrim1$PLAF != 0) &
+                                   (coverageTrim1$refCount + coverageTrim1$altCount >= 5), ]
+
+  ### write files
+  plafTrim2 <- plafFileTrim2$PLAF
+  altTrim2 <- coverageTrim2$altCount
+  refTrim2 <- coverageTrim2$refCount
+  # obsWSAFtmp <- alttmp/(reftmp + alttmp)
+
+  write.table(plafTrim2, file = "tmpPLAF.txt", sep = "\t", quote = F, row.names = F)
+  write.table(altTrim2, file = "tmpALT.txt", sep = "\t", quote = F, row.names = F)
+  write.table(refTrim2, file = "tmpREF.txt", sep = "\t", quote = F, row.names = F)
+
+  return (NULL)
+}
+
+
+
+
+
+
+#done.fetchPLAF = FALSE
+
+
+
+isBothPlafVcfTrimmed = FALSE
 deconvolutionIsCompleted = FALSE
 
+coverageUntrimmedGlobal = NULL
+coverageTrimmedGlobal = NULL
+plafUntrimmedGlobal = NULL
+plafTrimmedGlobal = NULL
 
+deconvolutedGlobal = NULL
 # decovlutedGlobal <<- dEploid(paste("-vcf", vcfFile, "-plaf", plafFile, "-noPanel", "-nSample 100"))
 # propGlobal <<- decovlutedGlobal$Proportions[dim(decovlutedGlobal$Proportions)[1],]
 # expWSAFGlobal <<- t(decovlutedGlobal$Haps) %*% propGlobal
@@ -47,10 +101,15 @@ coverageGlobal = c()
 
 function(input, output, session) {
 
-#  extractData <- reactive(
+#  dataReactions <- reactive({
+#    if (){
+
+#    }
+
+#    trimData(coverageGlobal, plafFile)
 
 
-#  )
+#  })
 
   ########## tabPanel 1. Sample Info
 
@@ -75,8 +134,6 @@ function(input, output, session) {
                                               "Cambodia" = "pv3_1", "Vietnam" = "pv3_2", "Laos" = "pv3_3",
                                               "Myanmar (Burma)" = "pv4_1", "China" = "pv4_2", "Madagascar" = "pv4_3", "Sri Lanka" = "pv4_4", "Brazil" = "pv4_5", "India" = "pv4_6")))
   })
-
-
 
 
   output$panelSampleInfoMap <- renderLeaflet({
@@ -115,14 +172,17 @@ function(input, output, session) {
               104.916667, 107.833333, 102.6,
               96.1, 116.383333, 47.516667, 79.866667, -47.88, 77.208333)
 
-    p = which(originlist == input$inputOrigin)
+    # SET DEFAULT MAP TO af1 group
+    coor.level = "af1"
+    p = 1
+    if (! is.null(input$inputOrigin)){
+      coor.level = str_sub(input$inputOrigin, 1, 3)
+      p = which(originlist == input$inputOrigin)
+    }
+
     p1 = longs[p]
     p2 = lats[p]
-    coor = data.frame(lat = p2,lng = p1)
 
-    ###### generate random samples
-    coor.level = str_sub(input$inputOrigin, 1, 3)
-    rancoor <- read.csv("Data/random.coordinates.csv")
     rancoortmp = rancoor %>%
       filter(ID == coor.level)
     x = c()
@@ -146,22 +206,17 @@ function(input, output, session) {
   })
 
 
-
-  ########## tabPanel 2. Sample sequence exploration
-  ### check if data is ready
-  output$panelDataCoverageTable <-renderTable({
-#    vcfFile <- input$inputVCFfile$datapath
-#    coverageGlobal <<- extractCoverageFromVcf(vcfFile)
-#    print(length(coverageGlobal$refCount))
-#    print(length(coverageGlobal$altCount))
-    if ( is.null(coverageGlobal) ){
-      return (NULL)
-    } else {
-      return(head(coverageGlobal, n = 5))
+  fetchPLAF <- reactive({
+    if (is.null(input$inputOrigin)){
+      cat("Log: no input, cann't fetch\n")
+      return()
     }
-  })
 
-  output$panelDataPlafTable <-renderTable({ # set the default to lab,
+    cat("Log: fetching PLAF\n")
+
+    # since is it's new data, need to trim, and rework with the data again
+    isBothPlafVcfTrimmed <<- FALSE
+
     urls = c("https://ndownloader.figshare.com/files/8916217?private_link=f09830a270360a4fe4a5",
              "https://ndownloader.figshare.com/files/8916220?private_link=f09830a270360a4fe4a5",
              "https://ndownloader.figshare.com/files/8916223?private_link=f09830a270360a4fe4a5",
@@ -185,24 +240,79 @@ function(input, output, session) {
                       9,9,9,
                       10,10,10,
                       11,11,11,11)
-    # urls.position = as.numeric(str_sub(input$origins,3,3))
     urls.position = positionlist[p]
     url_content = urls[urls.position]
     myfile <- getURL(url_content)
-    plafFile <<- read.table(textConnection(myfile), header=T)
-
-
-    plaf <<- plafFile$PLAF
-    head(plafFile, 5)
+#    done.fetchPLAF <<- TRUE
+    plafUntrimmedGlobal <<- read.table(textConnection(myfile), header=T)
   })
+
+
+  output$panelDataPlafTable <-renderTable({ # set the default to lab,
+    if (is.null(input$inputOrigin)){
+      return(NULL)
+    }
+
+    fetchPLAF()
+
+    if (is.null(plafUntrimmedGlobal)){
+      return (NULL)
+    }
+
+    head(plafUntrimmedGlobal, 5)
+  })
+
+
+  fetchVCF <- reactive({
+    if (is.null(input$inputVCFfile)){
+      cat("Log: no VCF, cann't fetch\n")
+      return()
+    }
+
+    cat("Log: fetching VCF\n")
+
+    # since is it's new data, need to trim, and rework with the data again
+    isBothPlafVcfTrimmed <<- FALSE
+
+    vcfFile <- input$inputVCFfile$datapath
+    coverageUntrimmedGlobal <<- extractCoverageFromVcf(vcfFile)
+  })
+
+
+  output$panelDataCoverageTable <-renderTable({
+
+    if (is.null(input$inputVCFfile)){
+      return(NULL)
+    }
+
+    fetchVCF()
+
+    if ( is.null(coverageUntrimmedGlobal) ){
+      return (NULL)
+    }
+
+    return(head(coverageUntrimmedGlobal, n = 5))
+  })
+
 
 
   output$panelDataTotalCoverage <- renderPlot({
     if (is.null(input$inputVCFfile)){
       emptyVcfReminder()
-    } else if (is.null(coverageGlobal)){
-      return (NULL)
+    } else if (!isBothPlafVcfTrimmed){
+      if (is.null(coverageUntrimmedGlobal)){
+        stop("coverage should have been loaded")
+      }
+
+      if (is.null(plafUntrimmedGlobal)){
+        stop("plaf should have been loaded")
+      }
+
+      letsTrimPlafVcf(coverageUntrimmedGlobal, plafUntrimmedGlobal)
+#      trimmingReminder()
+      return(NULL)
     } else {
+
 
 #    vcfFile <- input$inputVCFfile$datapath
 #    coverageGlobal <- extractCoverageFromVcf(vcfFile)
@@ -214,80 +324,79 @@ function(input, output, session) {
   })
 
 
-  output$panelDataAltVsRef <- renderPlotly({
-    if (is.null(input$inputVCFfile)){
-#      emptyVcfReminder()
-      return (NULL)
-    } else if (is.null(coverageGlobal)){
-      return (NULL)
-    }
+#  output$panelDataAltVsRef <- renderPlotly({
+#    if (is.null(input$inputVCFfile)){
+##      emptyVcfReminder()
+#      return (NULL)
+#    } else if (is.null(coverageGlobal)){
+#      return (NULL)
+#    }
 
-    vcfFile <- input$inputVCFfile$datapath
-    coverageGlobal <- extractCoverageFromVcf(vcfFile)
-    cat ("log: panelDataAltVsRef\n")
-    plotAltVsRef.plotly(coverageGlobal$refCount, coverageGlobal$altCount)
-  })
-
-
-
-  output$panelDataHistWSAF <- renderPlotly({
-    if (is.null(input$inputVCFfile)){
-#      emptyVcfReminder()
-      return (NULL)
-    } else if (is.null(coverageGlobal)){
-      return (NULL)
-    }
-
-    vcfFile <- input$inputVCFfile$datapath
-    coverageGlobal <- extractCoverageFromVcf(vcfFile)
-    cat ("log: panelDataHistWSAF\n")
-    obsWSAF <<- computeObsWSAF(coverageGlobal$refCount, coverageGlobal$altCount)
-    histWSAF.plotly(obsWSAF)
-  })
-
-  ### match VCF and PLAF by CHROM and POS instead
-
-  output$panelDataWSAFVsPLAF <- renderPlotly({
-    if (is.null(input$inputVCFfile)){
-#      emptyVcfReminder()
-      return (NULL)
-    } else if (is.null(coverageGlobal)){
-      return (NULL)
-    }
-
-    vcfFile <- input$inputVCFfile$datapath
-    coverageGlobal <- extractCoverageFromVcf(vcfFile)
-    cat ("log: panelDataWSAFVsPLAF\n")
-
-    trimData(coverageGlobal, plafFile)
-
-    tmpPLAF <<- read.csv("C:/Users/Hermosa/Documents/GitHub/DEploid-ShinyApp/tmpPLAF.txt", sep = "\t")
-    tmpPLAF <<- as.numeric(tmpPLAF[,1])
-    tmpREF <<- read.csv("C:/Users/Hermosa/Documents/GitHub/DEploid-ShinyApp/tmpREF.txt", sep = "\t")
-    tmpREF <<- as.numeric(tmpREF[,1])
-    tmpALT <<- read.csv("C:/Users/Hermosa/Documents/GitHub/DEploid-ShinyApp/tmpALT.txt", sep = "\t")
-    tmpALT <<- as.numeric(tmpALT[,1])
-    tmpobsWSAF <<- tmpALT/(tmpREF + tmpALT)
-
-    decovlutedGlobal <<- dEploid(paste("-ref", "tmpREF.txt", "-alt", "tmpALT.txt", "-plaf", "tmpPLAF.txt", "-noPanel"))
-    propGlobal <<- decovlutedGlobal$Proportions[dim(decovlutedGlobal$Proportions)[1],]
-    expWSAFGlobal <<- t(decovlutedGlobal$Haps) %*% propGlobal
-    plotWSAFvsPLAF.plotly(tmpPLAF, tmpobsWSAF, tmpREF, tmpALT)
-  })
+#    vcfFile <- input$inputVCFfile$datapath
+#    coverageGlobal <- extractCoverageFromVcf(vcfFile)
+#    cat ("log: panelDataAltVsRef\n")
+#    plotAltVsRef.plotly(coverageGlobal$refCount, coverageGlobal$altCount)
+#  })
 
 
-  output$panelSequenceDeconWSAFVsPOS <- renderDygraph ({
-    vcfFile <- input$inputVCFfile$datapath
-    coverageGlobal <- extractCoverageFromVcf(vcfFile)
-    obsWSAF = computeObsWSAF(coverageGlobal$altCount, coverageGlobal$refCount)
 
-    checkft = as.character(unique(coverageGlobal$CHROM))
-    type=""
-    for(i in input$panelSequenceDeconSelectCHROM){
-      type = paste(type, checkft[as.integer(i)], sep = "")
-    }
-    plot.wsaf.vs.pos.dygraph(coverageGlobal, chrom = type, obsWSAF)
-  })
+#  output$panelDataHistWSAF <- renderPlotly({
+#    if (is.null(input$inputVCFfile)){
+##      emptyVcfReminder()
+#      return (NULL)
+#    } else if (is.null(coverageGlobal)){
+#      return (NULL)
+#    }
+
+#    vcfFile <- input$inputVCFfile$datapath
+#    coverageGlobal <- extractCoverageFromVcf(vcfFile)
+#    cat ("log: panelDataHistWSAF\n")
+#    obsWSAF <<- computeObsWSAF(coverageGlobal$refCount, coverageGlobal$altCount)
+#    histWSAF.plotly(obsWSAF)
+#  })
+
+#  ### match VCF and PLAF by CHROM and POS instead
+
+#  output$panelDataWSAFVsPLAF <- renderPlotly({
+#    if (is.null(input$inputVCFfile)){
+##      emptyVcfReminder()
+#      return (NULL)
+#    } else if (is.null(coverageGlobal)){
+#      return (NULL)
+#    }
+
+#    vcfFile <- input$inputVCFfile$datapath
+#    coverageGlobal <- extractCoverageFromVcf(vcfFile)
+#    cat ("log: panelDataWSAFVsPLAF\n")
+
+
+#    tmpPLAF <<- read.csv("C:/Users/Hermosa/Documents/GitHub/DEploid-ShinyApp/tmpPLAF.txt", sep = "\t")
+#    tmpPLAF <<- as.numeric(tmpPLAF[,1])
+#    tmpREF <<- read.csv("C:/Users/Hermosa/Documents/GitHub/DEploid-ShinyApp/tmpREF.txt", sep = "\t")
+#    tmpREF <<- as.numeric(tmpREF[,1])
+#    tmpALT <<- read.csv("C:/Users/Hermosa/Documents/GitHub/DEploid-ShinyApp/tmpALT.txt", sep = "\t")
+#    tmpALT <<- as.numeric(tmpALT[,1])
+#    tmpobsWSAF <<- tmpALT/(tmpREF + tmpALT)
+
+#    decovlutedGlobal <<- dEploid(paste("-ref", "tmpREF.txt", "-alt", "tmpALT.txt", "-plaf", "tmpPLAF.txt", "-noPanel"))
+#    propGlobal <<- decovlutedGlobal$Proportions[dim(decovlutedGlobal$Proportions)[1],]
+#    expWSAFGlobal <<- t(decovlutedGlobal$Haps) %*% propGlobal
+#    plotWSAFvsPLAF.plotly(tmpPLAF, tmpobsWSAF, tmpREF, tmpALT)
+#  })
+
+
+#  output$panelSequenceDeconWSAFVsPOS <- renderDygraph ({
+#    vcfFile <- input$inputVCFfile$datapath
+#    coverageGlobal <- extractCoverageFromVcf(vcfFile)
+#    obsWSAF = computeObsWSAF(coverageGlobal$altCount, coverageGlobal$refCount)
+
+#    checkft = as.character(unique(coverageGlobal$CHROM))
+#    type=""
+#    for(i in input$panelSequenceDeconSelectCHROM){
+#      type = paste(type, checkft[as.integer(i)], sep = "")
+#    }
+#    plot.wsaf.vs.pos.dygraph(coverageGlobal, chrom = type, obsWSAF)
+#  })
 
 
 
@@ -352,7 +461,7 @@ function(input, output, session) {
   output$serverDataState <- renderText({
     if (is.null(input$inputVCFfile)){
       return (NULL)
-    } else if (!dataIsTrimmed){
+    } else if (!isBothPlafVcfTrimmed){
       HTML("Loading ... ")
     } else {
       return (NULL)
