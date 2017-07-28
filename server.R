@@ -3,6 +3,10 @@ library(dplyr)
 library(quantmod)
 library(RCurl)
 
+# allow maximum vcf upload to 30mb
+options(shiny.maxRequestSize=30*1024^2)
+
+
 # source("plaf.get.R")
 source("plot.total.coverage.R")
 source("plotAltVsRef.plotly.R")
@@ -13,33 +17,26 @@ source("chromosome.plotly.R")
 source("chromosome.dygraphs.R")
 
 
-plotEmptyVCF <- function(){
+emptyVcfReminder <- function(){
   plot(c(0,1),c(0,1),type="n", xlab = "", ylab = "", bty = "n", xaxt = "n", yaxt = "n")
   text(.5, .5, labels = "Please provide a VCF file in the \"Sample infos\" page.", cex = 3)
 }
 
 
-plotLoading <- function(){
+trimmingReminder <- function(){
+  plot(c(0,1),c(0,1),type="n", xlab = "", ylab = "", bty = "n", xaxt = "n", yaxt = "n")
+  text(.5, .5, labels = "Processing data.", cex = 3)
+}
+
+
+loadingReminder <- function(){
   plot(c(0,1),c(0,1),type="n", xlab = "", ylab = "", bty = "n", xaxt = "n", yaxt = "n")
   text(.5, .5, labels = "Loading ...", cex = 3)
 }
 
 
-
-
-
-
-
-
-
+dataIsTrimmed = FALSE
 deconvolutionIsCompleted = FALSE
-
-
-
-
-################# JOE: this do not need to be global.
-#rancoor <- read.csv("C:/Users/Hermosa/Desktop/random.coordinates.csv")
-#location <- read.csv("~/GitHub/DEploid-ShinyApp/Data/location.csv")
 
 
 # decovlutedGlobal <<- dEploid(paste("-vcf", vcfFile, "-plaf", plafFile, "-noPanel", "-nSample 100"))
@@ -80,78 +77,73 @@ function(input, output, session) {
   })
 
 
-  output$panelSampleInfoExplainSample <- renderText({
-    HTML(paste("", "Note: We use the genomic information extracted from the nearby (marked by red dots shown in the map) parasite sequences to deconvolve the input sequence data",
-               sep="<br/>"))
+
+
+  output$panelSampleInfoMap <- renderLeaflet({
+    originlist <- c("af1_1","af1_2",
+                     "af2",
+                     "af3_1","af3_2","af3_3",
+                     "af4_1","af4_2","af4_3",
+                     "as5_1","as5_2","as5_3",
+                     "as6_1","as6_2","as6_3","as6_4",
+                     "as7_1","as7_2","as7_3","as7_4",
+                     "pv1",
+                     "pv2_1", "pv2_2", "pv2_3",
+                     "pv3_1", "pv3_2", "pv3_3",
+                     "pv4_1", "pv4_2", "pv4_3", "pv4_4", "pv4_5", "pv4_6")
+
+    lats = c(-16.166667, -4.316667,
+             10.884722,
+             8.5, 14.783333, 12.650000,
+             13.466667, 7.75, 8.052222,
+             12.533333, 12.850556, 15.120000,
+             11.769167, 14.8, 13.733333, 14.390000,
+             21.458333, 18.25, 16.713056, 9.966944,
+             13.75,
+             -6.175, 3.133333, -9.5,
+             11.55, 16.166667, 17.966667,
+             19.75, 39.916667, -18.916667, 6.933333, -15.79, 28.613333)
+    longs = c(34.75, 15.316667,
+              -1.090278,
+              4.55, -16.916667, -8.000000,
+              -16.600000, -8.816667, -1.734722,
+              103.916667, 102.609444, 104.321667,
+              107.237222, 106.833, 107.000000, 104.680000,
+              92.1, 96, 98.574722, 98.635556,
+              100.483333,
+              106.828333, 101.683333, 147.116667,
+              104.916667, 107.833333, 102.6,
+              96.1, 116.383333, 47.516667, 79.866667, -47.88, 77.208333)
+
+    p = which(originlist == input$inputOrigin)
+    p1 = longs[p]
+    p2 = lats[p]
+    coor = data.frame(lat = p2,lng = p1)
+
+    ###### generate random samples
+    coor.level = str_sub(input$inputOrigin, 1, 3)
+    rancoor <- read.csv("Data/random.coordinates.csv")
+    rancoortmp = rancoor %>%
+      filter(ID == coor.level)
+    x = c()
+    y = c()
+    for (i in 1:nrow(rancoortmp)) {
+      set.seed(321)
+      xtmp = runif(rancoortmp$sample.size[i],rancoortmp$lats.min[i], rancoortmp$lats.max[i])
+      x = append(x, xtmp)
+      set.seed(123)
+      ytmp = runif(rancoortmp$sample.size[i],rancoortmp$longs.min[i], rancoortmp$longs.max[i])
+      y = append(y, ytmp)
+    }
+    df = data.frame(y, x)
+    colnames(df) = c("lng", "lat")
+
+    leaflet(df) %>%
+      addProviderTiles(providers$Esri.NatGeoWorldMap) %>%
+      addCircleMarkers(radius = 1.7, color = "#ff0048", stroke = FALSE, fillOpacity = 0.7) %>%
+      addMarkers(lng = p1, lat = p2, popup = "Origin") %>%
+      addCircleMarkers(lng = p1, lat = p2, radius = 18, color = "blue")
   })
-
-###################### JOE: turn this off, until coords data available
-#  output$panelSampleInfoMap <- renderLeaflet({
-#    originlist <<- c("af1_1","af1_2",
-#                     "af2",
-#                     "af3_1","af3_2","af3_3",
-#                     "af4_1","af4_2","af4_3",
-#                     "as5_1","as5_2","as5_3",
-#                     "as6_1","as6_2","as6_3","as6_4",
-#                     "as7_1","as7_2","as7_3","as7_4",
-#                     "pv1",
-#                     "pv2_1", "pv2_2", "pv2_3",
-#                     "pv3_1", "pv3_2", "pv3_3",
-#                     "pv4_1", "pv4_2", "pv4_3", "pv4_4", "pv4_5", "pv4_6")
-#    p = which(originlist == input$inputOrigin)
-
-#    lats = c(-16.166667, -4.316667,
-#             10.884722,
-#             8.5, 14.783333, 12.650000,
-#             13.466667, 7.75, 8.052222,
-#             12.533333, 12.850556, 15.120000,
-#             11.769167, 14.8, 13.733333, 14.390000,
-#             21.458333, 18.25, 16.713056, 9.966944,
-#             13.75,
-#             -6.175, 3.133333, -9.5,
-#             11.55, 16.166667, 17.966667,
-#             19.75, 39.916667, -18.916667, 6.933333, -15.79, 28.613333)
-#    longs = c(34.75, 15.316667,
-#              -1.090278,
-#              4.55, -16.916667, -8.000000,
-#              -16.600000, -8.816667, -1.734722,
-#              103.916667, 102.609444, 104.321667,
-#              107.237222, 106.833, 107.000000, 104.680000,
-#              92.1, 96, 98.574722, 98.635556,
-#              100.483333,
-#              106.828333, 101.683333, 147.116667,
-#              104.916667, 107.833333, 102.6,
-#              96.1, 116.383333, 47.516667, 79.866667, -47.88, 77.208333)
-
-#    p1 = longs[p]
-#    p2 = lats[p]
-#    coor = data.frame(lat = p2,lng = p1)
-
-#    ###### generate random samples
-#    coor.level = str_sub(input$inputOrigin, 1, 3)
-#    rancoortmp = rancoor %>%
-#      filter(ID == coor.level)
-#    x = c()
-#    y = c()
-#    for (i in 1:nrow(rancoortmp)) {
-#      set.seed(321)
-#      xtmp = runif(rancoortmp$sample.size[i],rancoortmp$lats.min[i], rancoortmp$lats.max[i])
-#      x = append(x, xtmp)
-#      set.seed(123)
-#      ytmp = runif(rancoortmp$sample.size[i],rancoortmp$longs.min[i], rancoortmp$longs.max[i])
-#      y = append(y, ytmp)
-#    }
-#    df = data.frame(y, x)
-#    colnames(df) = c("lng", "lat")
-
-#    leaflet(df) %>%
-#      addProviderTiles(providers$Esri.NatGeoWorldMap) %>%
-#      addCircleMarkers(radius = 1.7, color = "#ff0048", stroke = FALSE, fillOpacity = 0.7) %>%
-#      addMarkers(lng = p1, lat = p2, popup = "Origin") %>%
-#      addCircleMarkers(lng = p1, lat = p2, radius = 18, color = "blue")
-
-
-#  })
 
 
 
@@ -162,11 +154,10 @@ function(input, output, session) {
 #    coverageGlobal <<- extractCoverageFromVcf(vcfFile)
 #    print(length(coverageGlobal$refCount))
 #    print(length(coverageGlobal$altCount))
-
     if ( is.null(coverageGlobal) ){
-
+      return (NULL)
     } else {
-      head(coverageGlobal, n = 5)
+      return(head(coverageGlobal, n = 5))
     }
   })
 
@@ -199,6 +190,8 @@ function(input, output, session) {
     url_content = urls[urls.position]
     myfile <- getURL(url_content)
     plafFile <<- read.table(textConnection(myfile), header=T)
+
+
     plaf <<- plafFile$PLAF
     head(plafFile, 5)
   })
@@ -206,7 +199,7 @@ function(input, output, session) {
 
   output$panelDataTotalCoverage <- renderPlot({
     if (is.null(input$inputVCFfile)){
-      plotEmptyVCF()
+      emptyVcfReminder()
     } else if (is.null(coverageGlobal)){
       return (NULL)
     } else {
@@ -220,18 +213,10 @@ function(input, output, session) {
     }
   })
 
-  output$panelDataExplainTotalCoverage <- renderText({
-    if (is.null(input$inputVCFfile)){
-      return (NULL)
-    }
-    cat ("log: panelDataExplainTotalCoverage\n")
-    HTML(paste("", "The total coverage is computed as the sum of reference and alternative allele counts at every site. Our experience is that heterozygous sites with high counts for both reference allele and alternative allele can cause over-fitting.",
-               sep="<br/>"))
-  })
 
   output$panelDataAltVsRef <- renderPlotly({
     if (is.null(input$inputVCFfile)){
-#      plotEmptyVCF()
+#      emptyVcfReminder()
       return (NULL)
     } else if (is.null(coverageGlobal)){
       return (NULL)
@@ -244,18 +229,10 @@ function(input, output, session) {
   })
 
 
-  output$panelDataExplainAltVsRef <- renderText({
-    if (is.null(input$inputVCFfile)){
-      return (NULL)
-    }
-    cat ("log: panelDataExplainAltVsRef\n")
-    HTML(paste("Title", "Joe Explain",
-               sep="<br/>"))
-  })
 
   output$panelDataHistWSAF <- renderPlotly({
     if (is.null(input$inputVCFfile)){
-#      plotEmptyVCF()
+#      emptyVcfReminder()
       return (NULL)
     } else if (is.null(coverageGlobal)){
       return (NULL)
@@ -268,21 +245,11 @@ function(input, output, session) {
     histWSAF.plotly(obsWSAF)
   })
 
-  output$panelDataExplainHistWSAF <- renderText({
-    if (is.null(input$inputVCFfile)){
-      return (NULL)
-    }
-    cat ("log: panelDataExplainHistWSAF\n")
-    HTML(paste("Title", "Joe Explain",
-               sep="<br/>"))
-  })
-
-
   ### match VCF and PLAF by CHROM and POS instead
 
   output$panelDataWSAFVsPLAF <- renderPlotly({
     if (is.null(input$inputVCFfile)){
-#      plotEmptyVCF()
+#      emptyVcfReminder()
       return (NULL)
     } else if (is.null(coverageGlobal)){
       return (NULL)
@@ -308,17 +275,6 @@ function(input, output, session) {
     plotWSAFvsPLAF.plotly(tmpPLAF, tmpobsWSAF, tmpREF, tmpALT)
   })
 
-  output$panelDataExplainWSAFVsPLAF <- renderText({
-    if (is.null(input$inputVCFfile)){
-      return (NULL)
-    }
-
-    ### need to wait deconvolution finished ...
-
-    cat ("log: panelDataExplainWSAFVsPLAF\n")
-    HTML(paste("Title", "Joe Explain",
-               sep="<br/>"))
-  })
 
   output$panelSequenceDeconWSAFVsPOS <- renderDygraph ({
     vcfFile <- input$inputVCFfile$datapath
@@ -333,15 +289,75 @@ function(input, output, session) {
     plot.wsaf.vs.pos.dygraph(coverageGlobal, chrom = type, obsWSAF)
   })
 
+
+
+
+
+  ####################### Explanation boxes #########################
+
+  output$panelSampleInfoExplainSample <- renderText({
+    HTML("Note: We use the genomic information extracted from the nearby (marked by red dots shown in the map) parasite sequences to deconvolve the input sequence data")
+  })
+
+
+  output$panelDataExplainTotalCoverage <- renderText({
+    if (is.null(input$inputVCFfile)){
+      return (NULL)
+    }
+    cat ("log: panelDataExplainTotalCoverage\n")
+    HTML(paste("", "The total coverage is computed as the sum of reference and alternative allele counts at every site. Our experience is that heterozygous sites with high counts for both reference allele and alternative allele can cause over-fitting.",
+               sep="<br/>"))
+  })
+
+  output$panelDataExplainAltVsRef <- renderText({
+    if (is.null(input$inputVCFfile)){
+      return (NULL)
+    }
+    cat ("log: panelDataExplainAltVsRef\n")
+    HTML(" the alternative allele count against the reference allele count. As P. falciparum genomes are haploid, in clonal samples, one woule expect to see either alternative or reference allele at any sites. Heterozygous sites are indications of mixed infection.")
+  })
+
+
+  output$panelDataExplainHistWSAF <- renderText({
+    if (is.null(input$inputVCFfile)){
+      return (NULL)
+    }
+    cat ("log: panelDataExplainHistWSAF\n")
+    HTML("Histogram of the allele frequency within sample. Note that we exclude markers with WSAF strictly equal to 0s and 1s in the histogram.")
+  })
+
+
+  output$panelDataExplainWSAFVsPLAF <- renderText({
+    if (is.null(input$inputVCFfile)){
+      return (NULL)
+    }
+
+    ### need to wait deconvolution finished ...
+
+    cat ("log: panelDataExplainWSAFVsPLAF\n")
+    HTML("Allele frequency within sample, compare against the population average.")
+  })
+
+
   output$panelSequenceDeconExplainWSAFVsPOS <- renderText({
     if (is.null(input$inputVCFfile)){
       return (NULL)
     }
     cat ("log: panelSequenceDeconExplainWSAFVsPOS\n")
-    HTML(paste("Title", "Joe Explain",
-               sep="<br/>"))
+    HTML("Allele frequencies within sample across all 14 chromosomes. Expected and observed WSAF are marked in blue and red respectively.")
   })
-  #
+
+  ############# Require input data or patience ######################
+
+  output$serverDataState <- renderText({
+    if (is.null(input$inputVCFfile)){
+      return (NULL)
+    } else if (!dataIsTrimmed){
+      HTML("Loading ... ")
+    } else {
+      return (NULL)
+    }
+  })
 
   output$severDeconvolutionState <- renderText({
     if (deconvolutionIsCompleted){
@@ -350,7 +366,6 @@ function(input, output, session) {
       HTML("Loading ... ")
     }
   })
-
 
   output$severMcMcState <- renderText({
     if (deconvolutionIsCompleted){
