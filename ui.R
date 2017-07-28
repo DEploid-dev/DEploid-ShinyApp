@@ -5,10 +5,8 @@ fluidPage(
   titlePanel( title = div( img( src = "deploid.png",
                                 height = 93,
                                 width = 209,
-                                style = "margin:1px 1px"
-  )
-  )
-  ),
+                                style = "margin:1px 1px" )),
+    windowTitle = "DEploid-ShinyApp"),
 
   ####################### NAV BAR
   navbarPage(title = "", theme = shinytheme("cerulean"),
@@ -23,30 +21,28 @@ fluidPage(
                                                 c("Plasmodium Falciparum",
                                                   "Plasmodium Vivax")),
                                    hr(),
+                                   uiOutput("inputOriginUI"),
+                                   hr(),
                                    fileInput("inputVCFfile", "Choose VCF file",
                                             accept=c('text', 'ref', 'txt')),
                                    hr(),
-                                   uiOutput("inputOriginUI"),
-                                   hr(),
                                    htmlOutput("panelSampleInfoExplainSample"))
-                          )#,
-############ JOE: turn this back on, once the coordinate data available
-#                          column(9,
-#                                 leafletOutput("panelSampleInfoMap", height = "530px")
-#                          )
-                        ))
+                          ),
+                          column(9,
+                                 leafletOutput("panelSampleInfoMap", height = "530px")
+                          )
+                        ),
+                      fluidRow(
+                        column(4, tableOutput("panelDataCoverageTable")),
+                        column(4, tableOutput("panelDataPlafTable"))
+                        )
+                    )
              ),
 
 
              ############ tabPanel 2
              tabPanel("Sample sequence exploration",
-
-############# Joe: i am inclined not to include the following two lines
-#                      fluidRow(
-#                        column(4, tableOutput("panelDataCoverageTable")),
-#                        column(4, tableOutput("panelDataPlafTable"))
-#                        ),
-
+                      htmlOutput("serverDataState"),
 
                       ### 1. total coverage
                       fluidRow(column(1), column(10, plotOutput("panelDataTotalCoverage"))),
