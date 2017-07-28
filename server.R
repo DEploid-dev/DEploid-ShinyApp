@@ -19,6 +19,13 @@ source("chromosome.dygraphs.R")
 rancoor <- read.csv("Data/random.coordinates.csv")
 
 
+coverageUntrimmedGlobal = NULL
+coverageTrimmedGlobal = NULL
+plafUntrimmedGlobal = NULL
+plafTrimmedGlobal = NULL
+
+
+
 emptyVcfReminder <- function(){
   plot(c(0,1),c(0,1),type="n", xlab = "", ylab = "", bty = "n", xaxt = "n", yaxt = "n")
   text(.5, .5, labels = "Please provide a VCF file in the \"Sample infos\" page.", cex = 3)
@@ -56,28 +63,44 @@ letsTrimPlafVcf <- function (coverageVCF, plafFile) {
   coverageTrim1 <- coverageVCF[coverageIndex, ]
 
 
+  trimIdx = which((plafFileTrim1$PLAF != 0) &
+                        (coverageTrim1$refCount + coverageTrim1$altCount >= 5))
   ### Trim2
-  plafFileTrim2 <- plafFileTrim1[(plafFileTrim1$PLAF != 0) &
-                                   (coverageTrim1$refCount + coverageTrim1$altCount >= 5), ]
-  coverageTrim2 <- coverageTrim1[(plafFileTrim1$PLAF != 0) &
-                                   (coverageTrim1$refCount + coverageTrim1$altCount >= 5), ]
+  plafTrim2 <- plafFileTrim1[trimIdx,]
+  coverageTrim2 <- coverageTrim1[trimIdx,]
+
 
   ### write files
-  plafTrim2 <- plafFileTrim2$PLAF
-  altTrim2 <- coverageTrim2$altCount
-  refTrim2 <- coverageTrim2$refCount
+  plafTrim2[["MATCH"]] <- NULL
+  altTrim2 <- data.frame(CHROM = coverageTrim2$CHROM,
+                         POS = coverageTrim2$POS,
+                         altCount = coverageTrim2$altCount)
+  refTrim2 <- data.frame(CHROM = coverageTrim2$CHROM,
+                         POS = coverageTrim2$POS,
+                         refCount = coverageTrim2$refCount)
   # obsWSAFtmp <- alttmp/(reftmp + alttmp)
 
   write.table(plafTrim2, file = "tmpPLAF.txt", sep = "\t", quote = F, row.names = F)
   write.table(altTrim2, file = "tmpALT.txt", sep = "\t", quote = F, row.names = F)
   write.table(refTrim2, file = "tmpREF.txt", sep = "\t", quote = F, row.names = F)
 
+  isBothPlafVcfTrimmed <<- TRUE
+  coverageTrimmedGlobal <<- extractCoverageFromTxt("tmpREF.txt", "tmpALT.txt")
   return (NULL)
 }
 
 
-
-
+originlist <- c("af1_1","af1_2",
+                 "af2",
+                 "af3_1","af3_2","af3_3",
+                 "af4_1","af4_2","af4_3",
+                 "as5_1","as5_2","as5_3",
+                 "as6_1","as6_2","as6_3","as6_4",
+                 "as7_1","as7_2","as7_3","as7_4",
+                 "pv1",
+                 "pv2_1", "pv2_2", "pv2_3",
+                 "pv3_1", "pv3_2", "pv3_3",
+                 "pv4_1", "pv4_2", "pv4_3", "pv4_4", "pv4_5", "pv4_6")
 
 
 #done.fetchPLAF = FALSE
@@ -87,10 +110,6 @@ letsTrimPlafVcf <- function (coverageVCF, plafFile) {
 isBothPlafVcfTrimmed = FALSE
 deconvolutionIsCompleted = FALSE
 
-coverageUntrimmedGlobal = NULL
-coverageTrimmedGlobal = NULL
-plafUntrimmedGlobal = NULL
-plafTrimmedGlobal = NULL
 
 deconvolutedGlobal = NULL
 # decovlutedGlobal <<- dEploid(paste("-vcf", vcfFile, "-plaf", plafFile, "-noPanel", "-nSample 100"))
@@ -100,16 +119,6 @@ deconvolutedGlobal = NULL
 coverageGlobal = c()
 
 function(input, output, session) {
-
-#  dataReactions <- reactive({
-#    if (){
-
-#    }
-
-#    trimData(coverageGlobal, plafFile)
-
-
-#  })
 
   ########## tabPanel 1. Sample Info
 
@@ -137,18 +146,6 @@ function(input, output, session) {
 
 
   output$panelSampleInfoMap <- renderLeaflet({
-    originlist <- c("af1_1","af1_2",
-                     "af2",
-                     "af3_1","af3_2","af3_3",
-                     "af4_1","af4_2","af4_3",
-                     "as5_1","as5_2","as5_3",
-                     "as6_1","as6_2","as6_3","as6_4",
-                     "as7_1","as7_2","as7_3","as7_4",
-                     "pv1",
-                     "pv2_1", "pv2_2", "pv2_3",
-                     "pv3_1", "pv3_2", "pv3_3",
-                     "pv4_1", "pv4_2", "pv4_3", "pv4_4", "pv4_5", "pv4_6")
-
     lats = c(-16.166667, -4.316667,
              10.884722,
              8.5, 14.783333, 12.650000,
@@ -175,9 +172,13 @@ function(input, output, session) {
     # SET DEFAULT MAP TO af1 group
     coor.level = "af1"
     p = 1
+
     if (! is.null(input$inputOrigin)){
       coor.level = str_sub(input$inputOrigin, 1, 3)
       p = which(originlist == input$inputOrigin)
+    } else {
+      leaflet() %>%
+        addProviderTiles(providers$Esri.NatGeoWorldMap)
     }
 
     p1 = longs[p]
@@ -243,7 +244,6 @@ function(input, output, session) {
     urls.position = positionlist[p]
     url_content = urls[urls.position]
     myfile <- getURL(url_content)
-#    done.fetchPLAF <<- TRUE
     plafUntrimmedGlobal <<- read.table(textConnection(myfile), header=T)
   })
 
@@ -310,17 +310,14 @@ function(input, output, session) {
 
       letsTrimPlafVcf(coverageUntrimmedGlobal, plafUntrimmedGlobal)
 #      trimmingReminder()
-      return(NULL)
-    } else {
-
-
-#    vcfFile <- input$inputVCFfile$datapath
-#    coverageGlobal <- extractCoverageFromVcf(vcfFile)
-      cat ("log: panelDataTotalCoverage\n")
-      return(plot.total.coverage(coverageGlobal$refCount, coverageGlobal$altCount,
-                          coverageGlobal$CHROM, cex.lab = 1, cex.main = 1, cex.axis = 1,
-                          threshold = 0.995, window.size = 10))
+#      return(NULL)
     }
+#    else {
+      cat ("log: panelDataTotalCoverage\n")
+      return(plot.total.coverage(coverageTrimmedGlobal$refCount, coverageTrimmedGlobal$altCount,
+                          coverageTrimmedGlobal$CHROM, cex.lab = 1, cex.main = 1, cex.axis = 1,
+                          threshold = 0.995, window.size = 10))
+#    }
   })
 
 

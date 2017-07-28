@@ -33,3 +33,11 @@ vignettes/*.pdf
 *.knit.md
 .Rproj.user
 server.R
+
+# Temp file created by DEploid
+pf3k-dEploid.hap
+pf3k-dEploid.llk
+pf3k-dEploid.prop
+tmpALT.txt
+tmpPLAF.txt
+tmpREF.txt
