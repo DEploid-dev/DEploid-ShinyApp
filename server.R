@@ -24,6 +24,7 @@ coverageTrimmedGlobal = NULL
 plafUntrimmedGlobal = NULL
 plafTrimmedGlobal = NULL
 
+deconvolutedGlobal = NULL
 
 
 emptyVcfReminder <- function(){
@@ -104,20 +105,11 @@ originlist <- c("af1_1","af1_2",
                  "pv4_1", "pv4_2", "pv4_3", "pv4_4", "pv4_5", "pv4_6")
 
 
-#done.fetchPLAF = FALSE
-
-
 
 isBothPlafVcfTrimmed = FALSE
 deconvolutionIsCompleted = FALSE
 
 
-deconvolutedGlobal = NULL
-# decovlutedGlobal <<- dEploid(paste("-vcf", vcfFile, "-plaf", plafFile, "-noPanel", "-nSample 100"))
-# propGlobal <<- decovlutedGlobal$Proportions[dim(decovlutedGlobal$Proportions)[1],]
-# expWSAFGlobal <<- t(decovlutedGlobal$Haps) %*% propGlobal
-
-coverageGlobal = c()
 
 function(input, output, session) {
 
@@ -315,6 +307,7 @@ function(input, output, session) {
     }
 #    else {
       cat ("log: panelDataTotalCoverage\n")
+print(head(coverageTrimmedGlobal))
       return(plot.total.coverage(coverageTrimmedGlobal$refCount, coverageTrimmedGlobal$altCount,
                           coverageTrimmedGlobal$CHROM, cex.lab = 1, cex.main = 1, cex.axis = 1,
                           threshold = 0.995, window.size = 10))
@@ -323,42 +316,94 @@ function(input, output, session) {
 
 
   output$panelDataAltVsRef <- renderPlotly({
+    if (is.null(input$inputVCFfile)){
+      return (NULL)
+    }
+
     if (is.null(coverageTrimmedGlobal)){
       return (NULL)
     }
 
+    if (!isBothPlafVcfTrimmed){
+      if (is.null(coverageUntrimmedGlobal)){
+        stop("coverage should have been loaded")
+      }
+
+      if (is.null(plafUntrimmedGlobal)){
+        stop("plaf should have been loaded")
+      }
+      cat ("log: Reload plaf and VCF\n")
+
+      letsTrimPlafVcf(coverageUntrimmedGlobal, plafUntrimmedGlobal)
+    }
+
     cat ("log: panelDataAltVsRef\n")
+print(head(coverageTrimmedGlobal))
     plotAltVsRef.plotly(coverageTrimmedGlobal$refCount, coverageTrimmedGlobal$altCount)
   })
 
 
 
-  output$panelDataHistWSAF <- renderPlotly({
+  output$panelDataHistWSAF <- renderPlot({
+    if (is.null(input$inputVCFfile)){
+      return (NULL)
+    }
+
     if (is.null(coverageTrimmedGlobal)){
       return (NULL)
     }
 
+    if (!isBothPlafVcfTrimmed){
+      if (is.null(coverageUntrimmedGlobal)){
+        stop("coverage should have been loaded")
+      }
+
+      if (is.null(plafUntrimmedGlobal)){
+        stop("plaf should have been loaded")
+      }
+      cat ("log: Reload plaf and VCF\n")
+
+      letsTrimPlafVcf(coverageUntrimmedGlobal, plafUntrimmedGlobal)
+    }
+
     cat ("log: panelDataHistWSAF\n")
     tmpobsWSAF <<- coverageTrimmedGlobal$altCount/(coverageTrimmedGlobal$refCount + coverageTrimmedGlobal$altCount)
-    histWSAF.plotly(tmpobsWSAF)
+    histWSAF(tmpobsWSAF)
   })
 
 #  ### match VCF and PLAF by CHROM and POS instead
 
   output$panelDataWSAFVsPLAF <- renderPlotly({
+    if (is.null(input$inputVCFfile)){
+      return (NULL)
+    }
+
+    if (is.null(input$inputSample)){
+      return (NULL)
+    }
+
     if (is.null(coverageTrimmedGlobal)){
       return (NULL)
     }
+
+
+    print(isBothPlafVcfTrimmed)
+    if (!isBothPlafVcfTrimmed){
+      if (is.null(coverageUntrimmedGlobal)){
+        stop("coverage should have been loaded")
+      }
+
+      if (is.null(plafUntrimmedGlobal)){
+        stop("plaf should have been loaded")
+      }
+      cat ("log: Reload plaf and VCF\n")
+
+      letsTrimPlafVcf(coverageUntrimmedGlobal, plafUntrimmedGlobal)
+    }
     cat ("log: panelDataWSAFVsPLAF\n")
 
-
-#    tmpPLAF <<- read.csv("C:/Users/Hermosa/Documents/GitHub/DEploid-ShinyApp/tmpPLAF.txt", sep = "\t")
-#    tmpPLAF <<- as.numeric(tmpPLAF[,1])
-#    tmpREF <<- read.csv("C:/Users/Hermosa/Documents/GitHub/DEploid-ShinyApp/tmpREF.txt", sep = "\t")
-#    tmpREF <<- as.numeric(tmpREF[,1])
-#    tmpALT <<- read.csv("C:/Users/Hermosa/Documents/GitHub/DEploid-ShinyApp/tmpALT.txt", sep = "\t")
-#    tmpALT <<- as.numeric(tmpALT[,1])
     tmpobsWSAF <<- coverageTrimmedGlobal$altCount/(coverageTrimmedGlobal$refCount + coverageTrimmedGlobal$altCount)
+    head(plafTrimmedGlobal, 5)
 
 #    decovlutedGlobal <<- dEploid(paste("-ref", "tmpREF.txt", "-alt", "tmpALT.txt", "-plaf", "tmpPLAF.txt", "-noPanel"))
 #    propGlobal <<- decovlutedGlobal$Proportions[dim(decovlutedGlobal$Proportions)[1],]
@@ -367,18 +412,45 @@ function(input, output, session) {
   })
 
 
-#  output$panelSequenceDeconWSAFVsPOS <- renderDygraph ({
-#    vcfFile <- input$inputVCFfile$datapath
-#    coverageGlobal <- extractCoverageFromVcf(vcfFile)
-#    obsWSAF = computeObsWSAF(coverageGlobal$altCount, coverageGlobal$refCount)
+  deconvolute <- reactive({
+    if (is.null(input$inputVCFfile)){
+      cat("Log: no VCF, cann't deconvolute\n")
+      return()
+    }
 
-#    checkft = as.character(unique(coverageGlobal$CHROM))
-#    type=""
-#    for(i in input$panelSequenceDeconSelectCHROM){
-#      type = paste(type, checkft[as.integer(i)], sep = "")
-#    }
-#    plot.wsaf.vs.pos.dygraph(coverageGlobal, chrom = type, obsWSAF)
-#  })
+    deconvolutedGlobal <<- dEploid(paste("-ref", "tmpREF.txt", "-alt", "tmpALT.txt", "-plaf", "tmpPLAF.txt", "-noPanel"))
+    vcfFile <- input$inputVCFfile$datapath
+    coverageUntrimmedGlobal <<- extractCoverageFromVcf(vcfFile)
+  })
+
+
+
+  output$panelSequenceDeconWSAFVsPOS <- renderDygraph ({
+     deconvolute()
+
+     deconvolutionIsCompleted <- TRUE
+
+     prop = deconvolutedGlobal$Proportions[dim(deconvolutedGlobal$Proportions)[1],]
+     expWSAF = t(deconvolutedGlobal$Haps) %*% prop
+     obsWSAF <- coverageTrimmedGlobal$altCount/(coverageTrimmedGlobal$refCount + coverageTrimmedGlobal$altCount)
+
+     chroms = unique(coverageTrimmedGlobal$CHROM)
+
+     wsaf.list = list()
+     for (chromi in 1:length(chroms)){
+         idx = which(coverageTrimmedGlobal$CHROM == chroms[chromi])
+         wsaf.list[[as.character(chroms[chromi])]] = data.frame(
+           pos = coverageTrimmedGlobal$POS[idx], obsWSAF = obsWSAF[idx], expWSAF = expWSAF[idx])
+     }
+
+
+     checkft = as.character(unique(coverageTrimmedGlobal$CHROM))
+     type=""
+     for(i in input$panelSequenceDeconSelectCHROM){
+       type = paste(type, checkft[as.integer(i)], sep = "")
+     }
+     plot.wsaf.vs.pos.dygraph (wsaf.list[[type]], chrom = type)
+  })
 
 
 
@@ -454,7 +526,7 @@ function(input, output, session) {
     if (deconvolutionIsCompleted){
       return (NULL)
     } else {
-      HTML("Loading ... ")
+#      HTML("Loading ... ")
     }
   })
 
@@ -462,7 +534,7 @@ function(input, output, session) {
     if (deconvolutionIsCompleted){
       return (NULL)
     } else {
-      HTML("Loading ... ")
+#      HTML("Loading ... ")
     }
   })
 

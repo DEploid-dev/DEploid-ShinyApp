@@ -54,7 +54,7 @@ fluidPage(
                       fluidRow(column(4), column(5, align = "center", plotlyOutput("panelDataAltVsRef"))), #, height="550px", width="550px"
                       htmlOutput("panelDataExplainAltVsRef"),
 #                      # ### 3. WSAF Histogram
-                      fluidRow(column(4), column(4, align = "center", plotlyOutput("panelDataHistWSAF"))),
+                      fluidRow(column(4), column(4, align = "center", plotOutput("panelDataHistWSAF"))),
                       htmlOutput("panelDataExplainHistWSAF"),
 #                      # ### 4. WSAF VS PLAF
                       fluidRow(column(4), column(4, align = "center", plotlyOutput("panelDataWSAFVsPLAF"))),
@@ -63,17 +63,17 @@ fluidPage(
 
              ############ tabPanel 3
              tabPanel("Sequence deconvolution",
-                      htmlOutput("severDeconvolutionState")#,
+                      htmlOutput("severDeconvolutionState"),
 
-#                      selectInput("panelSequenceDeconSelectCHROM", label = h4("Choose a CHROMOSOME"),
-#                                  choices = list("Pf3D7_01_v3" = 1, "Pf3D7_02_v3" = 2, "Pf3D7_03_v3" = 3,
-#                                                 "Pf3D7_04_v3" = 4, "Pf3D7_05_v3" = 5, "Pf3D7_06_v3" = 6,
-#                                                 "Pf3D7_07_v3" = 7, "Pf3D7_08_v3" = 8, "Pf3D7_09_v3" = 9,
-#                                                 "Pf3D7_10_v3" = 10, "Pf3D7_11_v3" = 11, "Pf3D7_12_v3" = 12,
-#                                                 "Pf3D7_13_v3" = 13, "Pf3D7_14_v3" = 14),
-#                                  selected = c(1)),
-#                      dygraphOutput("panelSequenceDeconExplainWSAFVsPOS"),
-#                      htmlOutput("panelSequenceDeconExplainWSAFVsPOS")
+                      selectInput("panelSequenceDeconSelectCHROM", label = h4("Choose a CHROMOSOME"),
+                                  choices = list("Pf3D7_01_v3" = 1, "Pf3D7_02_v3" = 2, "Pf3D7_03_v3" = 3,
+                                                 "Pf3D7_04_v3" = 4, "Pf3D7_05_v3" = 5, "Pf3D7_06_v3" = 6,
+                                                 "Pf3D7_07_v3" = 7, "Pf3D7_08_v3" = 8, "Pf3D7_09_v3" = 9,
+                                                 "Pf3D7_10_v3" = 10, "Pf3D7_11_v3" = 11, "Pf3D7_12_v3" = 12,
+                                                 "Pf3D7_13_v3" = 13, "Pf3D7_14_v3" = 14),
+                                  selected = c(1)),
+                      dygraphOutput("panelSequenceDeconWSAFVsPOS"),
+                      htmlOutput("panelSequenceDeconExplainWSAFVsPOS")
              ),
 
 
