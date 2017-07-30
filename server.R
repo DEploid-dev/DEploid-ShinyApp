@@ -27,22 +27,22 @@ plafTrimmedGlobal = NULL
 deconvolutedGlobal = NULL
 
 
-emptyVcfReminder <- function(){
-  plot(c(0,1),c(0,1),type="n", xlab = "", ylab = "", bty = "n", xaxt = "n", yaxt = "n")
-  text(.5, .5, labels = "Please provide a VCF file in the \"Sample infos\" page.", cex = 3)
-}
+#emptyVcfReminder <- function(){
+#  plot(c(0,1),c(0,1),type="n", xlab = "", ylab = "", bty = "n", xaxt = "n", yaxt = "n")
+#  text(.5, .5, labels = "Please provide a VCF file in the \"Sample infos\" page.", cex = 3)
+#}
 
 
-trimmingReminder <- function(){
-  plot(c(0,1),c(0,1),type="n", xlab = "", ylab = "", bty = "n", xaxt = "n", yaxt = "n")
-  text(.5, .5, labels = "Working hard on the data.", cex = 3)
-}
+#trimmingReminder <- function(){
+#  plot(c(0,1),c(0,1),type="n", xlab = "", ylab = "", bty = "n", xaxt = "n", yaxt = "n")
+#  text(.5, .5, labels = "Working hard on the data.", cex = 3)
+#}
 
 
-loadingReminder <- function(){
-  plot(c(0,1),c(0,1),type="n", xlab = "", ylab = "", bty = "n", xaxt = "n", yaxt = "n")
-  text(.5, .5, labels = "Loading ...", cex = 3)
-}
+#loadingReminder <- function(){
+#  plot(c(0,1),c(0,1),type="n", xlab = "", ylab = "", bty = "n", xaxt = "n", yaxt = "n")
+#  text(.5, .5, labels = "Loading ...", cex = 3)
+#}
 
 
 letsTrimPlafVcf <- function (coverageVCF, plafFile) {
@@ -241,19 +241,20 @@ function(input, output, session) {
   })
 
 
-  output$panelDataPlafTable <-renderTable({ # set the default to lab,
-    if (is.null(input$inputOrigin)){
-      return(NULL)
-    }
 
-    fetchPLAF()
+#  output$panelDataPlafTable <-renderTable({ # set the default to lab,
+#    if (is.null(input$inputOrigin)){
+#      return(NULL)
+#    }
 
-    if (is.null(plafUntrimmedGlobal)){
-      return (NULL)
-    }
+#    fetchPLAF()
 
-    head(plafUntrimmedGlobal, 5)
-  })
+#    if (is.null(plafUntrimmedGlobal)){
+#      return (NULL)
+#    }
+
+#    head(plafUntrimmedGlobal, 5)
+#  })
 
 
   fetchVCF <- reactive({
@@ -278,8 +279,6 @@ function(input, output, session) {
       return(NULL)
     }
 
-    fetchVCF()
-
     if ( is.null(coverageUntrimmedGlobal) ){
       return (NULL)
     }
@@ -291,7 +290,9 @@ function(input, output, session) {
 
   output$panelDataTotalCoverage <- renderPlot({
     if (is.null(input$inputVCFfile)){
-      emptyVcfReminder()
+#      print("panelDataTotalCoverage empty file")
+      return(NULL)
+#      emptyVcfReminder()
     } else if (!isBothPlafVcfTrimmed){
       if (is.null(coverageUntrimmedGlobal)){
         stop("coverage should have been loaded")
@@ -301,7 +302,7 @@ function(input, output, session) {
         stop("plaf should have been loaded")
       }
 
-      letsTrimPlafVcf(coverageUntrimmedGlobal, plafUntrimmedGlobal)
+#      letsTrimPlafVcf(coverageUntrimmedGlobal, plafUntrimmedGlobal)
 #      trimmingReminder()
 #      return(NULL)
     }
@@ -334,7 +335,7 @@ print(head(coverageTrimmedGlobal))
       }
       cat ("log: Reload plaf and VCF\n")
 
-      letsTrimPlafVcf(coverageUntrimmedGlobal, plafUntrimmedGlobal)
+#      letsTrimPlafVcf(coverageUntrimmedGlobal, plafUntrimmedGlobal)
     }
 
     cat ("log: panelDataAltVsRef\n")
@@ -363,11 +364,11 @@ print(head(coverageTrimmedGlobal))
       }
       cat ("log: Reload plaf and VCF\n")
 
-      letsTrimPlafVcf(coverageUntrimmedGlobal, plafUntrimmedGlobal)
+#      letsTrimPlafVcf(coverageUntrimmedGlobal, plafUntrimmedGlobal)
     }
 
     cat ("log: panelDataHistWSAF\n")
-    tmpobsWSAF <<- coverageTrimmedGlobal$altCount/(coverageTrimmedGlobal$refCount + coverageTrimmedGlobal$altCount)
+    tmpobsWSAF <- coverageTrimmedGlobal$altCount/(coverageTrimmedGlobal$refCount + coverageTrimmedGlobal$altCount)
     histWSAF(tmpobsWSAF)
   })
 
@@ -398,11 +399,11 @@ print(head(coverageTrimmedGlobal))
       }
       cat ("log: Reload plaf and VCF\n")
 
-      letsTrimPlafVcf(coverageUntrimmedGlobal, plafUntrimmedGlobal)
+#      letsTrimPlafVcf(coverageUntrimmedGlobal, plafUntrimmedGlobal)
     }
     cat ("log: panelDataWSAFVsPLAF\n")
 
-    tmpobsWSAF <<- coverageTrimmedGlobal$altCount/(coverageTrimmedGlobal$refCount + coverageTrimmedGlobal$altCount)
+    tmpobsWSAF <- coverageTrimmedGlobal$altCount/(coverageTrimmedGlobal$refCount + coverageTrimmedGlobal$altCount)
     head(plafTrimmedGlobal, 5)
 
 #    decovlutedGlobal <<- dEploid(paste("-ref", "tmpREF.txt", "-alt", "tmpALT.txt", "-plaf", "tmpPLAF.txt", "-noPanel"))
@@ -412,21 +413,24 @@ print(head(coverageTrimmedGlobal))
   })
 
 
-  deconvolute <- reactive({
-    if (is.null(input$inputVCFfile)){
-      cat("Log: no VCF, cann't deconvolute\n")
-      return()
-    }
+#  deconvolute <- reactive({
+#    if (is.null(input$inputVCFfile)){
+#      cat("Log: no VCF, cann't deconvolute\n")
+#      return()
+#    }
 
-    deconvolutedGlobal <<- dEploid(paste("-ref", "tmpREF.txt", "-alt", "tmpALT.txt", "-plaf", "tmpPLAF.txt", "-noPanel"))
-    vcfFile <- input$inputVCFfile$datapath
-    coverageUntrimmedGlobal <<- extractCoverageFromVcf(vcfFile)
-  })
+#    deconvolutedGlobal <<- dEploid(paste("-ref", "tmpREF.txt", "-alt", "tmpALT.txt", "-plaf", "tmpPLAF.txt", "-noPanel"))
+#    vcfFile <- input$inputVCFfile$datapath
+#    coverageUntrimmedGlobal <<- extractCoverageFromVcf(vcfFile)
+#  })
 
 
 
   output$panelSequenceDeconWSAFVsPOS <- renderDygraph ({
-     deconvolute()
+#     deconvolute()
+     if (is.null(deconvolutedGlobal)){
+       return(NULL)
+     }
 
      deconvolutionIsCompleted <- TRUE
 
@@ -452,6 +456,28 @@ print(head(coverageTrimmedGlobal))
      plot.wsaf.vs.pos.dygraph (wsaf.list[[type]], chrom = type)
   })
 
+
+
+  observeEvent(input$do, {
+    if (is.null(input$inputVCFfile)){
+      return (NULL)
+    }
+
+    progress <- Progress$new(session, min=1, max=15)
+    on.exit(progress$close())
+
+    progress$set(message = 'Calculation in progress',
+                 detail = 'This may take a while...')
+
+    fetchPLAF()
+    fetchVCF()
+
+    letsTrimPlafVcf(coverageUntrimmedGlobal, plafUntrimmedGlobal)
+
+    deconvolutedGlobal <<- dEploid(paste("-ref", "tmpREF.txt", "-alt", "tmpALT.txt", "-plaf", "tmpPLAF.txt", "-noPanel", "-nSample 100 -rate 5"))
+    vcfFile <- input$inputVCFfile$datapath
+    coverageUntrimmedGlobal <<- extractCoverageFromVcf(vcfFile)
+  })
 
 
 

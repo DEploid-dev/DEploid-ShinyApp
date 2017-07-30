@@ -27,17 +27,18 @@ fluidPage(
                                    hr(),
                                    fileInput("inputVCFfile", "Choose VCF file",
                                             accept=c('text', 'ref', 'txt')),
+                                   actionButton("do", "DEploid"),
                                    hr(),
                                    htmlOutput("panelSampleInfoExplainSample"))
                           ),
                           column(9,
                                  leafletOutput("panelSampleInfoMap", height = "530px")
                           )
-                        ),
-                      fluidRow(
-                        column(4, tableOutput("panelDataCoverageTable")),
-                        column(4, tableOutput("panelDataPlafTable"))
                         )
+#                      fluidRow(
+#                        column(4, tableOutput("panelDataCoverageTable")),
+#                        column(4, tableOutput("panelDataPlafTable"))
+#                        )
                     )
              ),
 
