@@ -1,5 +1,5 @@
 rm(list=ls())
-library(dplyr)
+#library(dplyr)
 library(quantmod)
 library(RCurl)
 
@@ -12,11 +12,10 @@ source("plot.total.coverage.R")
 source("plotAltVsRef.plotly.R")
 source("histWSAF.plotly.R")
 source("plotWSAFvsPLAF.plotly.R")
-#source("trimData.R")
 source("chromosome.plotly.R")
 source("chromosome.dygraphs.R")
 
-rancoor <- read.csv("Data/random.coordinates.csv")
+rancoor <- read.csv("data/random.coordinates.csv")
 
 
 coverageUntrimmedGlobal = NULL
