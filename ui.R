@@ -55,7 +55,7 @@ fluidPage(
                       fluidRow(column(4), column(5, align = "center", plotlyOutput("panelDataAltVsRef"))), #, height="550px", width="550px"
                       htmlOutput("panelDataExplainAltVsRef"),
 #                      # ### 3. WSAF Histogram
-                      fluidRow(column(4), column(4, align = "center", plotOutput("panelDataHistWSAF"))),
+                      fluidRow(column(4), column(4, align = "center", plotlyOutput("panelDataHistWSAF"))),
                       htmlOutput("panelDataExplainHistWSAF"),
 #                      # ### 4. WSAF VS PLAF
                       fluidRow(column(4), column(4, align = "center", plotlyOutput("panelDataWSAFVsPLAF"))),
@@ -74,7 +74,9 @@ fluidPage(
                                                  "Pf3D7_13_v3" = 13, "Pf3D7_14_v3" = 14),
                                   selected = c(1)),
                       dygraphOutput("panelSequenceDeconWSAFVsPOS"),
-                      htmlOutput("panelSequenceDeconExplainWSAFVsPOS")
+                      htmlOutput("panelSequenceDeconExplainWSAFVsPOS"),
+                      hr(),
+                      hr()
              ),
 
 

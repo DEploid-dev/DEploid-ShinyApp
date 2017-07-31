@@ -16,11 +16,11 @@ histWSAF.plotly <- function ( obsWSAF, exclusive = TRUE,
   #              cex.lab = cex.lab, cex.main = cex.main, cex.axis = cex.axis))
   xb = list(
     start = 0,
-    end = 0.5,
-    size = 0.1) 
+    end = 1,
+    size = 0.1)
   return (plot_ly(x = obsWSAF[tmpWSAFIndex], 
                   type = "histogram", 
-                  xbins = xb, marker = list(color = "cornflowerblue", 
+                  xbins = xb, marker = list(color = "#5f9fe8", 
                                             line = list(color = "white", width = 1))) %>%
             layout(margin = list(l = 65, r = 25, b = 50, t = 80, pad = 0),
                    title = "Histogram 0<WSAF<1", font = list(size = 18, colot = "black"),

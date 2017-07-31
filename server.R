@@ -8,15 +8,11 @@ options(shiny.maxRequestSize=30*1024^2)
 
 
 # source("plaf.get.R")
-source("plot.total.coverage.R")
-source("plotAltVsRef.plotly.R")
-source("histWSAF.plotly.R")
-source("plotWSAFvsPLAF.plotly.R")
-source("chromosome.plotly.R")
-source("chromosome.dygraphs.R")
+source("src.R")
+
 
 rancoor <- read.csv("data/random.coordinates.csv")
-
+cencoor <- read.csv("data/center.coordinates.csv")
 
 coverageUntrimmedGlobal = NULL
 coverageTrimmedGlobal = NULL
@@ -91,18 +87,7 @@ letsTrimPlafVcf <- function (coverageVCF, plafFile) {
 }
 
 
-originlist <- c("af1_1","af1_2",
-                 "af2",
-                 "af3_1","af3_2","af3_3",
-                 "af4_1","af4_2","af4_3",
-                 "as5_1","as5_2","as5_3",
-                 "as6_1","as6_2","as6_3","as6_4",
-                 "as7_1","as7_2","as7_3","as7_4",
-                 "pv1",
-                 "pv2_1", "pv2_2", "pv2_3",
-                 "pv3_1", "pv3_2", "pv3_3",
-                 "pv4_1", "pv4_2", "pv4_3", "pv4_4", "pv4_5", "pv4_6")
-
+originlist <- cencoor$ID
 
 
 isBothPlafVcfTrimmed = FALSE
@@ -138,28 +123,8 @@ function(input, output, session) {
 
 
   output$panelSampleInfoMap <- renderLeaflet({
-    lats = c(-16.166667, -4.316667,
-             10.884722,
-             8.5, 14.783333, 12.650000,
-             13.466667, 7.75, 8.052222,
-             12.533333, 12.850556, 15.120000,
-             11.769167, 14.8, 13.733333, 14.390000,
-             21.458333, 18.25, 16.713056, 9.966944,
-             13.75,
-             -6.175, 3.133333, -9.5,
-             11.55, 16.166667, 17.966667,
-             19.75, 39.916667, -18.916667, 6.933333, -15.79, 28.613333)
-    longs = c(34.75, 15.316667,
-              -1.090278,
-              4.55, -16.916667, -8.000000,
-              -16.600000, -8.816667, -1.734722,
-              103.916667, 102.609444, 104.321667,
-              107.237222, 106.833, 107.000000, 104.680000,
-              92.1, 96, 98.574722, 98.635556,
-              100.483333,
-              106.828333, 101.683333, 147.116667,
-              104.916667, 107.833333, 102.6,
-              96.1, 116.383333, 47.516667, 79.866667, -47.88, 77.208333)
+    lats = cencoor$lats
+    longs = cencoor$longs
 
     # SET DEFAULT MAP TO af1 group
     coor.level = "af1"
@@ -308,7 +273,7 @@ function(input, output, session) {
 #    else {
       cat ("log: panelDataTotalCoverage\n")
 print(head(coverageTrimmedGlobal))
-      return(plot.total.coverage(coverageTrimmedGlobal$refCount, coverageTrimmedGlobal$altCount,
+      return(plot.totalCoverage.base(coverageTrimmedGlobal$refCount, coverageTrimmedGlobal$altCount,
                           coverageTrimmedGlobal$CHROM, cex.lab = 1, cex.main = 1, cex.axis = 1,
                           threshold = 0.995, window.size = 10))
 #    }
@@ -338,37 +303,64 @@ print(head(coverageTrimmedGlobal))
     }
 
     cat ("log: panelDataAltVsRef\n")
-print(head(coverageTrimmedGlobal))
-    plotAltVsRef.plotly(coverageTrimmedGlobal$refCount, coverageTrimmedGlobal$altCount)
+    print(head(coverageTrimmedGlobal))
+    plot.AltVsRef.plotly(coverageTrimmedGlobal$refCount, coverageTrimmedGlobal$altCount)
   })
 
 
 
-  output$panelDataHistWSAF <- renderPlot({
+#   output$panelDataHistWSAF <- renderPlot({
+#     if (is.null(input$inputVCFfile)){
+#       return (NULL)
+#     }
+# 
+#     if (is.null(coverageTrimmedGlobal)){
+#       return (NULL)
+#     }
+# 
+#     if (!isBothPlafVcfTrimmed){
+#       if (is.null(coverageUntrimmedGlobal)){
+#         stop("coverage should have been loaded")
+#       }
+# 
+#       if (is.null(plafUntrimmedGlobal)){
+#         stop("plaf should have been loaded")
+#       }
+#       cat ("log: Reload plaf and VCF\n")
+# 
+# #      letsTrimPlafVcf(coverageUntrimmedGlobal, plafUntrimmedGlobal)
+#     }
+# 
+#     cat ("log: panelDataHistWSAF\n")
+#     tmpobsWSAF <- coverageTrimmedGlobal$altCount/(coverageTrimmedGlobal$refCount + coverageTrimmedGlobal$altCount)
+#     histWSAF(tmpobsWSAF)
+#   })
+  
+  output$panelDataHistWSAF <- renderPlotly({
     if (is.null(input$inputVCFfile)){
       return (NULL)
     }
-
+    
     if (is.null(coverageTrimmedGlobal)){
       return (NULL)
     }
-
+    
     if (!isBothPlafVcfTrimmed){
       if (is.null(coverageUntrimmedGlobal)){
         stop("coverage should have been loaded")
       }
-
+      
       if (is.null(plafUntrimmedGlobal)){
         stop("plaf should have been loaded")
       }
       cat ("log: Reload plaf and VCF\n")
-
-#      letsTrimPlafVcf(coverageUntrimmedGlobal, plafUntrimmedGlobal)
+      
+      #      letsTrimPlafVcf(coverageUntrimmedGlobal, plafUntrimmedGlobal)
     }
-
-    cat ("log: panelDataHistWSAF\n")
+    
+    cat ("log: panelDataHistWSAF2\n")
     tmpobsWSAF <- coverageTrimmedGlobal$altCount/(coverageTrimmedGlobal$refCount + coverageTrimmedGlobal$altCount)
-    histWSAF(tmpobsWSAF)
+    plot.histWSAF.plotly(tmpobsWSAF)
   })
 
 #  ### match VCF and PLAF by CHROM and POS instead
@@ -408,7 +400,7 @@ print(head(coverageTrimmedGlobal))
 #    decovlutedGlobal <<- dEploid(paste("-ref", "tmpREF.txt", "-alt", "tmpALT.txt", "-plaf", "tmpPLAF.txt", "-noPanel"))
 #    propGlobal <<- decovlutedGlobal$Proportions[dim(decovlutedGlobal$Proportions)[1],]
 #    expWSAFGlobal <<- t(decovlutedGlobal$Haps) %*% propGlobal
-    plotWSAFvsPLAF.plotly(plafTrimmedGlobal[,3], tmpobsWSAF, coverageTrimmedGlobal$refCount, coverageTrimmedGlobal$altCount)
+    plot.WSAFVsPLAF.plotly(plafTrimmedGlobal[,3], tmpobsWSAF, coverageTrimmedGlobal$refCount, coverageTrimmedGlobal$altCount)
   })
 
 
@@ -452,7 +444,7 @@ print(head(coverageTrimmedGlobal))
      for(i in input$panelSequenceDeconSelectCHROM){
        type = paste(type, checkft[as.integer(i)], sep = "")
      }
-     plot.wsaf.vs.pos.dygraph (wsaf.list[[type]], chrom = type)
+     plot.WSAFVsPOS.dygraphs (wsaf.list[[type]], chrom = type)
   })
 
 
