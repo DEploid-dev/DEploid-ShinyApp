@@ -48,7 +48,7 @@ fluidPage(
                       htmlOutput("serverDataState"),
 
                       ### 1. total coverage
-                      fluidRow(column(1), column(10, plotOutput("panelDataTotalCoverage"))),
+                      fluidRow(column(1), column(10, dygraphOutput("panelDataTotalCoverage"))),
                       htmlOutput("panelDataExplainTotalCoverage"),
 
 #                      # ### 2. Alt VS Ref

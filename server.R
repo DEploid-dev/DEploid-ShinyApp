@@ -252,33 +252,59 @@ function(input, output, session) {
 
 
 
-  output$panelDataTotalCoverage <- renderPlot({
+#   output$panelDataTotalCoverage <- renderPlot({
+#     if (is.null(input$inputVCFfile)){
+# #      print("panelDataTotalCoverage empty file")
+#       return(NULL)
+# #      emptyVcfReminder()
+#     } else if (!isBothPlafVcfTrimmed){
+#       if (is.null(coverageUntrimmedGlobal)){
+#         stop("coverage should have been loaded")
+#       }
+# 
+#       if (is.null(plafUntrimmedGlobal)){
+#         stop("plaf should have been loaded")
+#       }
+# 
+# #      letsTrimPlafVcf(coverageUntrimmedGlobal, plafUntrimmedGlobal)
+# #      trimmingReminder()
+# #      return(NULL)
+#     }
+# #    else {
+#       cat ("log: panelDataTotalCoverage\n")
+#       print(head(coverageTrimmedGlobal))
+#       return(plot.totalCoverage.base(coverageTrimmedGlobal$refCount, coverageTrimmedGlobal$altCount,
+#                           coverageTrimmedGlobal$CHROM, cex.lab = 1, cex.main = 1, cex.axis = 1,
+#                           threshold = 0.995, window.size = 10))
+# #    }
+#   })
+
+  output$panelDataTotalCoverage <- renderDygraph({
     if (is.null(input$inputVCFfile)){
-#      print("panelDataTotalCoverage empty file")
+      #      print("panelDataTotalCoverage empty file")
       return(NULL)
-#      emptyVcfReminder()
+      #      emptyVcfReminder()
     } else if (!isBothPlafVcfTrimmed){
       if (is.null(coverageUntrimmedGlobal)){
         stop("coverage should have been loaded")
       }
-
+      
       if (is.null(plafUntrimmedGlobal)){
         stop("plaf should have been loaded")
       }
-
-#      letsTrimPlafVcf(coverageUntrimmedGlobal, plafUntrimmedGlobal)
-#      trimmingReminder()
-#      return(NULL)
+      
+      #      letsTrimPlafVcf(coverageUntrimmedGlobal, plafUntrimmedGlobal)
+      #      trimmingReminder()
+      #      return(NULL)
     }
-#    else {
-      cat ("log: panelDataTotalCoverage\n")
-print(head(coverageTrimmedGlobal))
-      return(plot.totalCoverage.base(coverageTrimmedGlobal$refCount, coverageTrimmedGlobal$altCount,
-                          coverageTrimmedGlobal$CHROM, cex.lab = 1, cex.main = 1, cex.axis = 1,
-                          threshold = 0.995, window.size = 10))
-#    }
+    #    else {
+    cat ("log: panelDataTotalCoverage\n")
+    print(head(coverageTrimmedGlobal))
+    return(plot.total.coverage.dygraphs(coverageTrimmedGlobal$refCount, coverageTrimmedGlobal$altCount,
+                                   coverageTrimmedGlobal, cex.lab = 1, cex.main = 1, cex.axis = 1,
+                                   threshold = 0.995, window.size = 10))
+    #    }
   })
-
 
   output$panelDataAltVsRef <- renderPlotly({
     if (is.null(input$inputVCFfile)){
