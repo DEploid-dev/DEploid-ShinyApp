@@ -465,7 +465,7 @@ print(head(coverageTrimmedGlobal))
     progress <- Progress$new(session, min=1, max=15)
     on.exit(progress$close())
 
-    progress$set(message = 'Calculation in progress',
+    progress$set(message = 'Deconvolution in progress',
                  detail = 'This may take a while...')
 
     fetchPLAF()
