@@ -4,7 +4,7 @@
 # 4. source("plotWSAFvsPLAF.plotly.R")
 # 5. source("chromosome.dygraphs.R")
 # 6. source("plot.proportions.plotly.R")
-
+# 7. source("plot.ObsExpWSAF.plotly")
 
 ############ 1. source("plot.total.coverage.R")
 ############ 1. plot.totalCoverage.base
@@ -315,8 +315,24 @@ plot.Proportions <- function (proportions){
 
 
 
+############# 7. source("plot.ObsExpWSAF.plotly")
 
-
+plot.ObsExpWSAF.plotly <- function (obsWSAF, expWSAF){
+  compare = data.frame(obsWSAF, expWSAF)
+  plot_ly(compare, x = ~obsWSAF, y = ~expWSAF, type = "scatter", mode = "markers",
+          marker = list(color = "blue", size = 3)) %>%
+    layout(margin = list(l = 65, r = 25, b = 50, t = 80, pad = 0),
+           title = "WSAF(observed vs expected)", font = list(size = 18, colot = "black"),
+           xaxis = list(title = "Observed WSAF (ALT/(ALT+REF))", range = c(0,1),
+                        titlefont = list(size = 18, color = "black"),
+                        tickfont = list(size = 16, color = "black")),
+           yaxis = list(title = "Expected WSAF (h%*%p)", range = c(0,1),
+                        titlefont = list(size = 18, color = "black"),
+                        tickfont = list(size = 16, color = "black")),
+           shapes = list(list(type = "line", fillcolor = "black", line = list(color = "black", width = 1.2, dash = "dot"),
+                              opacity = 0.8, x0 = 0, x1 = 1, y0 = 0, y1 = 1)))
+  
+}
 
 
 

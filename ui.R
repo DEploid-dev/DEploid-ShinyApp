@@ -76,6 +76,8 @@ fluidPage(
                       dygraphOutput("panelSequenceDeconWSAFVsPOS"),
                       htmlOutput("panelSequenceDeconExplainWSAFVsPOS"),
                       hr(),
+                      fluidRow(column(4), column(4, align = "center", plotlyOutput("panelSequenceDeconObsVsExpWSAF"))),
+                      hr(),
                       hr()
              ),
 

@@ -484,6 +484,19 @@ function(input, output, session) {
     plot.Proportions(prop)
   })
 
+    
+  output$panelSequenceDeconObsVsExpWSAF <- renderPlotly({
+    if (is.null(deconvolutedGlobal)){
+      return(NULL)
+    }
+    deconvolutionIsCompleted <- TRUE
+    prop = deconvolutedGlobal$Proportions[dim(deconvolutedGlobal$Proportions)[1],]
+    expWSAF = t(deconvolutedGlobal$Haps) %*% prop
+    obsWSAF <- coverageTrimmedGlobal$altCount/(coverageTrimmedGlobal$refCount + 
+                                                 coverageTrimmedGlobal$altCount)
+    plot.ObsExpWSAF.plotly(obsWSAF, expWSAF)
+  })
+
 
 
   observeEvent(input$do, {
