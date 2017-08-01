@@ -44,7 +44,7 @@ fluidPage(
 
 
              ############ tabPanel 2
-             tabPanel("Sample sequence exploration",
+             tabPanel("Sequence exploration",
                       htmlOutput("serverDataState"),
 
                       ### 1. total coverage
@@ -89,9 +89,11 @@ fluidPage(
              ),
 
              ############ tabPanel 5
-             tabPanel("Documentation")
-
-
-
+             navbarMenu("Documentation",
+               tabPanel("Sample Infos"),
+               tabPanel("Sequence Exploration"),
+               tabPanel("Sequence Deconvolution"),
+               tabPanel("Cite me", verbatimTextOutput("citeMe"))
+             )
   )
 )

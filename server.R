@@ -128,7 +128,7 @@ function(input, output, session) {
     longs = cencoor$longs
 
     # SET DEFAULT MAP TO af1 group
-    coor.level = "af1_1"
+    coor.level = "af1"
     p = 1
 
     if (! is.null(input$inputOrigin)){
@@ -264,11 +264,11 @@ function(input, output, session) {
 #       if (is.null(coverageUntrimmedGlobal)){
 #         stop("coverage should have been loaded")
 #       }
-# 
+#
 #       if (is.null(plafUntrimmedGlobal)){
 #         stop("plaf should have been loaded")
 #       }
-# 
+#
 # #      letsTrimPlafVcf(coverageUntrimmedGlobal, plafUntrimmedGlobal)
 # #      trimmingReminder()
 # #      return(NULL)
@@ -284,29 +284,21 @@ function(input, output, session) {
 
   output$panelDataTotalCoverage <- renderDygraph({
     if (is.null(input$inputVCFfile)){
-      #      print("panelDataTotalCoverage empty file")
       return(NULL)
-      #      emptyVcfReminder()
     } else if (!isBothPlafVcfTrimmed){
       if (is.null(coverageUntrimmedGlobal)){
         stop("coverage should have been loaded")
       }
-      
+
       if (is.null(plafUntrimmedGlobal)){
         stop("plaf should have been loaded")
       }
-      
-      #      letsTrimPlafVcf(coverageUntrimmedGlobal, plafUntrimmedGlobal)
-      #      trimmingReminder()
-      #      return(NULL)
     }
-    #    else {
     cat ("log: panelDataTotalCoverage\n")
     print(head(coverageTrimmedGlobal))
     return(plot.total.coverage.dygraphs(coverageTrimmedGlobal$refCount, coverageTrimmedGlobal$altCount,
                                    coverageTrimmedGlobal, cex.lab = 1, cex.main = 1, cex.axis = 1,
                                    threshold = 0.995, window.size = 10))
-    #    }
   })
 
   output$panelDataAltVsRef <- renderPlotly({
@@ -327,8 +319,6 @@ function(input, output, session) {
         stop("plaf should have been loaded")
       }
       cat ("log: Reload plaf and VCF\n")
-
-#      letsTrimPlafVcf(coverageUntrimmedGlobal, plafUntrimmedGlobal)
     }
 
     cat ("log: panelDataAltVsRef\n")
@@ -342,51 +332,51 @@ function(input, output, session) {
 #     if (is.null(input$inputVCFfile)){
 #       return (NULL)
 #     }
-# 
+#
 #     if (is.null(coverageTrimmedGlobal)){
 #       return (NULL)
 #     }
-# 
+#
 #     if (!isBothPlafVcfTrimmed){
 #       if (is.null(coverageUntrimmedGlobal)){
 #         stop("coverage should have been loaded")
 #       }
-# 
+#
 #       if (is.null(plafUntrimmedGlobal)){
 #         stop("plaf should have been loaded")
 #       }
 #       cat ("log: Reload plaf and VCF\n")
-# 
+#
 # #      letsTrimPlafVcf(coverageUntrimmedGlobal, plafUntrimmedGlobal)
 #     }
-# 
+#
 #     cat ("log: panelDataHistWSAF\n")
 #     tmpobsWSAF <- coverageTrimmedGlobal$altCount/(coverageTrimmedGlobal$refCount + coverageTrimmedGlobal$altCount)
 #     histWSAF(tmpobsWSAF)
 #   })
-  
+
   output$panelDataHistWSAF <- renderPlotly({
     if (is.null(input$inputVCFfile)){
       return (NULL)
     }
-    
+
     if (is.null(coverageTrimmedGlobal)){
       return (NULL)
     }
-    
+
     if (!isBothPlafVcfTrimmed){
       if (is.null(coverageUntrimmedGlobal)){
         stop("coverage should have been loaded")
       }
-      
+
       if (is.null(plafUntrimmedGlobal)){
         stop("plaf should have been loaded")
       }
       cat ("log: Reload plaf and VCF\n")
-      
+
       #      letsTrimPlafVcf(coverageUntrimmedGlobal, plafUntrimmedGlobal)
     }
-    
+
     cat ("log: panelDataHistWSAF2\n")
     tmpobsWSAF <- coverageTrimmedGlobal$altCount/(coverageTrimmedGlobal$refCount + coverageTrimmedGlobal$altCount)
     plot.histWSAF.plotly(tmpobsWSAF)
@@ -476,7 +466,7 @@ function(input, output, session) {
      plot.WSAFVsPOS.dygraphs (wsaf.list[[type]], chrom = type)
   })
 
-    
+
   output$panelMCMCProportions <- renderPlotly({
     if (is.null(deconvolutedGlobal)){
       return(NULL)
@@ -487,7 +477,7 @@ function(input, output, session) {
     plot.Proportions(prop)
   })
 
-    
+
   output$panelSequenceDeconObsVsExpWSAF <- renderPlotly({
     if (is.null(deconvolutedGlobal)){
       return(NULL)
@@ -495,7 +485,7 @@ function(input, output, session) {
     deconvolutionIsCompleted <- TRUE
     prop = deconvolutedGlobal$Proportions[dim(deconvolutedGlobal$Proportions)[1],]
     expWSAF = t(deconvolutedGlobal$Haps) %*% prop
-    obsWSAF <- coverageTrimmedGlobal$altCount/(coverageTrimmedGlobal$refCount + 
+    obsWSAF <- coverageTrimmedGlobal$altCount/(coverageTrimmedGlobal$refCount +
                                                  coverageTrimmedGlobal$altCount)
     plot.ObsExpWSAF.plotly(obsWSAF, expWSAF)
   })
@@ -606,6 +596,11 @@ function(input, output, session) {
     } else {
 #      HTML("Loading ... ")
     }
+  })
+
+  ############# Documentation ######################
+  output$citeMe <- renderText({
+    HTML(paste(toBibtex(citation(package="DEploid")), collapse="\n"))
   })
 
 }
