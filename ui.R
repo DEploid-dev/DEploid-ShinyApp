@@ -86,7 +86,12 @@ fluidPage(
              tabPanel("MCMC diagnostic",
                       htmlOutput("severMcMcState"),
                       fluidRow(column(3), column(5, align = "center", plotlyOutput("panelMCMCProportions")))
-             )
+             ),
+
+             ############ tabPanel 5
+             tabPanel("Documentation")
+
+
 
   )
 )

@@ -112,7 +112,8 @@ function(input, output, session) {
                                                    "Gambia" = "af4_1", "Guinea" = "af4_2", "Ghana (Kintampo)" = "af4_3",
                                                    "Cambodia (Pursat)" = "as5_1", "Cambodia (Pailin)" = "as5_2", "Thailand (Sisakhet)" = "as5_3",
                                                    "Vietnam" = "as6_1", "Laos" = "as6_2", "Cambodia (Ratanakiri)" = "as6_3", "Cambodia (Preah Vihear)" = "as6_4",
-                                                   "Bangladesh" = "as7_1", "Myanmar" = "as7_2", "Thailand (Mae Sot)" = "as7_3", "Thailand (Ranong)" = "as7_4")),
+                                                   "Bangladesh" = "as7_1", "Myanmar" = "as7_2", "Thailand (Mae Sot)" = "as7_3", "Thailand (Ranong)" = "as7_4",
+                                                   "Lab" = "lab")),
 
            "Plasmodium Vivax" = selectInput("inputOrigin", "Where is it coming from?",
                                             c("Thailand" = "pv1",
@@ -127,7 +128,7 @@ function(input, output, session) {
     longs = cencoor$longs
 
     # SET DEFAULT MAP TO af1 group
-    coor.level = "af1"
+    coor.level = "af1_1"
     p = 1
 
     if (! is.null(input$inputOrigin)){
@@ -185,7 +186,8 @@ function(input, output, session) {
              "https://ndownloader.figshare.com/files/8947990?private_link=f09830a270360a4fe4a5",
              "https://ndownloader.figshare.com/files/8947993?private_link=f09830a270360a4fe4a5",
              "https://ndownloader.figshare.com/files/8947996?private_link=f09830a270360a4fe4a5",
-             "https://ndownloader.figshare.com/files/8947999?private_link=f09830a270360a4fe4a5")
+             "https://ndownloader.figshare.com/files/8947999?private_link=f09830a270360a4fe4a5",
+             "https://ndownloader.figshare.com/files/8948002?private_link=f09830a270360a4fe4a5")
     p = which(originlist == input$inputOrigin)
     positionlist <- c(1,1,
                       2,
@@ -197,7 +199,8 @@ function(input, output, session) {
                       8,
                       9,9,9,
                       10,10,10,
-                      11,11,11,11)
+                      11,11,11,11,
+                      12)
     urls.position = positionlist[p]
     url_content = urls[urls.position]
     myfile <- getURL(url_content)
