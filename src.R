@@ -291,14 +291,17 @@ plot.WSAFVsPOS.dygraphs <- function (wsaf, chromName = ""){
 
 ############# 6. source("plot.proportions.plotly.R")
 
+
 plot.Proportions <- function (proportions){
-  # wid = 1/length(proportions$x)
-  plot_ly(proportions, x = ~x, y = ~V1, type = 'bar', name = 'Parasite 1', 
-          marker = list(color = "#afb55a ")) %>%
-    add_trace(y = ~V2, name = 'Parasite 2', marker = list(color = "#ff0000")) %>%
-    add_trace(y = ~V3, name = 'Parasite 3', marker = list(color = "#4297f7")) %>%
-    add_trace(y = ~V4, name = 'Parasite 4', marker = list(color = "#ffc700")) %>%
-    add_trace(y = ~V5, name = 'Parasite 5', marker = list(color = "#3e9fa0")) %>%
+  proportions = PG0390CoverageTxt.deconv$Proportions
+  proportions = as.data.frame(proportions)         
+  pnum = as.numeric(ncol(proportions))
+  proportions$x = rownames(proportions)
+  colors = c("#3e9fa0", "#ffc700", "#4297f7", "#ff0000", "#afb55a")
+  names = c("Parasite 1", "Parasite 2", "Parasite 3", "Parasite 4", "Parasite 5")
+  
+  p0 = plot_ly(proportions, x = ~x, y = ~V1, type = 'bar', name = 'Parasite 1', 
+               marker = list(color = colors[1]), width = 0.15) %>%
     layout(margin = list(l = 70, r = 25, b = 30, t = 80, pad = 0),
            barmode = "relative",
            title = "Components", font = list(size = 18, colot = "black"),
@@ -309,8 +312,13 @@ plot.Proportions <- function (proportions){
            yaxis = list(title = "Component Proportion", range = c(0, 1),
                         titlefont = list(size = 18, color = "black"),
                         tickfont = list(size = 16, color = "black")))
+  
+  for (i in 2:pnum) {
+    p0 = add_trace(p0, x = ~x, y = ~proportions[ ,i], name = names[i], 
+                   marker = list(color = colors[i]), width = 0.15)
+  }
+  p0
 }
-
 
 
 
