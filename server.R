@@ -473,6 +473,17 @@ function(input, output, session) {
      plot.WSAFVsPOS.dygraphs (wsaf.list[[type]], chrom = type)
   })
 
+    
+  output$panelMCMCProportions <- renderPlotly({
+    if (is.null(deconvolutedGlobal)){
+      return(NULL)
+    }
+    deconvolutionIsCompleted <- TRUE
+    prop = as.data.frame(deconvolutedGlobal$Proportions)
+    prop$x = rownames(prop)
+    plot.Proportions(prop)
+  })
+
 
 
   observeEvent(input$do, {
