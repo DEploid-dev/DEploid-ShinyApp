@@ -266,7 +266,7 @@ plot.WSAFVsPLAF.plotly <- function (plaf, obsWSAF, ref, alt){
 #     dySeries('expWSAF', drawPoints = TRUE, strokeWidth = 0, color = 'blue', pointSize = 3)  %>%
 #     dyRangeSelector(dateWindow = c(1, max(wsaf$pos)))
 # }
-plot.WSAFVsPOS.dygraphs <- function (wsaf, pfgene, chromName = ""){
+plot.WSAFVsPOS.dygraphs <- function (wsaf, pfgene, pfexon, chromName = ""){
   d1 <- dygraph(wsaf, xlab = "Positions", ylab="WSAF", main = "")  %>%
     dySeries('obsWSAF', drawPoints = TRUE, strokeWidth = 0, color = 'red', pointSize = 3)  %>%
     dySeries('expWSAF', drawPoints = TRUE, strokeWidth = 0, color = 'blue', pointSize = 3)  %>%
@@ -275,6 +275,10 @@ plot.WSAFVsPOS.dygraphs <- function (wsaf, pfgene, chromName = ""){
   for (i in 1:nrow(pfgene)) {
     d1 <- d1 %>%
       dyShading(from = pfgene$pos1[i], to = pfgene$pos2[i], color = "#b7e5e2") 
+  }
+  for (i in 1:nrow(pfexon)) {
+    d1 <- d1 %>%
+      dyShading(from = pfexon$pos3[i], to = pfexon$pos4[i], color = "#cbc6ff") 
   }
   d1
 }

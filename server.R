@@ -404,12 +404,16 @@ function(input, output, session) {
 
      wsaf.list = list()
      pfgene.list = list()
+     pfexon.list = list()
      for (chromi in 1:length(chroms)){
          pfgene <- pfgff %>%
           filter(V3 == "gene") %>%
           filter(V1 %in% chroms) %>%
           droplevels()
-         
+         pfexon = pfgff %>%
+           filter(V3 == "exon") %>%
+           filter(V1 %in% chroms) %>%
+           droplevels()
          idx = which(coverageTrimmedGlobal$CHROM == chroms[chromi])
          wsaf.list[[as.character(chroms[chromi])]] = data.frame(
            pos = coverageTrimmedGlobal$POS[idx], obsWSAF = obsWSAF[idx], expWSAF = expWSAF[idx])
@@ -430,6 +434,23 @@ function(input, output, session) {
          pfgene.list[[as.character(chroms[chromi])]] = data.frame(
            pos1, pos2
          )
+         ### 
+         idx4 = which(pfexon$V1 == chroms[chromi])
+         pfexon = pfexon[idx4, ]
+         
+         row.names(pfexon) = c(1:nrow(pfexon))
+         p2 = c()
+         for (j in 1:nrow(pfexon)) {
+           vec2 = !(wsaf.list[[as.character(chroms[chromi])]]$pos %in% c(pfexon$V4[j]:pfexon$V5[j]))
+           if (all(vec2, na.rm = TRUE)) {
+             p2 = append(p2, j)}
+         }
+         allrow2 = as.numeric(row.names(pfexon))
+         idx5 = allrow[!(allrow2 %in% p2)]
+         pos3 = pfexon$V4[idx5]
+         pos4 = pfexon$V5[idx5]
+         pfexon.list[[as.character(chroms[chromi])]] = data.frame(
+           pos3, pos4)
      }
 
 
@@ -438,9 +459,9 @@ function(input, output, session) {
      for(i in input$panelSequenceDeconSelectCHROM){
        type = paste(type, checkft[as.integer(i)], sep = "")
      }
-     pfgene.p1 = pfgene.list[[type]]
-     wsaf.p1 = wsaf.list[[type]]
-     plot.WSAFVsPOS.dygraphs (wsaf.list[[type]], pfgene.list[[type]], chrom = type)
+
+     plot.WSAFVsPOS.dygraphs (wsaf.list[[type]], pfgene.list[[type]], 
+                              pfexon.list[[type]], chrom = type)
   })
 
 
