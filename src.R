@@ -259,12 +259,27 @@ plot.WSAFVsPLAF.plotly <- function (plaf, obsWSAF, ref, alt){
 
 ############ 5. source("chromosome.dygraphs.R")
 ############ 5. plot.WSAFVsPOS.dygraphs
-plot.WSAFVsPOS.dygraphs <- function (wsaf, chromName = ""){
-  dygraph(wsaf, xlab = "Positions", ylab="WSAF", main = chromName)  %>%
+
+# plot.WSAFVsPOS.dygraphs <- function (wsaf, chromName = ""){
+#   dygraph(wsaf, xlab = "Positions", ylab="WSAF", main = chromName)  %>%
+#     dySeries('obsWSAF', drawPoints = TRUE, strokeWidth = 0, color = 'red', pointSize = 3)  %>%
+#     dySeries('expWSAF', drawPoints = TRUE, strokeWidth = 0, color = 'blue', pointSize = 3)  %>%
+#     dyRangeSelector(dateWindow = c(1, max(wsaf$pos)))
+# }
+plot.WSAFVsPOS.dygraphs <- function (wsaf, pfgene, chromName = ""){
+  d1 <- dygraph(wsaf, xlab = "Positions", ylab="WSAF", main = "")  %>%
     dySeries('obsWSAF', drawPoints = TRUE, strokeWidth = 0, color = 'red', pointSize = 3)  %>%
     dySeries('expWSAF', drawPoints = TRUE, strokeWidth = 0, color = 'blue', pointSize = 3)  %>%
     dyRangeSelector(dateWindow = c(1, max(wsaf$pos)))
+  
+  for (i in 1:nrow(pfgene)) {
+    d1 <- d1 %>%
+      dyShading(from = pfgene$pos1[i], to = pfgene$pos2[i], color = "#b7e5e2") 
+  }
+  d1
 }
+
+
 
 #rm(list=ls())
 

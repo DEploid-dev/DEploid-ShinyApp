@@ -13,6 +13,8 @@ source("src.R")
 
 rancoor <- read.csv("data/random.coordinates.csv")
 cencoor <- read.csv("data/center.coordinates.csv")
+pvgff <- read.delim("data/PlasmoDB-33_PvivaxSal1.gff", header=F, comment.char="#")
+pfgff <- read.delim("data/PlasmoDB-33_Pfalciparum3D7.gff", header=F, comment.char="#")
 
 coverageUntrimmedGlobal = NULL
 coverageTrimmedGlobal = NULL
@@ -240,6 +242,7 @@ function(input, output, session) {
   })
 
 
+  
   output$panelDataCoverageTable <-renderTable({
 
     if (is.null(input$inputVCFfile)){
@@ -255,32 +258,6 @@ function(input, output, session) {
 
 
 
-#   output$panelDataTotalCoverage <- renderPlot({
-#     if (is.null(input$inputVCFfile)){
-# #      print("panelDataTotalCoverage empty file")
-#       return(NULL)
-# #      emptyVcfReminder()
-#     } else if (!isBothPlafVcfTrimmed){
-#       if (is.null(coverageUntrimmedGlobal)){
-#         stop("coverage should have been loaded")
-#       }
-#
-#       if (is.null(plafUntrimmedGlobal)){
-#         stop("plaf should have been loaded")
-#       }
-#
-# #      letsTrimPlafVcf(coverageUntrimmedGlobal, plafUntrimmedGlobal)
-# #      trimmingReminder()
-# #      return(NULL)
-#     }
-# #    else {
-#       cat ("log: panelDataTotalCoverage\n")
-#       print(head(coverageTrimmedGlobal))
-#       return(plot.totalCoverage.base(coverageTrimmedGlobal$refCount, coverageTrimmedGlobal$altCount,
-#                           coverageTrimmedGlobal$CHROM, cex.lab = 1, cex.main = 1, cex.axis = 1,
-#                           threshold = 0.995, window.size = 10))
-# #    }
-#   })
 
   output$panelDataTotalCoverage <- renderDygraph({
     if (is.null(input$inputVCFfile)){
@@ -301,6 +278,8 @@ function(input, output, session) {
                                    threshold = 0.995, window.size = 10))
   })
 
+  
+  
   output$panelDataAltVsRef <- renderPlotly({
     if (is.null(input$inputVCFfile)){
       return (NULL)
@@ -327,33 +306,6 @@ function(input, output, session) {
   })
 
 
-
-#   output$panelDataHistWSAF <- renderPlot({
-#     if (is.null(input$inputVCFfile)){
-#       return (NULL)
-#     }
-#
-#     if (is.null(coverageTrimmedGlobal)){
-#       return (NULL)
-#     }
-#
-#     if (!isBothPlafVcfTrimmed){
-#       if (is.null(coverageUntrimmedGlobal)){
-#         stop("coverage should have been loaded")
-#       }
-#
-#       if (is.null(plafUntrimmedGlobal)){
-#         stop("plaf should have been loaded")
-#       }
-#       cat ("log: Reload plaf and VCF\n")
-#
-# #      letsTrimPlafVcf(coverageUntrimmedGlobal, plafUntrimmedGlobal)
-#     }
-#
-#     cat ("log: panelDataHistWSAF\n")
-#     tmpobsWSAF <- coverageTrimmedGlobal$altCount/(coverageTrimmedGlobal$refCount + coverageTrimmedGlobal$altCount)
-#     histWSAF(tmpobsWSAF)
-#   })
 
   output$panelDataHistWSAF <- renderPlotly({
     if (is.null(input$inputVCFfile)){
@@ -451,10 +403,33 @@ function(input, output, session) {
      chroms = unique(coverageTrimmedGlobal$CHROM)
 
      wsaf.list = list()
+     pfgene.list = list()
      for (chromi in 1:length(chroms)){
+         pfgene <- pfgff %>%
+          filter(V3 == "gene") %>%
+          filter(V1 %in% chroms) %>%
+          droplevels()
+         
          idx = which(coverageTrimmedGlobal$CHROM == chroms[chromi])
          wsaf.list[[as.character(chroms[chromi])]] = data.frame(
            pos = coverageTrimmedGlobal$POS[idx], obsWSAF = obsWSAF[idx], expWSAF = expWSAF[idx])
+         idx2 = which(pfgene$V1 == chroms[chromi])
+         pfgene = pfgene[idx2, ]
+         
+         row.names(pfgene) = c(1:nrow(pfgene))
+         p = c()
+         for (i in 1:nrow(pfgene)) {
+           vec = !(wsaf.list[[as.character(chroms[chromi])]]$pos %in% c(pfgene$V4[i]:pfgene$V5[i]))
+           if (all(vec, na.rm = TRUE)) {
+             p = append(p, i)}
+         }
+         allrow = as.numeric(row.names(pfgene))
+         idx3 = allrow[!(allrow %in% p)]
+         pos1 = pfgene$V4[idx3]
+         pos2 = pfgene$V5[idx3]
+         pfgene.list[[as.character(chroms[chromi])]] = data.frame(
+           pos1, pos2
+         )
      }
 
 
@@ -463,7 +438,9 @@ function(input, output, session) {
      for(i in input$panelSequenceDeconSelectCHROM){
        type = paste(type, checkft[as.integer(i)], sep = "")
      }
-     plot.WSAFVsPOS.dygraphs (wsaf.list[[type]], chrom = type)
+     pfgene.p1 = pfgene.list[[type]]
+     wsaf.p1 = wsaf.list[[type]]
+     plot.WSAFVsPOS.dygraphs (wsaf.list[[type]], pfgene.list[[type]], chrom = type)
   })
 
 
