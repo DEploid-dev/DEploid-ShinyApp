@@ -9,7 +9,7 @@ options(shiny.maxRequestSize=30*1024^2)
 
 # source("plaf.get.R")
 source("src.R")
-
+source("deploidPlotly.R")
 
 rancoor <- read.csv("data/random.coordinates.csv")
 cencoor <- read.csv("data/center.coordinates.csv")
@@ -302,7 +302,7 @@ function(input, output, session) {
 
     cat ("log: panelDataAltVsRef\n")
     print(head(coverageTrimmedGlobal))
-    plot.AltVsRef.plotly(coverageTrimmedGlobal$refCount, coverageTrimmedGlobal$altCount)
+    plotAltVsRefPlotly(coverageTrimmedGlobal$refCount, coverageTrimmedGlobal$altCount)
   })
 
 
@@ -331,7 +331,7 @@ function(input, output, session) {
 
     cat ("log: panelDataHistWSAF2\n")
     tmpobsWSAF <- coverageTrimmedGlobal$altCount/(coverageTrimmedGlobal$refCount + coverageTrimmedGlobal$altCount)
-    plot.histWSAF.plotly(tmpobsWSAF)
+    plotHistWSAFPlotly(tmpobsWSAF)
   })
 
 #  ### match VCF and PLAF by CHROM and POS instead
@@ -371,7 +371,7 @@ function(input, output, session) {
 #    decovlutedGlobal <<- dEploid(paste("-ref", "tmpREF.txt", "-alt", "tmpALT.txt", "-plaf", "tmpPLAF.txt", "-noPanel"))
 #    propGlobal <<- decovlutedGlobal$Proportions[dim(decovlutedGlobal$Proportions)[1],]
 #    expWSAFGlobal <<- t(decovlutedGlobal$Haps) %*% propGlobal
-    plot.WSAFVsPLAF.plotly(plafTrimmedGlobal[,3], tmpobsWSAF, coverageTrimmedGlobal$refCount, coverageTrimmedGlobal$altCount)
+    plotWSAFVsPLAFplotly(plafTrimmedGlobal[,3], tmpobsWSAF, coverageTrimmedGlobal$refCount, coverageTrimmedGlobal$altCount)
   })
 
 
@@ -460,22 +460,11 @@ function(input, output, session) {
        type = paste(type, checkft[as.integer(i)], sep = "")
      }
 
-     plot.WSAFVsPOS.dygraphs (wsaf.list[[type]], pfgene.list[[type]], 
+     plotWSAFVsPOSDygraphs(wsaf.list[[type]], pfgene.list[[type]], 
                               pfexon.list[[type]], chrom = type)
   })
 
-
-  output$panelMCMCProportions <- renderPlotly({
-    if (is.null(deconvolutedGlobal)){
-      return(NULL)
-    }
-    deconvolutionIsCompleted <- TRUE
-    prop = as.data.frame(deconvolutedGlobal$Proportions)
-    prop$x = rownames(prop)
-    plot.Proportions(prop)
-  })
-
-
+  
   output$panelSequenceDeconObsVsExpWSAF <- renderPlotly({
     if (is.null(deconvolutedGlobal)){
       return(NULL)
@@ -485,9 +474,19 @@ function(input, output, session) {
     expWSAF = t(deconvolutedGlobal$Haps) %*% prop
     obsWSAF <- coverageTrimmedGlobal$altCount/(coverageTrimmedGlobal$refCount +
                                                  coverageTrimmedGlobal$altCount)
-    plot.ObsExpWSAF.plotly(obsWSAF, expWSAF)
+    plotObsExpWSAFPlotly(obsWSAF, expWSAF)
   })
+  
 
+  output$panelMCMCProportions <- renderPlotly({
+    if (is.null(deconvolutedGlobal)){
+      return(NULL)
+    }
+    deconvolutionIsCompleted <- TRUE
+    prop = as.data.frame(deconvolutedGlobal$Proportions)
+    prop$x = rownames(prop)
+    plotProportionsPlotly(prop)
+  })
 
 
   observeEvent(input$do, {
