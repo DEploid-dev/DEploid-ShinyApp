@@ -510,7 +510,14 @@ function(input, output, session) {
   })
 
 
-
+  output$downloadHaplotypes <- downloadHandler(
+    filename = function() {
+      paste("haplotypes.txt", sep = "")
+    },
+    content = function(file) {
+      write.table(t(deconvolutedGlobal$Haps), file, sep = "\t", col.names = T, row.names = F, quote = F)
+    }
+  )
 
   ####################### Explanation boxes #########################
 

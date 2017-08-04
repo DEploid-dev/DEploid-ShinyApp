@@ -16,28 +16,26 @@ fluidPage(
 
     ########## tabPanel 1. would be great to have a map here
     tabPanel("Sample infos",
-       fluidPage(
-         fluidRow(
-           column(3,
-                  wellPanel(
-                    radioButtons("inputSample", "What is this sample?",
-                                 c("Plasmodium Falciparum",
-                                   "Plasmodium Vivax")),
-                    hr(),
-                    uiOutput("inputOriginUI"),
-                    hr(),
-                    fileInput("inputVCFfile", "Choose VCF file",
-                             accept = c("text", "ref", "txt")),
-                    actionButton("do", "DEploid"),
-                    hr(),
-                    htmlOutput("panelSampleInfoExplainSample"))
-           ),
-           column(9,
-                  leafletOutput("panelSampleInfoMap", height = "530px")
-           )
-         )
-#        fluidRow( column(4, tableOutput("panelDataCoverageTable")),
-#                        column(4, tableOutput("panelDataPlafTable")))
+      sidebarLayout(
+        sidebarPanel(width = 3,
+          radioButtons("inputSample", "What is this sample?",
+                             c("Plasmodium Falciparum",
+                               "Plasmodium Vivax")),
+          hr(),
+          uiOutput("inputOriginUI"),
+          hr(),
+          fileInput("inputVCFfile", "Choose VCF file",
+                   accept = c("text", "ref", "txt")),
+          actionButton("do", "DEploid"),
+          hr(),
+          downloadButton("downloadHaplotypes", "Download haplotypes"),
+          hr(),
+          htmlOutput("panelSampleInfoExplainSample")
+        ),
+        mainPanel(width = 9,
+          shinyjs::useShinyjs(),
+          leafletOutput("panelSampleInfoMap", height = "530px")
+        )
       )
      ),
 
