@@ -5,6 +5,8 @@ install:
 script:
   - ./lint.R | grep style ; if [ $? -ne 1 ]; then exit 1; fi
 
+notifications:
+  email: true
 
 #language: r
 #cache: packages

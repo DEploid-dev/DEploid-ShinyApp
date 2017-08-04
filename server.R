@@ -1,5 +1,4 @@
 rm(list=ls())
-#library(dplyr)
 library(quantmod)
 library(RCurl)
 
@@ -242,7 +241,7 @@ function(input, output, session) {
   })
 
 
-  
+
   output$panelDataCoverageTable <-renderTable({
 
     if (is.null(input$inputVCFfile)){
@@ -278,8 +277,8 @@ function(input, output, session) {
                                    threshold = 0.995, window.size = 10))
   })
 
-  
-  
+
+
   output$panelDataAltVsRef <- renderPlotly({
     if (is.null(input$inputVCFfile)){
       return (NULL)
@@ -419,7 +418,7 @@ function(input, output, session) {
            pos = coverageTrimmedGlobal$POS[idx], obsWSAF = obsWSAF[idx], expWSAF = expWSAF[idx])
          idx2 = which(pfgene$V1 == chroms[chromi])
          pfgene = pfgene[idx2, ]
-         
+
          row.names(pfgene) = c(1:nrow(pfgene))
          p = c()
          for (i in 1:nrow(pfgene)) {
@@ -434,10 +433,10 @@ function(input, output, session) {
          pfgene.list[[as.character(chroms[chromi])]] = data.frame(
            pos1, pos2
          )
-         ### 
+         ###
          idx4 = which(pfexon$V1 == chroms[chromi])
          pfexon = pfexon[idx4, ]
-         
+
          row.names(pfexon) = c(1:nrow(pfexon))
          p2 = c()
          for (j in 1:nrow(pfexon)) {
@@ -460,11 +459,11 @@ function(input, output, session) {
        type = paste(type, checkft[as.integer(i)], sep = "")
      }
 
-     plotWSAFVsPOSDygraphs(wsaf.list[[type]], pfgene.list[[type]], 
+     plotWSAFVsPOSDygraphs(wsaf.list[[type]], pfgene.list[[type]],
                               pfexon.list[[type]], chrom = type)
   })
 
-  
+
   output$panelSequenceDeconObsVsExpWSAF <- renderPlotly({
     if (is.null(deconvolutedGlobal)){
       return(NULL)
@@ -476,7 +475,7 @@ function(input, output, session) {
                                                  coverageTrimmedGlobal$altCount)
     plotObsExpWSAFPlotly(obsWSAF, expWSAF)
   })
-  
+
 
   output$panelMCMCProportions <- renderPlotly({
     if (is.null(deconvolutedGlobal)){
