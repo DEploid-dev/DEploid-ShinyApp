@@ -243,7 +243,7 @@ plot.total.coverage.dygraphs <- function(ref, alt, coverage, cex.lab = 1,
 #     dySeries('expWSAF', drawPoints = TRUE, strokeWidth = 0, color = 'blue', pointSize = 3)  %>%
 #     dyRangeSelector(dateWindow = c(1, max(wsaf$pos)))
 # }
-plotWSAFVsPOSDygraphs <- function (wsaf, gene, exon, chromName = ""){
+plotWSAFVsPOSDygraphs <- function (wsaf, gene, exon){
   d1 <- dygraph(wsaf, xlab = "Positions", ylab="WSAF", main = "")  %>%
     dySeries('obsWSAF', drawPoints = TRUE, strokeWidth = 0, color = 'red', pointSize = 3)  %>%
     dySeries('expWSAF', drawPoints = TRUE, strokeWidth = 0, color = 'blue', pointSize = 3)  %>%
