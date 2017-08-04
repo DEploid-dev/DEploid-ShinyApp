@@ -1,10 +1,9 @@
 rm(list=ls())
-#library(dplyr)
 library(quantmod)
 library(RCurl)
 
-# allow maximum vcf upload to 30mb
-options(shiny.maxRequestSize=30*1024^2)
+# allow maximum vcf upload to 100mb
+options(shiny.maxRequestSize=100*1024^2)
 
 
 # source("plaf.get.R")
@@ -43,7 +42,7 @@ deconvolutedGlobal = NULL
 
 
 letsTrimPlafVcf <- function (coverageVCF, plafFile) {
-
+  cat("Log: trim VCF and plaf")
   coverageVCF$MATCH <- paste(coverageVCF$CHROM, coverageVCF$POS, sep = "-")
   plafFile$MATCH <- paste(plafFile$CHROM, plafFile$POS, sep = "-")
   ### assertion: take a look at r-package: assertthat
@@ -261,15 +260,10 @@ function(input, output, session) {
 
   output$panelDataTotalCoverage <- renderDygraph({
     if (is.null(input$inputVCFfile)){
+      validate(
+        need(input$inputVCFfile != "", "Please provide a VCF file")
+      )
       return(NULL)
-    } else if (!isBothPlafVcfTrimmed){
-      if (is.null(coverageUntrimmedGlobal)){
-        stop("coverage should have been loaded")
-      }
-
-      if (is.null(plafUntrimmedGlobal)){
-        stop("plaf should have been loaded")
-      }
     }
     cat ("log: panelDataTotalCoverage\n")
     print(head(coverageTrimmedGlobal))
@@ -282,7 +276,10 @@ function(input, output, session) {
 
   output$panelDataAltVsRef <- renderPlotly({
     if (is.null(input$inputVCFfile)){
-      return (NULL)
+      validate(
+        need(input$inputVCFfile != "", "Please provide a VCF file")
+      )
+      return(NULL)
     }
 
     if (is.null(coverageTrimmedGlobal)){
@@ -309,7 +306,10 @@ function(input, output, session) {
 
   output$panelDataHistWSAF <- renderPlotly({
     if (is.null(input$inputVCFfile)){
-      return (NULL)
+      validate(
+        need(input$inputVCFfile != "", "Please provide a VCF file")
+      )
+      return(NULL)
     }
 
     if (is.null(coverageTrimmedGlobal)){
@@ -338,7 +338,10 @@ function(input, output, session) {
 
   output$panelDataWSAFVsPLAF <- renderPlotly({
     if (is.null(input$inputVCFfile)){
-      return (NULL)
+      validate(
+        need(input$inputVCFfile != "", "Please provide a VCF file")
+      )
+      return(NULL)
     }
 
     if (is.null(input$inputSample)){
@@ -389,6 +392,12 @@ function(input, output, session) {
 
 
   output$panelSequenceDeconWSAFVsPOS <- renderDygraph ({
+    if (is.null(input$inputVCFfile)){
+      validate(
+        need(input$inputVCFfile != "", "Please provide a VCF file")
+      )
+      return(NULL)
+    }
 #     deconvolute()
      if (is.null(deconvolutedGlobal)){
        return(NULL)
@@ -466,7 +475,10 @@ function(input, output, session) {
 
 
   output$panelSequenceDeconObsVsExpWSAF <- renderPlotly({
-    if (is.null(deconvolutedGlobal)){
+    if (is.null(input$inputVCFfile)){
+      validate(
+        need(input$inputVCFfile != "", "Please provide a VCF file")
+      )
       return(NULL)
     }
     deconvolutionIsCompleted <- TRUE
@@ -497,8 +509,8 @@ function(input, output, session) {
     progress <- Progress$new(session, min=1, max=15)
     on.exit(progress$close())
 
-    progress$set(message = 'Deconvolution in progress',
-                 detail = 'This may take a while...')
+    progress$set(message = "Deconvolution in progress, ",
+                 detail = "this may take a few mins ...")
 
     fetchPLAF()
     fetchVCF()
@@ -511,7 +523,22 @@ function(input, output, session) {
   })
 
 
+#  observe({
+#    if (is.null(deconvolutedGlobal) | (is.null(input$inputVCFfile))){
+#      shinyjs::disable("downloadHaplotypes")
+#    } else {
+#      shinyjs::enable("downloadHaplotypes")
+#    }
+#  })
 
+  output$downloadHaplotypes <- downloadHandler(
+    filename = function() {
+      paste("haplotypes.txt", sep = "")
+    },
+    content = function(file) {
+      write.table(t(deconvolutedGlobal$Haps), file, sep = "\t", col.names = T, row.names = F, quote = F)
+    }
+  )
 
   ####################### Explanation boxes #########################
 

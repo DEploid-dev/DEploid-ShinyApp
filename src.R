@@ -30,7 +30,7 @@
 #   }
 #   return(unique(idx.out))
 # }
-# 
+#
 # plot.totalCoverage.base <- function(ref, alt, chroms, cex.lab = 1,
 #                                 cex.main = 1, cex.axis = 1,  threshold, window.size){
 #   totalDepth = ref + alt
@@ -38,7 +38,7 @@
 #   tmpQ = quantile(totalDepth, threshold)
 #   outliers.idx = which((totalDepth > tmpQ ))
 #   potentialOutliers = fun.find.more(outliers.idx, window.size)
-#   
+#
 #   chromCol = (as.numeric(chroms) %% 2 )
 #   chromCol[chromCol==1] = NA
 #   chromCol[chromCol==0] = 8
@@ -80,8 +80,8 @@ plot.total.coverage.dygraphs <- function(ref, alt, coverage, cex.lab = 1,
   tmpQ = quantile(totalDepth, threshold)
   outliers.idx = which((totalDepth > tmpQ ))
   potentialOutliers = fun.find.more(outliers.idx, window.size)
-  
-  
+
+
   # chromCol = (as.numeric(chroms) %% 2 )
   # chromCol[chromCol==1] = NA
   # chromCol[chromCol==0] = 8
@@ -103,7 +103,7 @@ plot.total.coverage.dygraphs <- function(ref, alt, coverage, cex.lab = 1,
   chromgroup$cut = as.numeric(rownames(chromgroup))%%2
   pos1 = chromgroup$position[chromgroup$cut==1]
   pos2 = chromgroup$position[chromgroup$cut==0]
-  
+
   dygraph(tmp, xlab = "SNP Index", ylab="Coverage Depth", main = "Coverage across the sequence")  %>%
     dySeries("totalDepth", drawPoints = TRUE, strokeWidth = 0, color = 'black', pointSize = 1)  %>%
     dyRangeSelector(dateWindow = c(1, max(tmp$x))) %>%
@@ -115,16 +115,16 @@ plot.total.coverage.dygraphs <- function(ref, alt, coverage, cex.lab = 1,
     dyShading(from = pos1[5]-1, to = pos2[5], color = "#dae0e8") %>%
     dyShading(from = pos1[6]-1, to = pos2[6], color = "#dae0e8") %>%
     dyShading(from = pos1[7]-1, to = pos2[7], color = "#dae0e8")
-  
+
   # return (potentialOutliers)
 }
 
 
 
 # ############ 2. source("plotAltVsRef.plotly.R")
-# ############ 2. plot.AltVsRef.plotly 
+# ############ 2. plot.AltVsRef.plotly
 # plot.AltVsRef.plotly <- function (ref, alt){
-#   
+#
 #   ratios <- ref/(ref + alt + 0.0000001)
 #   tmpRange <- 1.1 * mean(max(alt), max(ref))
 #   legend.name <- "Ref/(Ref+Alt) Ratio"
@@ -149,9 +149,9 @@ plot.total.coverage.dygraphs <- function(ref, alt, coverage, cex.lab = 1,
 #                               opacity = 0.8, x0 = 0, x1 = 200, y0 = 50, y1 = 50),
 #                          list(type = "line", fillcolor = "grey", line = list(color = "grey", width = 2.5, dash = "dot"),
 #                               opacity = 0.8, x0 = 0, x1 = 200, y0 = 0, y1 = 200))
-#            
+#
 #     )
-#   
+#
 #   # if ( length(potentialOutliers) > 0 ){
 #   #   points(ref[potentialOutliers], alt[potentialOutliers], col="black", pch="x", cex = 2)
 #   # }
@@ -188,16 +188,16 @@ plot.total.coverage.dygraphs <- function(ref, alt, coverage, cex.lab = 1,
 #     start = 0,
 #     end = 1,
 #     size = 0.1)
-#   return (plot_ly(x = obsWSAF[tmpWSAFIndex], 
-#                   type = "histogram", 
-#                   xbins = xb, marker = list(color = "#5f9fe8", 
+#   return (plot_ly(x = obsWSAF[tmpWSAFIndex],
+#                   type = "histogram",
+#                   xbins = xb, marker = list(color = "#5f9fe8",
 #                                             line = list(color = "white", width = 1))) %>%
 #             layout(margin = list(l = 65, r = 25, b = 50, t = 80, pad = 0),
 #                    title = "Histogram 0<WSAF<1", font = list(size = 18, colot = "black"),
-#                    xaxis = list(title = "WSAF", range = c(0,1), 
+#                    xaxis = list(title = "WSAF", range = c(0,1),
 #                                 titlefont = list(size = 18, color = "black"),
 #                                 tickfont = list(size = 14, color = "black")),
-#                    yaxis = list(title = "Frequency", 
+#                    yaxis = list(title = "Frequency",
 #                                 titlefont = list(size = 18, color = "black"),
 #                                 tickfont = list(size = 14, color = "black"))))
 # }
@@ -248,14 +248,14 @@ plotWSAFVsPOSDygraphs <- function (wsaf, pfgene, pfexon, chromName = ""){
     dySeries('obsWSAF', drawPoints = TRUE, strokeWidth = 0, color = 'red', pointSize = 3)  %>%
     dySeries('expWSAF', drawPoints = TRUE, strokeWidth = 0, color = 'blue', pointSize = 3)  %>%
     dyRangeSelector(dateWindow = c(1, max(wsaf$pos)))
-  
+
   for (i in 1:nrow(pfgene)) {
     d1 <- d1 %>%
-      dyShading(from = pfgene$pos1[i], to = pfgene$pos2[i], color = "#b7e5e2") 
+      dyShading(from = pfgene$pos1[i], to = pfgene$pos2[i], color = "#b7e5e2")
   }
   for (i in 1:nrow(pfexon)) {
     d1 <- d1 %>%
-      dyShading(from = pfexon$pos3[i], to = pfexon$pos4[i], color = "#cbc6ff") 
+      dyShading(from = pfexon$pos3[i], to = pfexon$pos4[i], color = "#cbc6ff")
   }
   d1
 }
@@ -293,14 +293,14 @@ plotWSAFVsPOSDygraphs <- function (wsaf, pfgene, pfexon, chromName = ""){
 ############# 5. plot.proportions.plotly
 
 plotProportionsPlotly <- function (proportions){
-  proportions = PG0390CoverageTxt.deconv$Proportions
-  proportions = as.data.frame(proportions)         
+#  proportions = PG0390CoverageTxt.deconv$Proportions
+  proportions = as.data.frame(proportions)
   pnum = as.numeric(ncol(proportions))
   proportions$x = rownames(proportions)
   colors = c("#3e9fa0", "#ffc700", "#4297f7", "#ff0000", "#afb55a")
   names = c("Parasite 1", "Parasite 2", "Parasite 3", "Parasite 4", "Parasite 5")
-  
-  p0 = plot_ly(proportions, x = ~x, y = ~V1, type = 'bar', name = 'Parasite 1', 
+
+  p0 = plot_ly(proportions, x = ~x, y = ~V1, type = 'bar', name = 'Parasite 1',
                marker = list(color = colors[1]), width = 0.15) %>%
     layout(margin = list(l = 70, r = 25, b = 30, t = 80, pad = 0),
            barmode = "relative",
@@ -312,9 +312,9 @@ plotProportionsPlotly <- function (proportions){
            yaxis = list(title = "Component Proportion", range = c(0, 1),
                         titlefont = list(size = 18, color = "black"),
                         tickfont = list(size = 16, color = "black")))
-  
+
   for (i in 2:pnum) {
-    p0 = add_trace(p0, x = ~x, y = ~proportions[ ,i], name = names[i], 
+    p0 = add_trace(p0, x = ~x, y = ~proportions[ ,i], name = names[i],
                    marker = list(color = colors[i]), width = 0.15)
   }
   p0
@@ -324,7 +324,7 @@ plotProportionsPlotly <- function (proportions){
 
 
 # ############# 7. source("plot.ObsExpWSAF.plotly")
-# 
+#
 # plot.ObsExpWSAF.plotly <- function (obsWSAF, expWSAF){
 #   compare = data.frame(obsWSAF, expWSAF)
 #   plot_ly(compare, x = ~obsWSAF, y = ~expWSAF, type = "scatter", mode = "markers",
@@ -339,7 +339,7 @@ plotProportionsPlotly <- function (proportions){
 #                         tickfont = list(size = 16, color = "black")),
 #            shapes = list(list(type = "line", fillcolor = "black", line = list(color = "black", width = 1.2, dash = "dot"),
 #                               opacity = 0.8, x0 = 0, x1 = 1, y0 = 0, y1 = 1)))
-#   
+#
 # }
 
 

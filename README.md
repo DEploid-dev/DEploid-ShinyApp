@@ -13,7 +13,7 @@ Make sure you have the following `R` packages installed.
 
 ```R
 install.packages(c("shinythemes", "dplyr", "quantmod", "RCurl", "shiny",
-    "plotly", "ggplot2", "dygraphs", "DEploid", "leaflet", "stringr", "dplyr"))
+    "plotly", "ggplot2", "dygraphs", "DEploid", "leaflet", "stringr"))
 ```
 
 Download `DEploid-ShinyApp` from the git repository,

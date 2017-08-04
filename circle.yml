@@ -1,0 +1,11 @@
+dependencies:
+  pre:
+    - sudo apt-get update
+  override:
+    - sudo apt-get install r-base-core
+    - Rscript -e 'install.packages("devtools")'
+    - Rscript -e 'devtools::install_github("jimhester/lintr")'
+
+test:
+  override:
+    - ./lint.R | grep style
