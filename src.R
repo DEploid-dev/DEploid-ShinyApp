@@ -243,19 +243,19 @@ plot.total.coverage.dygraphs <- function(ref, alt, coverage, cex.lab = 1,
 #     dySeries('expWSAF', drawPoints = TRUE, strokeWidth = 0, color = 'blue', pointSize = 3)  %>%
 #     dyRangeSelector(dateWindow = c(1, max(wsaf$pos)))
 # }
-plotWSAFVsPOSDygraphs <- function (wsaf, pfgene, pfexon, chromName = ""){
+plotWSAFVsPOSDygraphs <- function (wsaf, gene, exon, chromName = ""){
   d1 <- dygraph(wsaf, xlab = "Positions", ylab="WSAF", main = "")  %>%
     dySeries('obsWSAF', drawPoints = TRUE, strokeWidth = 0, color = 'red', pointSize = 3)  %>%
     dySeries('expWSAF', drawPoints = TRUE, strokeWidth = 0, color = 'blue', pointSize = 3)  %>%
     dyRangeSelector(dateWindow = c(1, max(wsaf$pos)))
 
-  for (i in 1:nrow(pfgene)) {
+  for (i in 1:nrow(gene)) {
     d1 <- d1 %>%
-      dyShading(from = pfgene$pos1[i], to = pfgene$pos2[i], color = "#b7e5e2")
+      dyShading(from = gene$pos1[i], to = gene$pos2[i], color = "#d5d1ff")
   }
-  for (i in 1:nrow(pfexon)) {
+  for (i in 1:nrow(exon)) {
     d1 <- d1 %>%
-      dyShading(from = pfexon$pos3[i], to = pfexon$pos4[i], color = "#cbc6ff")
+      dyShading(from = exon$pos3[i], to = exon$pos4[i], color = "#b7e5e2")
   }
   d1
 }
