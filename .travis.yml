@@ -1,0 +1,13 @@
+language: r
+cache: packages
+
+r:
+  - oldrel
+  - release
+  - devel
+
+r_github_packages:
+  - jimhester/lintr
+
+script:
+  - ./lint.R | grep style ; if [ $? -ne 1 ]; then exit 1; fi
