@@ -18,6 +18,7 @@ fluidPage(
     tabPanel("Sample infos",
       sidebarLayout(
         sidebarPanel(width = 3,
+          shinyjs::useShinyjs(),
           radioButtons("inputSample", "What is this sample?",
                              c("Plasmodium Falciparum",
                                "Plasmodium Vivax")),
@@ -28,7 +29,7 @@ fluidPage(
                    accept = c("text", "ref", "txt")),
           actionButton("do", "DEploid"),
           hr(),
-          downloadButton("downloadHaplotypes", "Download haplotypes"),
+          HTML("TODO: advanced parameter turning"),
           hr(),
           htmlOutput("panelSampleInfoExplainSample")
         ),
@@ -41,26 +42,52 @@ fluidPage(
 
     ############ tabPanel 2
     tabPanel("Sequence exploration",
-      htmlOutput("serverDataState"),
-      ### 1. total coverage
-      fluidRow(column(1), column(10, dygraphOutput("panelDataTotalCoverage"))),
-      htmlOutput("panelDataExplainTotalCoverage"),
-      ### 2. Alt VS Ref
-      fluidRow(column(4), column(5, align = "center",
-        plotlyOutput("panelDataAltVsRef"))), #, height="550px", width="550px"
-      htmlOutput("panelDataExplainAltVsRef"),
-      ### 3. WSAF Histogram
-      fluidRow(column(4), column(4, align = "center",
-        plotlyOutput("panelDataHistWSAF"))),
-      htmlOutput("panelDataExplainHistWSAF"),
-      ### 4. WSAF VS PLAF
-      fluidRow(column(4), column(4, align = "center",
-        plotlyOutput("panelDataWSAFVsPLAF"))),
-      htmlOutput("panelDataExplainWSAFVsPLAF")
+      sidebarLayout(
+        sidebarPanel(width = 2,
+          HTML("TODO: advanced parameter turning")
+        ),
+        mainPanel(width = 10,
+          shinyjs::useShinyjs(),
+          tabsetPanel(id = "data",
+            tabPanel("total coverage", value = "p1",
+              column(12, dygraphOutput("panelDataTotalCoverage"))
+            ),
+            tabPanel("Alt VS Ref", value = "p2",
+              column(5, align = "center", plotlyOutput("panelDataAltVsRef"))
+            ),
+            tabPanel("WSAF Histogram", value = "p3",
+              column(5, align = "center", plotlyOutput("panelDataHistWSAF"))
+            ),
+            tabPanel("WSAF VS PLAF", value = "p4",
+              column(5, align = "center", plotlyOutput("panelDataWSAFVsPLAF"))
+            )
+          )
+        )
+      )
+
+#      htmlOutput("serverDataState"),
+#      ### 1. total coverage
+#      fluidRow(column(1), column(10, dygraphOutput("panelDataTotalCoverage"))),
+#      htmlOutput("panelDataExplainTotalCoverage"),
+#      ### 2. Alt VS Ref
+#      fluidRow(column(4), column(5, align = "center",
+#        plotlyOutput("panelDataAltVsRef"))), #, height="550px", width="550px"
+#      htmlOutput("panelDataExplainAltVsRef"),
+#      ### 3. WSAF Histogram
+#      fluidRow(column(4), column(4, align = "center",
+#        plotlyOutput("panelDataHistWSAF"))),
+#      htmlOutput("panelDataExplainHistWSAF"),
+#      ### 4. WSAF VS PLAF
+#      fluidRow(column(4), column(4, align = "center",
+#        plotlyOutput("panelDataWSAFVsPLAF"))),
+#      htmlOutput("panelDataExplainWSAFVsPLAF")
     ),
 
     ############ tabPanel 3
     tabPanel("Sequence deconvolution",
+      downloadButton("downloadHaplotypes", "Download haplotypes"),
+      hr(),
+
       htmlOutput("severDeconvolutionState"),
 
       selectInput("panelSequenceDeconSelectCHROM",

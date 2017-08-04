@@ -510,6 +510,14 @@ function(input, output, session) {
   })
 
 
+  observe({
+    if (is.null(deconvolutedGlobal)){
+      shinyjs::disable("downloadHaplotypes")
+    } else {
+      shinyjs::enable("downloadHaplotypes")
+    }
+  })
+
   output$downloadHaplotypes <- downloadHandler(
     filename = function() {
       paste("haplotypes.txt", sep = "")
