@@ -528,8 +528,9 @@ function(input, output, session) {
     }
     deconvolutionIsCompleted <- TRUE
     prop = as.data.frame(deconvolutedGlobal$Proportions)
+    pnum = as.numeric(ncol(prop))
     prop$x = c(1:nrow(prop))
-    plotProportionsPlotly(prop)
+    plotProportionsPlotly(prop, pnum)
   })
   
   
@@ -538,8 +539,8 @@ function(input, output, session) {
       return(NULL)
     }
     deconvolutionIsCompleted <- TRUE
-    llk = coverageTrimmedGlobal$llks
-    llkEvent = coverageTrimmedGlobal$llksStates
+    llk = deconvolutedGlobal$llks
+    llkEvent = deconvolutedGlobal$llksStates
     plotLLKPlotly(llk, llkEvent)
   })
 
