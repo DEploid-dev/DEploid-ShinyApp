@@ -8,7 +8,7 @@ options(shiny.maxRequestSize=100*1024^2)
 
 # source("plaf.get.R")
 source("src.R")
-source("deploidPlotly.R")
+source("dEploidPlotly.R")
 
 rancoor <- read.csv("data/random.coordinates.csv")
 cencoor <- read.csv("data/center.coordinates.csv")
@@ -390,7 +390,7 @@ function(input, output, session) {
 #  })
 
 
-  uiOutput("inputOriginUI")
+#  uiOutput("inputOriginUI")
   output$inputCHROMUI <- renderUI({
     if (is.null(input$inputSample)){
       return()}
@@ -403,7 +403,7 @@ function(input, output, session) {
                                                    "Pf3D7_07_v3" = "7", "Pf3D7_08_v3" = "8", "Pf3D7_09_v3" = "9",
                                                    "Pf3D7_10_v3" = "10", "Pf3D7_11_v3" = "11", "Pf3D7_12_v3" = "12",
                                                    "Pf3D7_13_v3" = "13", "Pf3D7_14_v3" = "14")),
-           
+
            "Plasmodium Vivax" = selectInput("inputCHROM", h4("Choose a CHROMOSOME"),
                                             c("Pv_Sal1_chr01" = "1", "Pv_Sal1_chr02" = "2", "Pv_Sal1_chr03" = "3",
                                               "Pv_Sal1_chr04" = "4", "Pv_Sal1_chr05" = "5", "Pv_Sal1_chr06" = "6",
@@ -411,7 +411,7 @@ function(input, output, session) {
                                               "Pv_Sal1_chr10" = "10", "Pv_Sal1_chr11" = "11", "Pv_Sal1_chr12" = "12",
                                               "Pv_Sal1_chr13" = "13", "Pv_Sal1_chr14" = "14")))
   })
-  
+
   output$panelSequenceDeconWSAFVsPOS <- renderDygraph ({
     if (is.null(input$inputVCFfile)){
       validate(
@@ -442,7 +442,7 @@ function(input, output, session) {
            filter(V3 == "gene") %>%
            filter(V1 %in% chroms) %>%
            droplevels()
-         exon = pfgff %>%
+         exon <- pfgff %>%
            filter(V3 == "exon") %>%
            filter(V1 %in% chroms) %>%
            droplevels()
@@ -452,7 +452,7 @@ function(input, output, session) {
            filter(V3 == "gene") %>%
            filter(V1 %in% chroms) %>%
            droplevels()
-         exon = pvgff %>%
+         exon <- pvgff %>%
            filter(V3 == "exon") %>%
            filter(V1 %in% chroms) %>%
            droplevels()
@@ -502,7 +502,7 @@ function(input, output, session) {
        return (NULL)
      }
      plotWSAFVsPOSDygraphs(wsaf.list[[type]], gene.list[[type]],
-                              exon.list[[type]], chrom = type)
+       exon.list[[type]])
   })
 
 

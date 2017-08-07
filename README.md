@@ -44,4 +44,4 @@ Citation
 
 If you use `dEploid` in your work, please cite the program:
 
-Zhu, J. S. J. A. Garcia G. McVean. (2017) Deconvoluting multiple infections in *Plasmodium falciparum* from high throughput sequencing data. *bioRxiv* 099499. doi: https://doi.org/10.1101/099499
+Zhu, J. S. J. Almagro-Garcia G. McVean. (2017) Deconvoluting multiple infections in *Plasmodium falciparum* from high throughput sequencing data. *bioRxiv* 099499. doi: https://doi.org/10.1101/099499
