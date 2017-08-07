@@ -533,14 +533,14 @@ function(input, output, session) {
   })
   
   
-  output$panelMCMCProportions <- renderPlotly({
+  output$panelMCMCLLK <- renderPlotly({
     if (is.null(deconvolutedGlobal)){
       return(NULL)
     }
     deconvolutionIsCompleted <- TRUE
-    prop = as.data.frame(deconvolutedGlobal$Proportions)
-    prop$x = c(1:nrow(prop))
-    plotProportionsPlotly(prop)
+    llk = coverageTrimmedGlobal$llks
+    llkEvent = coverageTrimmedGlobal$llksStates
+    plotLLKPlotly(llk, llkEvent)
   })
 
 
