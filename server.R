@@ -498,7 +498,9 @@ function(input, output, session) {
      for(i in input$inputCHROM){
        type = paste(type, checkft[as.integer(i)], sep = "")
      }
-
+     if (is.null(input$inputVCFfile)){
+       return (NULL)
+     }
      plotWSAFVsPOSDygraphs(wsaf.list[[type]], gene.list[[type]],
                               exon.list[[type]], chrom = type)
   })
@@ -526,7 +528,18 @@ function(input, output, session) {
     }
     deconvolutionIsCompleted <- TRUE
     prop = as.data.frame(deconvolutedGlobal$Proportions)
-    prop$x = rownames(prop)
+    prop$x = c(1:nrow(prop))
+    plotProportionsPlotly(prop)
+  })
+  
+  
+  output$panelMCMCProportions <- renderPlotly({
+    if (is.null(deconvolutedGlobal)){
+      return(NULL)
+    }
+    deconvolutionIsCompleted <- TRUE
+    prop = as.data.frame(deconvolutedGlobal$Proportions)
+    prop$x = c(1:nrow(prop))
     plotProportionsPlotly(prop)
   })
 

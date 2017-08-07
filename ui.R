@@ -102,12 +102,19 @@ fluidPage(
               htmlOutput("severMcMcState"),
               tabsetPanel(id = "mcmc",
                 tabPanel("Proportions",
-                  fluidRow(
-                    column(2)#,
-#                    column(5, align = "center", plotlyOutput("panelMCMCProportions")
+                         fluidRow(
+                           column(2),
+                           column(6, align = "center", 
+                                  plotlyOutput("panelMCMCProportions"))
                   )
                 ),
-                tabPanel("LLKs")
+                tabPanel("LLKs",
+                         fluidRow(
+                           column(2),
+                           column(6, align = "center",
+                                  plotlyOutput("panelMCMCLLK"))
+                         )
+                         )
               )
             )
           )

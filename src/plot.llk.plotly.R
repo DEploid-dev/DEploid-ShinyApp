@@ -36,16 +36,15 @@ fun.dic.by.theta <- function ( tmpllk, thetallk ){
 }
 
 #############################
-plot.llk <- function (llk, ref, alt, expWSAF, title = "", cex.lab = 1, cex.main = 1, cex.axis = 1 ){
+plot.llk <- function (llk, ref, alt, expWSAF, title = "", 
+                      cex.lab = 1, cex.main = 1, cex.axis = 1 ){
   llk = PG0390CoverageTxt.deconv$llks
-  range(llk)
-  table(PG0390CoverageTxt.deconv$Haps)
-  llkEvent = llkTable$V1
+  llkEvent = PG0390CoverageTxt.deconv$llksStates
   #    llk_sd = sd(llk)
   #    llk_range = range(llk)
   
-  #    dic.by.var = fun.dic.by.llk.var (llk)
-  #    dic.by.theta = fun.dic.by.theta ( llk, fun.llk(ref, alt, expWSAF))
+  #    dic.by.var = fun.dic.by.llk.var(llk)
+  #    dic.by.theta = fun.dic.by.theta(llk, fun.llk(ref, alt, expWSAF))
   
   plot(llk, lty=2, type="l", col="black", xlab="Iteration", ylab="LLK", main=title,
        cex.lab = cex.lab, cex.main = cex.main, cex.axis = cex.axis)
