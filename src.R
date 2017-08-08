@@ -399,8 +399,8 @@ plotLLKPlotly <- function (llk, llkEvent){
               marker = list(size = 5, color = "#005dff")) %>%
     add_trace(x = ~x, y = ~prop, name = 'Prop', type = 'scatter', mode = 'markers',
               marker = list(size = 5, color = "#06e579")) %>%
-    layout(margin = list(l = 85, r = 25, b = 50, t = 80, pad = 0),
-           title = "LLK", font = list(size = 18, colot = "black"),
+    layout(margin = list(l = 95, r = 25, b = 50, t = 80, pad = 0),
+           title = "Log Likelihood of MCMC", font = list(size = 18, colot = "black"),
            xaxis = list(title = "Iteration", 
                         titlefont = list(size = 18, color = "black"),
                         tickfont = list(size = 14, color = "black")),

@@ -10,8 +10,9 @@ options(shiny.maxRequestSize=100*1024^2)
 source("src.R")
 source("dEploidPlotly.R")
 
-rancoor <- read.csv("data/random.coordinates.csv")
-cencoor <- read.csv("data/center.coordinates.csv")
+rancoor <- read.csv("data/randomCoordinates.csv")
+cencoor <- read.csv("data/centerCoordinates.csv")
+urlfile <- read.csv("data/fetchPLAFUrls.csv")
 pvgff <- read.delim("data/PlasmoDB-33_PvivaxSal1.gff", header=F, comment.char="#")
 pfgff <- read.delim("data/PlasmoDB-33_Pfalciparum3D7.gff", header=F, comment.char="#")
 
@@ -177,18 +178,7 @@ function(input, output, session) {
     # since is it's new data, need to trim, and rework with the data again
     isBothPlafVcfTrimmed <<- FALSE
 
-    urls = c("https://ndownloader.figshare.com/files/8916217?private_link=f09830a270360a4fe4a5",
-             "https://ndownloader.figshare.com/files/8916220?private_link=f09830a270360a4fe4a5",
-             "https://ndownloader.figshare.com/files/8916223?private_link=f09830a270360a4fe4a5",
-             "https://ndownloader.figshare.com/files/8916226?private_link=f09830a270360a4fe4a5",
-             "https://ndownloader.figshare.com/files/8916229?private_link=f09830a270360a4fe4a5",
-             "https://ndownloader.figshare.com/files/8916232?private_link=f09830a270360a4fe4a5",
-             "https://ndownloader.figshare.com/files/8916235?private_link=f09830a270360a4fe4a5",
-             "https://ndownloader.figshare.com/files/8947990?private_link=f09830a270360a4fe4a5",
-             "https://ndownloader.figshare.com/files/8947993?private_link=f09830a270360a4fe4a5",
-             "https://ndownloader.figshare.com/files/8947996?private_link=f09830a270360a4fe4a5",
-             "https://ndownloader.figshare.com/files/8947999?private_link=f09830a270360a4fe4a5",
-             "https://ndownloader.figshare.com/files/8948002?private_link=f09830a270360a4fe4a5")
+    urls <- as.vector(urlfile$URL)
     p = which(originlist == input$inputOrigin)
     positionlist <- c(1,1,
                       2,
