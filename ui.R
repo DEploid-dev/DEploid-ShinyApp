@@ -94,7 +94,7 @@ fluidPage(
               htmlOutput("severMcMcState"),
               tabsetPanel(id = "mcmc",
                 tabPanel("Proportions",
-                         fluidRow(column(12, align = "center", 
+                         fluidRow(column(12, align = "center",
                                   plotlyOutput("panelMCMCProportions"))
                   )
                 ),
