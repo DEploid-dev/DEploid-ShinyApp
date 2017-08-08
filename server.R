@@ -257,11 +257,10 @@ function(input, output, session) {
     }
     cat ("log: panelDataTotalCoverage\n")
     print(head(coverageTrimmedGlobal))
+    threshold <- input$panelDataTotalCoverageThreshold
     return(plot.total.coverage.dygraphs(coverageTrimmedGlobal$refCount, 
                                         coverageTrimmedGlobal$altCount,
-                                        coverageTrimmedGlobal, cex.lab = 1, 
-                                        cex.main = 1, cex.axis = 1, 
-                                        threshold = 0.995, window.size = 10))
+                                        coverageTrimmedGlobal, threshold))
   })
 
 
@@ -403,20 +402,7 @@ function(input, output, session) {
     #                                           "Pv_Sal1_chr07" = "7", "Pv_Sal1_chr08" = "8", "Pv_Sal1_chr09" = "9",
     #                                           "Pv_Sal1_chr10" = "10", "Pv_Sal1_chr11" = "11", "Pv_Sal1_chr12" = "12",
     #                                           "Pv_Sal1_chr13" = "13", "Pv_Sal1_chr14" = "14")))
-    # switch(input$inputSample,
-    #        "Plasmodium Falciparum" = selectInput("inputCHROM", h4("Choose a CHROMOSOME"),
-    #                                              c("Pf3D7_01_v3", "Pf3D7_02_v3", "Pf3D7_03_v3",
-    #                                                "Pf3D7_04_v3", "Pf3D7_05_v3", "Pf3D7_06_v3",
-    #                                                "Pf3D7_07_v3", "Pf3D7_08_v3", "Pf3D7_09_v3",
-    #                                                "Pf3D7_10_v3", "Pf3D7_11_v3", "Pf3D7_12_v3",
-    #                                                "Pf3D7_13_v3", "Pf3D7_14_v3")),
-    #        
-    #        "Plasmodium Vivax" = selectInput("inputCHROM", h4("Choose a CHROMOSOME"),
-    #                                         c("Pv_Sal1_chr01", "Pv_Sal1_chr02", "Pv_Sal1_chr03",
-    #                                           "Pv_Sal1_chr04", "Pv_Sal1_chr05", "Pv_Sal1_chr06",
-    #                                           "Pv_Sal1_chr07", "Pv_Sal1_chr08", "Pv_Sal1_chr09",
-    #                                           "Pv_Sal1_chr10", "Pv_Sal1_chr11", "Pv_Sal1_chr12",
-    #                                           "Pv_Sal1_chr13", "Pv_Sal1_chr14")))
+
     switch(input$inputSample,
            "Plasmodium Falciparum" = selectInput("inputCHROM", h5("Choose a CHROMOSOME"), vcfCHROMlist),
            

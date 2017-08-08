@@ -44,7 +44,10 @@ fluidPage(
     tabPanel("Sequence exploration",
       sidebarLayout(
         sidebarPanel(width = 2,
-          HTML("<font color=\"blue\">TODO: interactive buttons.</font>")
+          HTML("<font color=\"blue\">TODO: interactive buttons.</font>"),
+          sliderInput("panelDataTotalCoverageThreshold", 
+                      label = h4("Choose probability threshold for outliers: "),
+                      min = 0, max = 1, value = 0.995)
         ),
         mainPanel(width = 10,
           shinyjs::useShinyjs(),
@@ -81,7 +84,7 @@ fluidPage(
           HTML("<font color=\"blue\">TODO: interactive buttons.</font>"),
           uiOutput("inputCHROMUI"),
           hr(),
-          checkboxGroupInput("panelSequenceDeconWSAFVsPOSShades", 
+          checkboxGroupInput("panelSequenceDeconWSAFVsPOSShades",
                              h5("Show Gene and Exon:"), c("Gene", "Exon"))
         ),
         mainPanel(width = 10,
