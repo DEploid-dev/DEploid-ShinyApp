@@ -88,22 +88,18 @@ fluidPage(
               fluidRow(column(12, dygraphOutput("panelSequenceDeconWSAFVsPOS")))
             ),
             tabPanel("Expected vs observed allele frequency", value = "p1",
-              fluidRow(column(4), column(4, align = "center",
+              fluidRow(column(3), column(4, align = "center",
                 plotlyOutput("panelSequenceDeconObsVsExpWSAF")))),
             tabPanel("MCMC diagnostic",
               htmlOutput("severMcMcState"),
               tabsetPanel(id = "mcmc",
                 tabPanel("Proportions",
-                         fluidRow(
-                           column(2),
-                           column(6, align = "center", 
+                         fluidRow(column(12, align = "center", 
                                   plotlyOutput("panelMCMCProportions"))
                   )
                 ),
                 tabPanel("LLKs",
-                         fluidRow(
-                           column(2),
-                           column(6, align = "center",
+                         fluidRow(column(12, align = "center",
                                   plotlyOutput("panelMCMCLLK"))
                          )
                          )

@@ -389,22 +389,24 @@ plotLLKPlotly <- function (llk, llkEvent){
   #   add_trace(y = ~llk, mode = "lines+markers", name = "llk",
   #             line = list(color = "black", width = 1, dash = "dot"))
   
-  plot_ly(llks, x = ~x, y = ~llk, type = "scatter", mode = "lines", 
-          line = list(color = "black", width = 1, dash = "dot"), name = "llk") %>%
-    add_trace(y = ~single, mode = "markers", 
-              marker = list(size = 4, color = "#ff0054"), name = "Single") %>%
-    add_trace(y = ~both, mode = "markers", 
-              marker = list(size = 4, color = "#005dff"), name = "Both") %>%
-    add_trace(y = ~prop, mode = "markers", 
-              marker = list(size = 4, color = "#00ff87"), name = "Prop") %>%
-    layout(margin = list(l = 95, r = 25, b = 50, t = 80, pad = 0),
+  plot_ly() %>% 
+    add_data(llks) %>%
+    add_trace(x = ~x, y = ~llk, name = 'llk', type = 'scatter', mode = 'lines',
+              line = list(color = "black", width = 1, dash = "dot")) %>%
+    add_trace(x = ~x, y = ~single, name = 'Sinlge', type = 'scatter', mode = 'markers',
+              marker = list(size = 5, color = "#ff0054")) %>%
+    add_trace(x = ~x, y = ~both, name = 'Both', type = 'scatter', mode = 'markers',
+              marker = list(size = 5, color = "#005dff")) %>%
+    add_trace(x = ~x, y = ~prop, name = 'Prop', type = 'scatter', mode = 'markers',
+              marker = list(size = 5, color = "#06e579")) %>%
+    layout(margin = list(l = 85, r = 25, b = 50, t = 80, pad = 0),
            title = "LLK", font = list(size = 18, colot = "black"),
            xaxis = list(title = "Iteration", 
                         titlefont = list(size = 18, color = "black"),
-                        tickfont = list(size = 16, color = "black")),
+                        tickfont = list(size = 14, color = "black")),
            yaxis = list(title = "LLK",
                         titlefont = list(size = 18, color = "black"),
-                        tickfont = list(size = 16, color = "black")))
+                        tickfont = list(size = 14, color = "black")))
 }
 
 
