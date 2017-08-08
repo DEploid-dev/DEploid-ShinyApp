@@ -12,8 +12,8 @@ Installation
 Make sure you have the following `R` packages installed.
 
 ```R
-install.packages(c("shinythemes", "dplyr", "quantmod", "RCurl", "shiny",
-    "plotly", "ggplot2", "dygraphs", "DEploid", "leaflet", "stringr"))
+install.packages(c("shinythemes", "shinyjs", "shiny", "dplyr", "quantmod",
+    "RCurl", "plotly", "ggplot2", "dygraphs", "DEploid", "leaflet", "stringr"))
 ```
 
 Download `DEploid-ShinyApp` from the git repository,
