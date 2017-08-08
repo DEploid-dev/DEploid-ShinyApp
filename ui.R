@@ -79,7 +79,10 @@ fluidPage(
         sidebarPanel(width = 2,
           downloadButton("downloadHaplotypes", "Download haplotypes"),
           HTML("<font color=\"blue\">TODO: interactive buttons.</font>"),
-          uiOutput("inputCHROMUI")
+          uiOutput("inputCHROMUI"),
+          hr(),
+          checkboxGroupInput("panelSequenceDeconWSAFVsPOSShades", 
+                             h5("Show Gene and Exon:"), c("Gene", "Exon"))
         ),
         mainPanel(width = 10,
           shinyjs::useShinyjs(),
@@ -94,7 +97,7 @@ fluidPage(
               htmlOutput("severMcMcState"),
               tabsetPanel(id = "mcmc",
                 tabPanel("Proportions",
-                         fluidRow(column(12, align = "center", 
+                         fluidRow(column(12, align = "center",
                                   plotlyOutput("panelMCMCProportions"))
                   )
                 ),

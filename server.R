@@ -257,9 +257,11 @@ function(input, output, session) {
     }
     cat ("log: panelDataTotalCoverage\n")
     print(head(coverageTrimmedGlobal))
-    return(plot.total.coverage.dygraphs(coverageTrimmedGlobal$refCount, coverageTrimmedGlobal$altCount,
-                                   coverageTrimmedGlobal, cex.lab = 1, cex.main = 1, cex.axis = 1,
-                                   threshold = 0.995, window.size = 10))
+    return(plot.total.coverage.dygraphs(coverageTrimmedGlobal$refCount, 
+                                        coverageTrimmedGlobal$altCount,
+                                        coverageTrimmedGlobal, cex.lab = 1, 
+                                        cex.main = 1, cex.axis = 1, 
+                                        threshold = 0.995, window.size = 10))
   })
 
 
@@ -384,23 +386,43 @@ function(input, output, session) {
   output$inputCHROMUI <- renderUI({
     if (is.null(input$inputSample)){
       return()}
+    vcfCHROMlist <- as.vector(unique(coverageTrimmedGlobal$CHROM))
     # Depending on input$input_type, we'll generate a different
     # CHROMOSOME and send it to the client.
+    # switch(input$inputSample,
+    #        "Plasmodium Falciparum" = selectInput("inputCHROM", h4("Choose a CHROMOSOME"),
+    #                                              c("Pf3D7_01_v3" = "1", "Pf3D7_02_v3" = "2", "Pf3D7_03_v3" = "3",
+    #                                                "Pf3D7_04_v3" = "4", "Pf3D7_05_v3" = "5", "Pf3D7_06_v3" = "6",
+    #                                                "Pf3D7_07_v3" = "7", "Pf3D7_08_v3" = "8", "Pf3D7_09_v3" = "9",
+    #                                                "Pf3D7_10_v3" = "10", "Pf3D7_11_v3" = "11", "Pf3D7_12_v3" = "12",
+    #                                                "Pf3D7_13_v3" = "13", "Pf3D7_14_v3" = "14")),
+    # 
+    #        "Plasmodium Vivax" = selectInput("inputCHROM", h4("Choose a CHROMOSOME"),
+    #                                         c("Pv_Sal1_chr01" = "1", "Pv_Sal1_chr02" = "2", "Pv_Sal1_chr03" = "3",
+    #                                           "Pv_Sal1_chr04" = "4", "Pv_Sal1_chr05" = "5", "Pv_Sal1_chr06" = "6",
+    #                                           "Pv_Sal1_chr07" = "7", "Pv_Sal1_chr08" = "8", "Pv_Sal1_chr09" = "9",
+    #                                           "Pv_Sal1_chr10" = "10", "Pv_Sal1_chr11" = "11", "Pv_Sal1_chr12" = "12",
+    #                                           "Pv_Sal1_chr13" = "13", "Pv_Sal1_chr14" = "14")))
+    # switch(input$inputSample,
+    #        "Plasmodium Falciparum" = selectInput("inputCHROM", h4("Choose a CHROMOSOME"),
+    #                                              c("Pf3D7_01_v3", "Pf3D7_02_v3", "Pf3D7_03_v3",
+    #                                                "Pf3D7_04_v3", "Pf3D7_05_v3", "Pf3D7_06_v3",
+    #                                                "Pf3D7_07_v3", "Pf3D7_08_v3", "Pf3D7_09_v3",
+    #                                                "Pf3D7_10_v3", "Pf3D7_11_v3", "Pf3D7_12_v3",
+    #                                                "Pf3D7_13_v3", "Pf3D7_14_v3")),
+    #        
+    #        "Plasmodium Vivax" = selectInput("inputCHROM", h4("Choose a CHROMOSOME"),
+    #                                         c("Pv_Sal1_chr01", "Pv_Sal1_chr02", "Pv_Sal1_chr03",
+    #                                           "Pv_Sal1_chr04", "Pv_Sal1_chr05", "Pv_Sal1_chr06",
+    #                                           "Pv_Sal1_chr07", "Pv_Sal1_chr08", "Pv_Sal1_chr09",
+    #                                           "Pv_Sal1_chr10", "Pv_Sal1_chr11", "Pv_Sal1_chr12",
+    #                                           "Pv_Sal1_chr13", "Pv_Sal1_chr14")))
     switch(input$inputSample,
-           "Plasmodium Falciparum" = selectInput("inputCHROM", h4("Choose a CHROMOSOME"),
-                                                 c("Pf3D7_01_v3" = "1", "Pf3D7_02_v3" = "2", "Pf3D7_03_v3" = "3",
-                                                   "Pf3D7_04_v3" = "4", "Pf3D7_05_v3" = "5", "Pf3D7_06_v3" = "6",
-                                                   "Pf3D7_07_v3" = "7", "Pf3D7_08_v3" = "8", "Pf3D7_09_v3" = "9",
-                                                   "Pf3D7_10_v3" = "10", "Pf3D7_11_v3" = "11", "Pf3D7_12_v3" = "12",
-                                                   "Pf3D7_13_v3" = "13", "Pf3D7_14_v3" = "14")),
-
-           "Plasmodium Vivax" = selectInput("inputCHROM", h4("Choose a CHROMOSOME"),
-                                            c("Pv_Sal1_chr01" = "1", "Pv_Sal1_chr02" = "2", "Pv_Sal1_chr03" = "3",
-                                              "Pv_Sal1_chr04" = "4", "Pv_Sal1_chr05" = "5", "Pv_Sal1_chr06" = "6",
-                                              "Pv_Sal1_chr07" = "7", "Pv_Sal1_chr08" = "8", "Pv_Sal1_chr09" = "9",
-                                              "Pv_Sal1_chr10" = "10", "Pv_Sal1_chr11" = "11", "Pv_Sal1_chr12" = "12",
-                                              "Pv_Sal1_chr13" = "13", "Pv_Sal1_chr14" = "14")))
+           "Plasmodium Falciparum" = selectInput("inputCHROM", h5("Choose a CHROMOSOME"), vcfCHROMlist),
+           
+           "Plasmodium Vivax" = selectInput("inputCHROM", h5("Choose a CHROMOSOME"), vcfCHROMlist))
   })
+
 
   output$panelSequenceDeconWSAFVsPOS <- renderDygraph ({
     if (is.null(input$inputVCFfile)){
@@ -408,7 +430,7 @@ function(input, output, session) {
         need(input$inputVCFfile != "", "Please provide a VCF file")
       )
       return(NULL)
-    }
+     }
 #     deconvolute()
      if (is.null(deconvolutedGlobal)){
        return(NULL)
@@ -419,13 +441,27 @@ function(input, output, session) {
      prop = deconvolutedGlobal$Proportions[dim(deconvolutedGlobal$Proportions)[1],]
      expWSAF = t(deconvolutedGlobal$Haps) %*% prop
      obsWSAF <- coverageTrimmedGlobal$altCount/(coverageTrimmedGlobal$refCount + coverageTrimmedGlobal$altCount)
-
+    
+     vcfCHROMlist <- as.vector(unique(coverageTrimmedGlobal$CHROM))
      chroms = unique(coverageTrimmedGlobal$CHROM)
-     par.level = str_sub(input$inputCHROM, 1, 2)
+     # par.level = str_sub(input$inputCHROM, 1, 2)
 
      wsaf.list = list()
      gene.list = list()
      exon.list = list()
+     
+     # if (is.null(type)){
+     #   return(NULL)
+     # }
+     
+     for(i in input$inputCHROM){
+       type = input$inputCHROM
+     }
+     
+     if (is.null(type)){
+       return(NULL)
+     }
+     
      for (chromi in 1:length(chroms)){
        if (input$inputSample == "Plasmodium Falciparum"){
          gene <- pfgff %>%
@@ -447,52 +483,36 @@ function(input, output, session) {
            filter(V1 %in% chroms) %>%
            droplevels()
        }
-         idx = which(coverageTrimmedGlobal$CHROM == chroms[chromi])
-         wsaf.list[[as.character(chroms[chromi])]] = data.frame(
-           pos = coverageTrimmedGlobal$POS[idx], obsWSAF = obsWSAF[idx], expWSAF = expWSAF[idx])
-         idx2 = which(gene$V1 == chroms[chromi])
-         gene = gene[idx2, ]
-
-         row.names(gene) = c(1:nrow(gene))
-         p = c()
-         for (i in 1:nrow(gene)) {
-           vec = !(wsaf.list[[as.character(chroms[chromi])]]$pos %in% c(gene$V4[i]:gene$V5[i]))
-           if (all(vec, na.rm = TRUE)) {
-             p = append(p, i)}
-         }
-         allrow = as.numeric(row.names(gene))
-         idx3 = allrow[!(allrow %in% p)]
-         pos1 = gene$V4[idx3]
-         pos2 = gene$V5[idx3]
-         gene.list[[as.character(chroms[chromi])]] = data.frame(pos1, pos2)
-         ###
-         idx4 = which(exon$V1 == chroms[chromi])
-         exon = exon[idx4, ]
-
-         row.names(exon) = c(1:nrow(exon))
-         p2 = c()
-         for (j in 1:nrow(exon)) {
-           vec2 = !(wsaf.list[[as.character(chroms[chromi])]]$pos %in% c(exon$V4[j]:exon$V5[j]))
-           if (all(vec2, na.rm = TRUE)) {
-             p2 = append(p2, j)}
-         }
-         allrow2 = as.numeric(row.names(exon))
-         idx5 = allrow2[!(allrow2 %in% p2)]
-         pos3 = exon$V4[idx5]
-         pos4 = exon$V5[idx5]
-         exon.list[[as.character(chroms[chromi])]] = data.frame(pos3, pos4)
+       ### wsaf.list
+       idx = which(coverageTrimmedGlobal$CHROM == chroms[chromi])
+       wsaf.list[[as.character(chroms[chromi])]] = data.frame(
+         pos = coverageTrimmedGlobal$POS[idx], obsWSAF = obsWSAF[idx], expWSAF = expWSAF[idx])
+       ### gene.list
+       idx2 = which(gene$V1 == chroms[chromi])
+       gene = gene[idx2, ]
+       pos1 = gene$V4
+       pos2 = gene$V5
+       gene.list[[as.character(chroms[chromi])]] = data.frame(
+         pos1, pos2)
+       ### exon.list
+       idx4 = which(exon$V1 == chroms[chromi])
+       exon = exon[idx4, ]
+       pos3 = exon$V4
+       pos4 = exon$V5
+       exon.list[[as.character(chroms[chromi])]] = data.frame(
+         pos3, pos4)
      }
-
-     checkft = as.character(unique(coverageTrimmedGlobal$CHROM))
-     type=""
-     for(i in input$inputCHROM){
-       type = paste(type, checkft[as.integer(i)], sep = "")
-     }
+      
      if (is.null(input$inputVCFfile)){
        return (NULL)
      }
+
+     ### Add checkboxinput
+     checkBoxGene <- "Gene" %in% input$panelSequenceDeconWSAFVsPOSShades
+     checkBoxExon <- "Exon" %in% input$panelSequenceDeconWSAFVsPOSShades
+     
      plotWSAFVsPOSDygraphs(wsaf.list[[type]], gene.list[[type]],
-       exon.list[[type]])
+       exon.list[[type]], checkBoxGene, checkBoxExon)
   })
 
 
