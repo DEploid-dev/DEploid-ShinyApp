@@ -13,6 +13,7 @@ source("dEploidPlotly.R")
 rancoor <- read.csv("data/randomCoordinates.csv")
 cencoor <- read.csv("data/centerCoordinates.csv")
 urlfile <- read.csv("data/fetchPLAFUrls.csv")
+geneDrugZone <- read.csv("data/geneDrugZone.csv")
 pvgff <- read.delim("data/PlasmoDB-33_PvivaxSal1.gff", header=F, comment.char="#")
 pfgff <- read.delim("data/PlasmoDB-33_Pfalciparum3D7.gff", header=F, comment.char="#")
 
@@ -107,21 +108,25 @@ function(input, output, session) {
     # Depending on input$input_type, we'll generate a different
     # UI component and send it to the client.
     switch(input$inputSample,
-           "Plasmodium Falciparum" = selectInput("inputOrigin", "Where was the sample collected?",
-                                                 c("Malawi" = "af1_1", "Congo" = "af1_2",
-                                                   "Ghana (Kassena)" = "af2",
-                                                   "Nigeria" = "af3_1", "Senegal" = "af3_2", "Mali" = "af3_3",
-                                                   "Gambia" = "af4_1", "Guinea" = "af4_2", "Ghana (Kintampo)" = "af4_3",
-                                                   "Cambodia (Pursat)" = "as5_1", "Cambodia (Pailin)" = "as5_2", "Thailand (Sisakhet)" = "as5_3",
-                                                   "Vietnam" = "as6_1", "Laos" = "as6_2", "Cambodia (Ratanakiri)" = "as6_3", "Cambodia (Preah Vihear)" = "as6_4",
-                                                   "Bangladesh" = "as7_1", "Myanmar" = "as7_2", "Thailand (Mae Sot)" = "as7_3", "Thailand (Ranong)" = "as7_4",
-                                                   "Lab" = "lab")),
+           "Plasmodium Falciparum" = 
+             selectInput(
+               "inputOrigin", "Where was the sample collected?",
+               c("Malawi" = "af1_1", "Congo" = "af1_2",
+                 "Ghana (Kassena)" = "af2",
+                 "Nigeria" = "af3_1", "Senegal" = "af3_2", "Mali" = "af3_3",
+                 "Gambia" = "af4_1", "Guinea" = "af4_2", "Ghana (Kintampo)" = "af4_3",
+                 "Cambodia (Pursat)" = "as5_1", "Cambodia (Pailin)" = "as5_2", "Thailand (Sisakhet)" = "as5_3",
+                 "Vietnam" = "as6_1", "Laos" = "as6_2", "Cambodia (Ratanakiri)" = "as6_3", "Cambodia (Preah Vihear)" = "as6_4",
+                 "Bangladesh" = "as7_1", "Myanmar" = "as7_2", "Thailand (Mae Sot)" = "as7_3", "Thailand (Ranong)" = "as7_4",
+                 "Lab" = "lab")),
 
-           "Plasmodium Vivax" = selectInput("inputOrigin", "Where is it coming from?",
-                                            c("Thailand" = "pv1",
-                                              "Indonesia" = "pv2_1", "Malaysia" = "pv2_2", "Papua New Guinea" = "pv2_3",
-                                              "Cambodia" = "pv3_1", "Vietnam" = "pv3_2", "Laos" = "pv3_3",
-                                              "Myanmar (Burma)" = "pv4_1", "China" = "pv4_2", "Madagascar" = "pv4_3", "Sri Lanka" = "pv4_4", "Brazil" = "pv4_5", "India" = "pv4_6")))
+           "Plasmodium Vivax" = 
+             selectInput(
+               "inputOrigin", "Where is it coming from?",
+               c("Thailand" = "pv1",
+                 "Indonesia" = "pv2_1", "Malaysia" = "pv2_2", "Papua New Guinea" = "pv2_3",
+                 "Cambodia" = "pv3_1", "Vietnam" = "pv3_2", "Laos" = "pv3_3",
+                 "Myanmar (Burma)" = "pv4_1", "China" = "pv4_2", "Madagascar" = "pv4_3", "Sri Lanka" = "pv4_4", "Brazil" = "pv4_5", "India" = "pv4_6")))
   })
 
 
@@ -386,6 +391,7 @@ function(input, output, session) {
     if (is.null(input$inputSample)){
       return()}
     vcfCHROMlist <- as.vector(unique(coverageTrimmedGlobal$CHROM))
+    
     # Depending on input$input_type, we'll generate a different
     # CHROMOSOME and send it to the client.
     # switch(input$inputSample,
@@ -408,8 +414,46 @@ function(input, output, session) {
            
            "Plasmodium Vivax" = selectInput("inputCHROM", h5("Choose a CHROMOSOME"), vcfCHROMlist))
   })
+  
+  # radioButtons("panelSequenceDeconWSAFVsPOSGene", 
+  #              h5("Choose a gene"),
+  #              c("CRT", "DHFR", "DHPS", "Kelch13", "MDR1",
+  #                "Plasmepsin II and III"), 
+  #              selected = NULL)
+  output$inputGeneUI <- renderUI({
+    if (is.null(input$inputSample)){
+      return()}
+    CRTlist <- as.vector(unique(geneDrugZone$CHROM[
+      geneDrugZone$gene == "CRT" & geneDrugZone$species %in% input$inputSample]))
+    DHFRlist <- as.vector(unique(geneDrugZone$CHROM[
+      geneDrugZone$gene == "DHFR" & geneDrugZone$species %in% input$inputSample]))
+                                                      
+    DHPSlist <- as.vector(unique(geneDrugZone$CHROM[
+      geneDrugZone$gene == "DHPS" & geneDrugZone$species %in% input$inputSample]))
+                                                      
+    Kelchlist <- as.vector(unique(geneDrugZone$CHROM[
+      geneDrugZone$gene == "Kelch" & geneDrugZone$species %in% input$inputSample]))
+                                                       
+    MDRlist <- as.vector(unique(geneDrugZone$CHROM[
+      geneDrugZone$gene == "MDR1" & geneDrugZone$species %in% input$inputSample]))
+                                                     
+    Plasmepsinlist <- as.vector(unique(geneDrugZone$CHROM[
+      geneDrugZone$gene == "Plasmepsin2&3" & geneDrugZone$species %in% input$inputSample]))
+    switch(input$panelSequenceDeconWSAFVsPOSGene,
+           "CRT" = selectInput("inputZone", h5("Choose a CHROMOSOME"), CRTlist),
+           "DHFR" = selectInput("inputZone", h5("Choose a CHROMOSOME"), DHFRlist),
+           "DHPS" = selectInput("inputZone", h5("Choose a CHROMOSOME"), DHPSlist),
+           "Kelch" = selectInput("inputZone", h5("Choose a CHROMOSOME"), Kelchlist),
+           "MDR1" = selectInput("inputZone", h5("Choose a CHROMOSOME"), MDRlist),
+           "Plasmepsin2&3" = selectInput("inputZone", h5("Choose a CHROMOSOME"), Plasmepsinlist))
+  })
 
 
+  
+  # observeEvent(input$panelSequenceDeconWSAFVsPOSDisableGene, {
+  #   disable("panelSequenceDeconWSAFVsPOSGene")
+  # })
+  
   output$panelSequenceDeconWSAFVsPOS <- renderDygraph ({
     if (is.null(input$inputVCFfile)){
       validate(
@@ -435,6 +479,7 @@ function(input, output, session) {
      wsaf.list = list()
      gene.list = list()
      exon.list = list()
+     zone.list = list()
      
      # if (is.null(type)){
      #   return(NULL)
@@ -497,8 +542,28 @@ function(input, output, session) {
      checkBoxGene <- "Gene" %in% input$panelSequenceDeconWSAFVsPOSShades
      checkBoxExon <- "Exon" %in% input$panelSequenceDeconWSAFVsPOSShades
      
+     ### Show gene zone when selected
+     zone <- geneDrugZone %>%
+       filter(species == input$inputSample)
+     for (i in input$panelSequenceDeconWSAFVsPOSGene) {
+       zone <- geneDrugZone %>%
+         filter(gene == input$panelSequenceDeconWSAFVsPOSGene) %>%
+         filter(CHROM == input$inputZone)
+       pos5 = zone$start
+       pos6 = zone$end
+       zone.list[[as.character(paste(input$panelSequenceDeconWSAFVsPOSGene, 
+               input$inputZone, sep = ":"))]] = data.frame(pos5, pos6)
+     }
+     ### type2
+     type2 <- as.character(paste(input$panelSequenceDeconWSAFVsPOSGene, 
+                                 input$inputZone, sep = ":"))
+     type3 <- as.character(input$inputZone)
+     
+     ### plot
      plotWSAFVsPOSDygraphs(wsaf.list[[type]], gene.list[[type]],
-       exon.list[[type]], checkBoxGene, checkBoxExon)
+       exon.list[[type]], checkBoxGene, checkBoxExon, 
+       input$panelSequenceDeconWSAFVsPOSControlGene, zone.list[[type2]],
+       wsaf.list[[type3]])
   })
 
 

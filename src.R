@@ -229,46 +229,92 @@ plot.total.coverage.dygraphs <- function(ref, alt, coverage, threshold){
 #     dyRangeSelector(dateWindow = c(1, max(wsaf$pos)))
 # }
 plotWSAFVsPOSDygraphs <- function (wsaf, gene, exon,
-                                   checkBoxGene, checkBoxExon){
-  d1 <- dygraph(wsaf, xlab = "Positions", ylab="WSAF", main = "")  %>%
-    dySeries('obsWSAF', drawPoints = TRUE, strokeWidth = 0, color = 'red', pointSize = 3)  %>%
-    dySeries('expWSAF', drawPoints = TRUE, strokeWidth = 0, color = 'blue', pointSize = 3)  %>%
-    dyRangeSelector(dateWindow = c(1, max(wsaf$pos)))
+                                   checkBoxGene, checkBoxExon, 
+                                   control, zone, wsaf2){
 
-  if (checkBoxGene == FALSE && checkBoxExon == FALSE) {
+  if (control == FALSE) {
     d1 <- dygraph(wsaf, xlab = "Positions", ylab="WSAF", main = "")  %>%
       dySeries('obsWSAF', drawPoints = TRUE, strokeWidth = 0, color = 'red', pointSize = 3)  %>%
       dySeries('expWSAF', drawPoints = TRUE, strokeWidth = 0, color = 'blue', pointSize = 3)  %>%
       dyRangeSelector(dateWindow = c(1, max(wsaf$pos)))
-  }
-
-  if (checkBoxGene) {
-    for (i in 1:nrow(gene)) {
-      d1 <- d1 %>%
-        dyShading(from = gene$pos1[i], to = gene$pos2[i], color = "#b3b4fc")
+    if (checkBoxGene == FALSE && checkBoxExon == FALSE) {
+      d1 <- dygraph(wsaf, xlab = "Positions", ylab="WSAF", main = "")  %>%
+        dySeries('obsWSAF', drawPoints = TRUE, strokeWidth = 0, color = 'red', pointSize = 3)  %>%
+        dySeries('expWSAF', drawPoints = TRUE, strokeWidth = 0, color = 'blue', pointSize = 3)  %>%
+        dyRangeSelector(dateWindow = c(1, max(wsaf$pos)))
+    }
+    if (checkBoxGene) {
+      for (i in 1:nrow(gene)) {
+        d1 <- d1 %>%
+          dyShading(from = gene$pos1[i], to = gene$pos2[i], color = "#b3b4fc")
+      }
+    }
+    if (checkBoxExon) {
+      for (i in 1:nrow(exon)) {
+        d1 <- d1 %>%
+          dyShading(from = exon$pos3[i], to = exon$pos4[i], color = "#b7e5e2")
+      }
+    }
+    if (checkBoxGene && checkBoxExon) {
+      for (i in 1:nrow(gene)) {
+        d1 <- d1 %>%
+          dyShading(from = gene$pos1[i], to = gene$pos2[i], color = "#b3b4fc")
+      }
+      for (i in 1:nrow(exon)) {
+        d1 <- d1 %>%
+          dyShading(from = exon$pos3[i], to = exon$pos4[i], color = "#b7e5e2")
+      }
     }
   }
-
-  if (checkBoxExon) {
-    for (i in 1:nrow(exon)) {
+  
+  if (control == TRUE) {
+    d1 <- dygraph(wsaf2, xlab = "Positions", ylab="WSAF", main = "")  %>%
+      dySeries('obsWSAF', drawPoints = TRUE, strokeWidth = 0, color = 'red', pointSize = 3)  %>%
+      dySeries('expWSAF', drawPoints = TRUE, strokeWidth = 0, color = 'blue', pointSize = 3)  %>%
+      dyRangeSelector(dateWindow = c(min(zone$pos5)-10000, max(zone$pos6)+10000))
+    for (i in 1:nrow(zone)) {
       d1 <- d1 %>%
-        dyShading(from = exon$pos3[i], to = exon$pos4[i], color = "#b7e5e2")
+        dyShading(from = zone$pos5[i], to = zone$pos6[i], color = "#ffd951")
+    }
+    if (checkBoxGene == FALSE && checkBoxExon == FALSE) {
+      d1 <- dygraph(wsaf2, xlab = "Positions", ylab="WSAF", main = "")  %>%
+        dySeries('obsWSAF', drawPoints = TRUE, strokeWidth = 0, color = 'red', pointSize = 3)  %>%
+        dySeries('expWSAF', drawPoints = TRUE, strokeWidth = 0, color = 'blue', pointSize = 3)  %>%
+        dyRangeSelector(dateWindow = c(min(zone$pos5)-10000, max(zone$pos6)+10000))
+      for (i in 1:nrow(zone)) {
+        d1 <- d1 %>%
+          dyShading(from = zone$pos5[i], to = zone$pos6[i], color = "#ffd951")
+      }
+    }
+    if (checkBoxGene) {
+      for (i in 1:nrow(gene)) {
+        d1 <- d1 %>%
+          dyShading(from = gene$pos1[i], to = gene$pos2[i], color = "#b3b4fc")
+      }
+    }
+    if (checkBoxExon) {
+      for (i in 1:nrow(exon)) {
+        d1 <- d1 %>%
+          dyShading(from = exon$pos3[i], to = exon$pos4[i], color = "#b7e5e2")
+      }
+    }
+    if (checkBoxGene && checkBoxExon) {
+      for (i in 1:nrow(gene)) {
+        d1 <- d1 %>%
+          dyShading(from = gene$pos1[i], to = gene$pos2[i], color = "#b3b4fc")
+      }
+      for (i in 1:nrow(exon)) {
+        d1 <- d1 %>%
+          dyShading(from = exon$pos3[i], to = exon$pos4[i], color = "#b7e5e2")
+      }
     }
   }
-
-  if (checkBoxGene && checkBoxExon) {
-    for (i in 1:nrow(gene)) {
-      d1 <- d1 %>%
-        dyShading(from = gene$pos1[i], to = gene$pos2[i], color = "#b3b4fc")
-    }
-    for (i in 1:nrow(exon)) {
-      d1 <- d1 %>%
-        dyShading(from = exon$pos3[i], to = exon$pos4[i], color = "#b7e5e2")
-    }
-  }
-
   d1
 }
+
+
+
+ 
 
 
 

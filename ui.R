@@ -79,15 +79,29 @@ fluidPage(
     ############ tabPanel 3
     tabPanel("Sequence deconvolution",
       sidebarLayout(
-        sidebarPanel(width = 2,
+        sidebarPanel(width = 3,
           downloadButton("downloadHaplotypes", "Download haplotypes"),
-          HTML("<font color=\"blue\">TODO: interactive buttons.</font>"),
+          # HTML("<font color=\"blue\">TODO: interactive buttons.</font>"),
           uiOutput("inputCHROMUI"),
-          hr(),
+          # hr(),
           checkboxGroupInput("panelSequenceDeconWSAFVsPOSShades",
-                             h5("Show Gene and Exon:"), c("Gene", "Exon"))
-        ),
-        mainPanel(width = 10,
+                             h5("Show Gene and Exon:"), c("Gene", "Exon")),
+          hr(),
+          checkboxInput("panelSequenceDeconWSAFVsPOSControlGene", 
+                        label = h5("Enable/Disable Gene Zoom"), value = FALSE),
+          conditionalPanel(
+            condition = "input.panelSequenceDeconWSAFVsPOSControlGene == true",
+            fluidRow(
+              column(5, radioButtons("panelSequenceDeconWSAFVsPOSGene", 
+                                     h5("Choose a Gene"),
+                                     c("CRT", "DHFR", "DHPS", "Kelch", "MDR1",
+                                       "Plasmepsin2&3"), 
+                                     selected = NULL)),
+              column(7, uiOutput("inputGeneUI"))
+          )
+          # actionButton("panelSequenceDeconWSAFVsPOSDisableGene", "Disable zoom in.")
+        )),
+        mainPanel(width = 9,
           shinyjs::useShinyjs(),
           tabsetPanel(id = "deconvolution",
             tabPanel("Allele frequency across the genome", value = "p1",
