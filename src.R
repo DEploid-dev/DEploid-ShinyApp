@@ -91,12 +91,12 @@ plot.total.coverage.dygraphs <- function(ref, alt, coverage, threshold){
   pos1 = chromgroup$position[chromgroup$cut==1]
   pos2 = chromgroup$position[chromgroup$cut==0]
   shadenum <- length(pos1)
-  d0 <- dygraph(tmp, xlab = "SNP Index", ylab="Coverage Depth", 
+  d0 <- dygraph(tmp, xlab = "SNP Index", ylab="Coverage Depth",
                 main = "Coverage across the sequence")  %>%
     dySeries("totalDepth", drawPoints = TRUE, strokeWidth = 0, color = 'black', pointSize = 1)  %>%
     dySeries("outliers", drawPoints = TRUE, strokeWidth = 0, color = 'red', pointSize = 1) %>%
     dyRangeSelector(dateWindow = c(1, max(tmp$x))) %>%
-    dyLimit(as.numeric(tmpQ), color = "red") 
+    dyLimit(as.numeric(tmpQ), color = "red")
   for (i in 1: shadenum) {
     d0 <- d0 %>%
       dyShading(from = pos1[i]-1, to = pos2[i], color = "#dae0e8")
@@ -234,7 +234,7 @@ plotWSAFVsPOSDygraphs <- function (wsaf, gene, exon,
     dySeries('obsWSAF', drawPoints = TRUE, strokeWidth = 0, color = 'red', pointSize = 3)  %>%
     dySeries('expWSAF', drawPoints = TRUE, strokeWidth = 0, color = 'blue', pointSize = 3)  %>%
     dyRangeSelector(dateWindow = c(1, max(wsaf$pos)))
-  
+
   if (checkBoxGene == FALSE && checkBoxExon == FALSE) {
     d1 <- dygraph(wsaf, xlab = "Positions", ylab="WSAF", main = "")  %>%
       dySeries('obsWSAF', drawPoints = TRUE, strokeWidth = 0, color = 'red', pointSize = 3)  %>%
@@ -255,7 +255,7 @@ plotWSAFVsPOSDygraphs <- function (wsaf, gene, exon,
         dyShading(from = exon$pos3[i], to = exon$pos4[i], color = "#b7e5e2")
     }
   }
-  
+
   if (checkBoxGene && checkBoxExon) {
     for (i in 1:nrow(gene)) {
       d1 <- d1 %>%
@@ -305,7 +305,7 @@ plotWSAFVsPOSDygraphs <- function (wsaf, gene, exon,
 plotProportionsPlotly <- function (proportions, pnum){
   colors = c("#3e9fa0", "#ffc700", "#4297f7", "#ff0000", "#afb55a", "#7c0101", "#8bb7ba", "#9b8352")
   names = c("Parasite 1", "Parasite 2", "Parasite 3", "Parasite 4", "Parasite 5", "Parasite 6", "Parasite 7", "Parasite 8")
-  
+
   p0 = plot_ly(proportions, x = ~x, y = proportions[ ,1], type = 'bar',
                name = names[1], marker = list(color = colors[1])) %>%
     layout(margin = list(l = 70, r = 25, b = 30, t = 80, pad = 0),
@@ -317,10 +317,10 @@ plotProportionsPlotly <- function (proportions, pnum){
                         showticklabels = FALSE),
            yaxis = list(title = "Component Proportion", range = c(0, 1),
                         titlefont = list(size = 18, color = "black"),
-                        tickfont = list(size = 16, color = "black")))
+                        tickfont = list(size = 16, color = "black")), bargap = 0)
 
   for (i in 2:pnum) {
-    p0 = add_trace(p0, proportions, x = ~x, y = proportions[ ,i], 
+    p0 = add_trace(p0, proportions, x = ~x, y = proportions[ ,i],
                    name = names[i], marker = list(color = colors[i]))
   }
   p0
@@ -351,7 +351,7 @@ plotProportionsPlotly <- function (proportions, pnum){
 
 
 ############ 8. source("plot.llk.plotly")
-# 
+#
 # ############################
 # fun.llk <- function(cov.ref, cov.alt, f.samp, err=0.01, fac=100) {
 #   f.samp<-f.samp+err*(1-2*f.samp);
@@ -362,12 +362,12 @@ plotProportionsPlotly <- function (proportions, pnum){
 #   }
 #   return(llk);
 # }
-# 
+#
 # #############################
 # fun.dic.by.llk.var <- function ( tmpllk ){
 #   return (  mean(-2*tmpllk) + var(-2*tmpllk)/2 )# D_bar + 1/2 var (D_theta), where D_theta = -2*tmpllk, and D_bar = mean(D_theta)
 # }
-# 
+#
 # #############################
 # fun.dic.by.theta <- function ( tmpllk, thetallk ){
 #   DIC.WSAF.bar = -2 * sum(thetallk)
@@ -376,30 +376,30 @@ plotProportionsPlotly <- function (proportions, pnum){
 
 #############################
 plotLLKPlotly <- function (llk, llkEvent){
-  
+
   #    llk_sd = sd(llk)
   #    llk_range = range(llk)
-  
+
   #    dic.by.var = fun.dic.by.llk.var(llk)
   #    dic.by.theta = fun.dic.by.theta(llk, fun.llk(ref, alt, expWSAF))
-  
+
   x = c(1:length(llk))
   llks = data.frame(x, llk, llkEvent)
   llks$single = ifelse(llkEvent == 1, llk, NA)
   llks$both = ifelse(llkEvent == 2, llk, NA)
   llks$prop = ifelse(llkEvent == 0, llk, NA)
-  
+
   # plot_ly(llks, x = ~x, y = ~single, type = "scatter", mode = "markers",
   #         marker = list(size = 3, color = "#ff0054"), name = "Single") %>%
-  #   add_trace(y = ~both, mode = "markers", 
+  #   add_trace(y = ~both, mode = "markers",
   #             marker = list(size = 3, color = "#005dff"), name = "Both") %>%
-  #   add_trace(y = ~prop, mode = "markers", 
+  #   add_trace(y = ~prop, mode = "markers",
   #             marker = list(size = 3, color = "#00ff87"), name = "Prop") %>%
-  #   
+  #
   #   add_trace(y = ~llk, mode = "lines+markers", name = "llk",
   #             line = list(color = "black", width = 1, dash = "dot"))
-  
-  plot_ly() %>% 
+
+  plot_ly() %>%
     add_data(llks) %>%
     add_trace(x = ~x, y = ~llk, name = 'llk', type = 'scatter', mode = 'lines',
               line = list(color = "black", width = 1, dash = "dot")) %>%
@@ -411,7 +411,7 @@ plotLLKPlotly <- function (llk, llkEvent){
               marker = list(size = 5, color = "#06e579")) %>%
     layout(margin = list(l = 95, r = 25, b = 50, t = 80, pad = 0),
            title = "Log Likelihood of MCMC", font = list(size = 18, colot = "black"),
-           xaxis = list(title = "Iteration", 
+           xaxis = list(title = "Iteration",
                         titlefont = list(size = 18, color = "black"),
                         tickfont = list(size = 14, color = "black")),
            yaxis = list(title = "LLK",
