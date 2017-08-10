@@ -60,16 +60,16 @@ fluidPage(
                 column(6, align = "center", plotlyOutput("panelDataAltVsRef")))
 #              htmlOutput("panelDataExplainTotalCoverage"),
             ),
-            tabPanel("WSAF Histogram", value = "p3",
-              fluidRow(column(3),
-                column(5, align = "center", plotlyOutput("panelDataHistWSAF")))
-#              htmlOutput("panelDataExplainHistWSAF"),
-            ),
             tabPanel("WSAF VS PLAF", value = "p4",
               fluidRow(column(3),
                 column(5, align = "center",
                   plotlyOutput("panelDataWSAFVsPLAF")))
 #              htmlOutput("panelDataExplainWSAFVsPLAF")
+            ),
+            tabPanel("WSAF Histogram", value = "p3",
+              fluidRow(column(3),
+                column(5, align = "center", plotlyOutput("panelDataHistWSAF")))
+#              htmlOutput("panelDataExplainHistWSAF"),
             )
           )
         )
@@ -87,19 +87,19 @@ fluidPage(
           checkboxGroupInput("panelSequenceDeconWSAFVsPOSShades",
                              h5("Show Gene and Exon:"), c("Gene", "Exon")),
           hr(),
-          checkboxInput("panelSequenceDeconWSAFVsPOSControlGene", 
+          checkboxInput("panelSequenceDeconWSAFVsPOSControlGene",
                         label = h5("Enable/Disable Gene Zoom"), value = FALSE),
           conditionalPanel(
             condition = "input.panelSequenceDeconWSAFVsPOSControlGene == true",
             fluidRow(
-              column(5, radioButtons("panelSequenceDeconWSAFVsPOSGene", 
+              column(5, radioButtons("panelSequenceDeconWSAFVsPOSGene",
                                      h5("Choose a Gene"),
                                      c("CRT", "DHFR", "DHPS", "Kelch", "MDR1",
-                                       "Plasmepsin2&3"), 
+                                       "Plasmepsin2&3"),
                                      selected = NULL)),
               column(7, uiOutput("inputGeneUI"))
           )
-          # actionButton("panelSequenceDeconWSAFVsPOSDisableGene", "Disable zoom in.")
+  # actionButton("panelSequenceDeconWSAFVsPOSDisableGene", "Disable zoom in.")
         )),
         mainPanel(width = 9,
           shinyjs::useShinyjs(),
