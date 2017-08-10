@@ -73,16 +73,17 @@ fun.find.more <- function (outliers.idx, window.size){
   return(unique(idx.out))
 }
 
-plot.total.coverage.dygraphs <- function(ref, alt, coverage, threshold){
+plot.total.coverage.dygraphs <- function(ref, alt, coverage, threshold, window.size = 10){
   # potentialOutliers = fun.find.more(outliers.idx, window.size)
   totalDepth = ref + alt
   x = 1:length(totalDepth)
   # range(totalDepth)
   tmpQ = quantile(totalDepth, threshold)
-  outliers.idx = which((totalDepth > tmpQ ))
-  # potentialOutliers = fun.find.more(outliers.idx, window.size)
+  tmpIdx = which((totalDepth > tmpQ ))
+  potentialOutliers = fun.find.more(tmpIdx, window.size)
+  
   tmp = data.frame(x, totalDepth)
-  tmp$outliers = ifelse(rownames(tmp) %in% outliers.idx, totalDepth, NA)
+  tmp$outliers = ifelse(rownames(tmp) %in% potentialOutliers, totalDepth, NA)
   chromgroup = coverage %>%
     group_by(CHROM) %>%
     summarise(count = n())
