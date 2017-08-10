@@ -43,13 +43,13 @@ fluidPage(
     ############ tabPanel 2
     tabPanel("Sequence exploration",
       sidebarLayout(
-        sidebarPanel(width = 2,
+        sidebarPanel(width = 3,
           HTML("<font color=\"blue\">TODO: interactive buttons.</font>"),
           sliderInput("panelDataTotalCoverageThreshold",
                       label = h4("Choose probability threshold for outliers: "),
                       min = 0, max = 1, value = 0.995)
         ),
-        mainPanel(width = 10,
+        mainPanel(width = 9,
           shinyjs::useShinyjs(),
           tabsetPanel(id = "data",
             tabPanel("Coverage distribution across the genome", value = "p1",

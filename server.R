@@ -61,13 +61,11 @@ letsTrimPlafVcf <- function (coverageVCF, plafFile) {
   coverageIndex <- which(coverageVCF$MATCH %in% plafFile$MATCH)
   coverageTrim1 <- coverageVCF[coverageIndex, ]
 
-
   trimIdx = which((plafFileTrim1$PLAF != 0) &
                         (coverageTrim1$refCount + coverageTrim1$altCount >= 5))
   ### Trim2
   plafTrim2 <- plafFileTrim1[trimIdx,]
   coverageTrim2 <- coverageTrim1[trimIdx,]
-
 
   ### write files
   plafTrim2[["MATCH"]] <- NULL
@@ -155,10 +153,12 @@ function(input, output, session) {
     y = c()
     for (i in 1:nrow(rancoortmp)) {
       set.seed(321)
-      xtmp = runif(rancoortmp$sample.size[i],rancoortmp$lats.min[i], rancoortmp$lats.max[i])
+      xtmp = runif(rancoortmp$sample.size[i],rancoortmp$lats.min[i], 
+                   rancoortmp$lats.max[i])
       x = append(x, xtmp)
       set.seed(123)
-      ytmp = runif(rancoortmp$sample.size[i],rancoortmp$longs.min[i], rancoortmp$longs.max[i])
+      ytmp = runif(rancoortmp$sample.size[i],rancoortmp$longs.min[i], 
+                   rancoortmp$longs.max[i])
       y = append(y, ytmp)
     }
     df = data.frame(y, x)
@@ -166,7 +166,8 @@ function(input, output, session) {
 
     leaflet(df) %>%
       addProviderTiles(providers$Esri.NatGeoWorldMap) %>%
-      addCircleMarkers(radius = 1.7, color = "#ff0048", stroke = FALSE, fillOpacity = 0.7) %>%
+      addCircleMarkers(radius = 1.7, color = "#ff0048", 
+                       stroke = FALSE, fillOpacity = 0.7) %>%
       addMarkers(lng = p1, lat = p2, popup = "Origin") %>%
       addCircleMarkers(lng = p1, lat = p2, radius = 18, color = "blue")
   })
@@ -203,23 +204,7 @@ function(input, output, session) {
     plafUntrimmedGlobal <<- read.table(textConnection(myfile), header=T)
   })
 
-
-
-#  output$panelDataPlafTable <-renderTable({ # set the default to lab,
-#    if (is.null(input$inputOrigin)){
-#      return(NULL)
-#    }
-
-#    fetchPLAF()
-
-#    if (is.null(plafUntrimmedGlobal)){
-#      return (NULL)
-#    }
-
-#    head(plafUntrimmedGlobal, 5)
-#  })
-
-
+  
   fetchVCF <- reactive({
     if (is.null(input$inputVCFfile)){
       cat("Log: no VCF, cann't fetch\n")
@@ -295,9 +280,11 @@ function(input, output, session) {
 
     cat ("log: panelDataAltVsRef\n")
     print(head(coverageTrimmedGlobal))
-    plotAltVsRefPlotly(coverageTrimmedGlobal$refCount, coverageTrimmedGlobal$altCount)
+    threshold <- input$panelDataTotalCoverageThreshold
+    plotAltVsRefPlotly(coverageTrimmedGlobal$refCount, 
+                       coverageTrimmedGlobal$altCount,
+                       threshold)
   })
-
 
 
   output$panelDataHistWSAF <- renderPlotly({
@@ -321,16 +308,14 @@ function(input, output, session) {
         stop("plaf should have been loaded")
       }
       cat ("log: Reload plaf and VCF\n")
-
-      #      letsTrimPlafVcf(coverageUntrimmedGlobal, plafUntrimmedGlobal)
     }
 
     cat ("log: panelDataHistWSAF2\n")
-    tmpobsWSAF <- coverageTrimmedGlobal$altCount/(coverageTrimmedGlobal$refCount + coverageTrimmedGlobal$altCount)
+    tmpobsWSAF <- coverageTrimmedGlobal$altCount / (
+      coverageTrimmedGlobal$refCount + coverageTrimmedGlobal$altCount)
     plotHistWSAFPlotly(tmpobsWSAF)
   })
 
-#  ### match VCF and PLAF by CHROM and POS instead
 
   output$panelDataWSAFVsPLAF <- renderPlotly({
     if (is.null(input$inputVCFfile)){
@@ -359,18 +344,18 @@ function(input, output, session) {
         stop("plaf should have been loaded")
       }
       cat ("log: Reload plaf and VCF\n")
-
-#      letsTrimPlafVcf(coverageUntrimmedGlobal, plafUntrimmedGlobal)
     }
     cat ("log: panelDataWSAFVsPLAF\n")
 
-    tmpobsWSAF <- coverageTrimmedGlobal$altCount/(coverageTrimmedGlobal$refCount + coverageTrimmedGlobal$altCount)
+    tmpobsWSAF <- coverageTrimmedGlobal$altCount/(
+      coverageTrimmedGlobal$refCount + coverageTrimmedGlobal$altCount)
     head(plafTrimmedGlobal, 5)
 
-#    decovlutedGlobal <<- dEploid(paste("-ref", "tmpREF.txt", "-alt", "tmpALT.txt", "-plaf", "tmpPLAF.txt", "-noPanel"))
-#    propGlobal <<- decovlutedGlobal$Proportions[dim(decovlutedGlobal$Proportions)[1],]
-#    expWSAFGlobal <<- t(decovlutedGlobal$Haps) %*% propGlobal
-    plotWSAFVsPLAFPlotly(plafTrimmedGlobal[,3], tmpobsWSAF, coverageTrimmedGlobal$refCount, coverageTrimmedGlobal$altCount)
+    threshold <- input$panelDataTotalCoverageThreshold
+    plotWSAFVsPLAFPlotly(plafTrimmedGlobal[,3], tmpobsWSAF, 
+                         coverageTrimmedGlobal$refCount, 
+                         coverageTrimmedGlobal$altCount,
+                         threshold)
   })
 
 
@@ -380,79 +365,70 @@ function(input, output, session) {
 #      return()
 #    }
 
-#    deconvolutedGlobal <<- dEploid(paste("-ref", "tmpREF.txt", "-alt", "tmpALT.txt", "-plaf", "tmpPLAF.txt", "-noPanel"))
+#  deconvolutedGlobal <<- dEploid(paste("-ref", "tmpREF.txt", 
+#                                       "-alt", "tmpALT.txt", 
+#                                       "-plaf", "tmpPLAF.txt", "-noPanel"))
 #    vcfFile <- input$inputVCFfile$datapath
 #    coverageUntrimmedGlobal <<- extractCoverageFromVcf(vcfFile)
 #  })
 
-
-#  uiOutput("inputOriginUI")
+  
   output$inputCHROMUI <- renderUI({
     if (is.null(input$inputSample)){
       return()}
     vcfCHROMlist <- as.vector(unique(coverageTrimmedGlobal$CHROM))
-    
-    # Depending on input$input_type, we'll generate a different
-    # CHROMOSOME and send it to the client.
-    # switch(input$inputSample,
-    #        "Plasmodium Falciparum" = selectInput("inputCHROM", h4("Choose a CHROMOSOME"),
-    #                                              c("Pf3D7_01_v3" = "1", "Pf3D7_02_v3" = "2", "Pf3D7_03_v3" = "3",
-    #                                                "Pf3D7_04_v3" = "4", "Pf3D7_05_v3" = "5", "Pf3D7_06_v3" = "6",
-    #                                                "Pf3D7_07_v3" = "7", "Pf3D7_08_v3" = "8", "Pf3D7_09_v3" = "9",
-    #                                                "Pf3D7_10_v3" = "10", "Pf3D7_11_v3" = "11", "Pf3D7_12_v3" = "12",
-    #                                                "Pf3D7_13_v3" = "13", "Pf3D7_14_v3" = "14")),
-    # 
-    #        "Plasmodium Vivax" = selectInput("inputCHROM", h4("Choose a CHROMOSOME"),
-    #                                         c("Pv_Sal1_chr01" = "1", "Pv_Sal1_chr02" = "2", "Pv_Sal1_chr03" = "3",
-    #                                           "Pv_Sal1_chr04" = "4", "Pv_Sal1_chr05" = "5", "Pv_Sal1_chr06" = "6",
-    #                                           "Pv_Sal1_chr07" = "7", "Pv_Sal1_chr08" = "8", "Pv_Sal1_chr09" = "9",
-    #                                           "Pv_Sal1_chr10" = "10", "Pv_Sal1_chr11" = "11", "Pv_Sal1_chr12" = "12",
-    #                                           "Pv_Sal1_chr13" = "13", "Pv_Sal1_chr14" = "14")))
-
     switch(input$inputSample,
-           "Plasmodium Falciparum" = selectInput("inputCHROM", h5("Choose a CHROMOSOME"), vcfCHROMlist),
+           "Plasmodium Falciparum" = selectInput("inputCHROM", 
+                                                 h5("Choose a CHROMOSOME"), 
+                                                 vcfCHROMlist),
            
-           "Plasmodium Vivax" = selectInput("inputCHROM", h5("Choose a CHROMOSOME"), vcfCHROMlist))
+           "Plasmodium Vivax" = selectInput("inputCHROM", 
+                                            h5("Choose a CHROMOSOME"), 
+                                            vcfCHROMlist))
   })
   
-  # radioButtons("panelSequenceDeconWSAFVsPOSGene", 
-  #              h5("Choose a gene"),
-  #              c("CRT", "DHFR", "DHPS", "Kelch13", "MDR1",
-  #                "Plasmepsin II and III"), 
-  #              selected = NULL)
+
   output$inputGeneUI <- renderUI({
     if (is.null(input$inputSample)){
       return()}
     CRTlist <- as.vector(unique(geneDrugZone$CHROM[
-      geneDrugZone$gene == "CRT" & geneDrugZone$species %in% input$inputSample]))
+      geneDrugZone$gene == "CRT" & 
+        geneDrugZone$species %in% input$inputSample]))
     DHFRlist <- as.vector(unique(geneDrugZone$CHROM[
-      geneDrugZone$gene == "DHFR" & geneDrugZone$species %in% input$inputSample]))
+      geneDrugZone$gene == "DHFR" & 
+        geneDrugZone$species %in% input$inputSample]))
                                                       
     DHPSlist <- as.vector(unique(geneDrugZone$CHROM[
-      geneDrugZone$gene == "DHPS" & geneDrugZone$species %in% input$inputSample]))
+      geneDrugZone$gene == "DHPS" & 
+        geneDrugZone$species %in% input$inputSample]))
                                                       
     Kelchlist <- as.vector(unique(geneDrugZone$CHROM[
-      geneDrugZone$gene == "Kelch" & geneDrugZone$species %in% input$inputSample]))
+      geneDrugZone$gene == "Kelch" & 
+        geneDrugZone$species %in% input$inputSample]))
                                                        
     MDRlist <- as.vector(unique(geneDrugZone$CHROM[
-      geneDrugZone$gene == "MDR1" & geneDrugZone$species %in% input$inputSample]))
+      geneDrugZone$gene == "MDR1" & 
+        geneDrugZone$species %in% input$inputSample]))
                                                      
     Plasmepsinlist <- as.vector(unique(geneDrugZone$CHROM[
-      geneDrugZone$gene == "Plasmepsin2&3" & geneDrugZone$species %in% input$inputSample]))
+      geneDrugZone$gene == "Plasmepsin2&3" &
+        geneDrugZone$species %in% input$inputSample]))
     switch(input$panelSequenceDeconWSAFVsPOSGene,
-           "CRT" = selectInput("inputZone", h5("Choose a CHROMOSOME"), CRTlist),
-           "DHFR" = selectInput("inputZone", h5("Choose a CHROMOSOME"), DHFRlist),
-           "DHPS" = selectInput("inputZone", h5("Choose a CHROMOSOME"), DHPSlist),
-           "Kelch" = selectInput("inputZone", h5("Choose a CHROMOSOME"), Kelchlist),
-           "MDR1" = selectInput("inputZone", h5("Choose a CHROMOSOME"), MDRlist),
-           "Plasmepsin2&3" = selectInput("inputZone", h5("Choose a CHROMOSOME"), Plasmepsinlist))
+           "CRT" = selectInput("inputZone", 
+                               h5("Choose a CHROMOSOME"), CRTlist),
+           "DHFR" = selectInput("inputZone", 
+                                h5("Choose a CHROMOSOME"), DHFRlist),
+           "DHPS" = selectInput("inputZone", 
+                                h5("Choose a CHROMOSOME"), DHPSlist),
+           "Kelch" = selectInput("inputZone", 
+                                 h5("Choose a CHROMOSOME"), Kelchlist),
+           "MDR1" = selectInput("inputZone", 
+                                h5("Choose a CHROMOSOME"), MDRlist),
+           "Plasmepsin2&3" = selectInput("inputZone", 
+                                         h5("Choose a CHROMOSOME"), 
+                                         Plasmepsinlist))
   })
 
-
-  
-  # observeEvent(input$panelSequenceDeconWSAFVsPOSDisableGene, {
-  #   disable("panelSequenceDeconWSAFVsPOSGene")
-  # })
   
   output$panelSequenceDeconWSAFVsPOS <- renderDygraph ({
     if (is.null(input$inputVCFfile)){
@@ -470,21 +446,17 @@ function(input, output, session) {
 
      prop = deconvolutedGlobal$Proportions[dim(deconvolutedGlobal$Proportions)[1],]
      expWSAF = t(deconvolutedGlobal$Haps) %*% prop
-     obsWSAF <- coverageTrimmedGlobal$altCount/(coverageTrimmedGlobal$refCount + coverageTrimmedGlobal$altCount)
+     obsWSAF <- coverageTrimmedGlobal$altCount/(
+       coverageTrimmedGlobal$refCount + coverageTrimmedGlobal$altCount)
     
      vcfCHROMlist <- as.vector(unique(coverageTrimmedGlobal$CHROM))
      chroms = unique(coverageTrimmedGlobal$CHROM)
-     # par.level = str_sub(input$inputCHROM, 1, 2)
 
      wsaf.list = list()
      gene.list = list()
      exon.list = list()
      zone.list = list()
-     
-     # if (is.null(type)){
-     #   return(NULL)
-     # }
-     
+
      for(i in input$inputCHROM){
        type = input$inputCHROM
      }
@@ -622,7 +594,10 @@ function(input, output, session) {
 
     letsTrimPlafVcf(coverageUntrimmedGlobal, plafUntrimmedGlobal)
 
-    deconvolutedGlobal <<- dEploid(paste("-ref", "tmpREF.txt", "-alt", "tmpALT.txt", "-plaf", "tmpPLAF.txt", "-noPanel", "-nSample 100 -rate 5"))
+    deconvolutedGlobal <<- dEploid(paste("-ref", "tmpREF.txt", 
+                                         "-alt", "tmpALT.txt", 
+                                         "-plaf", "tmpPLAF.txt", 
+                                         "-noPanel", "-nSample 100 -rate 5"))
     vcfFile <- input$inputVCFfile$datapath
     coverageUntrimmedGlobal <<- extractCoverageFromVcf(vcfFile)
   })
@@ -641,7 +616,8 @@ function(input, output, session) {
       paste("haplotypes.txt", sep = "")
     },
     content = function(file) {
-      write.table(t(deconvolutedGlobal$Haps), file, sep = "\t", col.names = T, row.names = F, quote = F)
+      write.table(t(deconvolutedGlobal$Haps), file, sep = "\t", 
+                  col.names = T, row.names = F, quote = F)
     }
   )
 
