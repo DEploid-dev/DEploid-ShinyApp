@@ -47,7 +47,10 @@ fluidPage(
           HTML("<font color=\"blue\">TODO: interactive buttons.</font>"),
           sliderInput("panelDataTotalCoverageThreshold",
                       label = h4("Choose probability threshold for outliers: "),
-                      min = 0, max = 1, value = 0.995)
+                      min = 0.9, max = 1, value = 0.995),
+          sliderInput("panelDataTotalCoverageWindow",
+                      label = h4("Choose a window size for outlier: "),
+                      min = 0, max = 50, value = 10)
         ),
         mainPanel(width = 9,
           shinyjs::useShinyjs(),
@@ -108,7 +111,7 @@ fluidPage(
               fluidRow(column(12, dygraphOutput("panelSequenceDeconWSAFVsPOS")))
             ),
             tabPanel("Expected vs observed allele frequency", value = "p1",
-              fluidRow(column(3), column(4, align = "center",
+              fluidRow(column(3), column(5, align = "center",
                 plotlyOutput("panelSequenceDeconObsVsExpWSAF")))),
             tabPanel("MCMC diagnostic",
               htmlOutput("severMcMcState"),

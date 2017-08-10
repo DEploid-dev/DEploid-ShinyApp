@@ -73,7 +73,7 @@ fun.find.more <- function (outliers.idx, window.size){
   return(unique(idx.out))
 }
 
-plot.total.coverage.dygraphs <- function(ref, alt, coverage, threshold, window.size = 10){
+plot.total.coverage.dygraphs <- function(ref, alt, coverage, threshold, window.size){
   # potentialOutliers = fun.find.more(outliers.idx, window.size)
   totalDepth = ref + alt
   x = 1:length(totalDepth)

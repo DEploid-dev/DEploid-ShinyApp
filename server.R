@@ -14,8 +14,10 @@ rancoor <- read.csv("data/randomCoordinates.csv")
 cencoor <- read.csv("data/centerCoordinates.csv")
 urlfile <- read.csv("data/fetchPLAFUrls.csv")
 geneDrugZone <- read.csv("data/geneDrugZone.csv")
-pvgff <- read.delim("data/PlasmoDB-33_PvivaxSal1.gff", header=F, comment.char="#")
-pfgff <- read.delim("data/PlasmoDB-33_Pfalciparum3D7.gff", header=F, comment.char="#")
+pvgff <- read.delim("data/PlasmoDB-33_PvivaxSal1.gff", 
+                    header=F, comment.char="#")
+pfgff <- read.delim("data/PlasmoDB-33_Pfalciparum3D7.gff", 
+                    header=F, comment.char="#")
 
 coverageUntrimmedGlobal = NULL
 coverageTrimmedGlobal = NULL
@@ -77,9 +79,12 @@ letsTrimPlafVcf <- function (coverageVCF, plafFile) {
                          refCount = coverageTrim2$refCount)
   # obsWSAFtmp <- alttmp/(reftmp + alttmp)
 
-  write.table(plafTrim2, file = "tmpPLAF.txt", sep = "\t", quote = F, row.names = F)
-  write.table(altTrim2, file = "tmpALT.txt", sep = "\t", quote = F, row.names = F)
-  write.table(refTrim2, file = "tmpREF.txt", sep = "\t", quote = F, row.names = F)
+  write.table(plafTrim2, file = "tmpPLAF.txt", 
+              sep = "\t", quote = F, row.names = F)
+  write.table(altTrim2, file = "tmpALT.txt", 
+              sep = "\t", quote = F, row.names = F)
+  write.table(refTrim2, file = "tmpREF.txt", 
+              sep = "\t", quote = F, row.names = F)
 
   isBothPlafVcfTrimmed <<- TRUE
   coverageTrimmedGlobal <<- extractCoverageFromTxt("tmpREF.txt", "tmpALT.txt")
@@ -112,19 +117,27 @@ function(input, output, session) {
                c("Malawi" = "af1_1", "Congo" = "af1_2",
                  "Ghana (Kassena)" = "af2",
                  "Nigeria" = "af3_1", "Senegal" = "af3_2", "Mali" = "af3_3",
-                 "Gambia" = "af4_1", "Guinea" = "af4_2", "Ghana (Kintampo)" = "af4_3",
-                 "Cambodia (Pursat)" = "as5_1", "Cambodia (Pailin)" = "as5_2", "Thailand (Sisakhet)" = "as5_3",
-                 "Vietnam" = "as6_1", "Laos" = "as6_2", "Cambodia (Ratanakiri)" = "as6_3", "Cambodia (Preah Vihear)" = "as6_4",
-                 "Bangladesh" = "as7_1", "Myanmar" = "as7_2", "Thailand (Mae Sot)" = "as7_3", "Thailand (Ranong)" = "as7_4",
+                 "Gambia" = "af4_1", "Guinea" = "af4_2", 
+                 "Ghana (Kintampo)" = "af4_3",
+                 "Cambodia (Pursat)" = "as5_1", "Cambodia (Pailin)" = "as5_2", 
+                 "Thailand (Sisakhet)" = "as5_3",
+                 "Vietnam" = "as6_1", "Laos" = "as6_2", 
+                 "Cambodia (Ratanakiri)" = "as6_3", 
+                 "Cambodia (Preah Vihear)" = "as6_4",
+                 "Bangladesh" = "as7_1", "Myanmar" = "as7_2", 
+                 "Thailand (Mae Sot)" = "as7_3", "Thailand (Ranong)" = "as7_4",
                  "Lab" = "lab")),
 
            "Plasmodium Vivax" = 
              selectInput(
                "inputOrigin", "Where is it coming from?",
                c("Thailand" = "pv1",
-                 "Indonesia" = "pv2_1", "Malaysia" = "pv2_2", "Papua New Guinea" = "pv2_3",
+                 "Indonesia" = "pv2_1", "Malaysia" = "pv2_2", 
+                 "Papua New Guinea" = "pv2_3",
                  "Cambodia" = "pv3_1", "Vietnam" = "pv3_2", "Laos" = "pv3_3",
-                 "Myanmar (Burma)" = "pv4_1", "China" = "pv4_2", "Madagascar" = "pv4_3", "Sri Lanka" = "pv4_4", "Brazil" = "pv4_5", "India" = "pv4_6")))
+                 "Myanmar (Burma)" = "pv4_1", "China" = "pv4_2", 
+                 "Madagascar" = "pv4_3", "Sri Lanka" = "pv4_4", 
+                 "Brazil" = "pv4_5", "India" = "pv4_6")))
   })
 
 
@@ -236,8 +249,6 @@ function(input, output, session) {
   })
 
 
-
-
   output$panelDataTotalCoverage <- renderDygraph({
     if (is.null(input$inputVCFfile)){
       validate(
@@ -248,11 +259,12 @@ function(input, output, session) {
     cat ("log: panelDataTotalCoverage\n")
     print(head(coverageTrimmedGlobal))
     threshold <- input$panelDataTotalCoverageThreshold
+    window.size <- input$panelDataTotalCoverageWindow
     return(plot.total.coverage.dygraphs(coverageTrimmedGlobal$refCount, 
                                         coverageTrimmedGlobal$altCount,
-                                        coverageTrimmedGlobal, threshold))
+                                        coverageTrimmedGlobal, 
+                                        threshold, window.size))
   })
-
 
 
   output$panelDataAltVsRef <- renderPlotly({
@@ -281,9 +293,10 @@ function(input, output, session) {
     cat ("log: panelDataAltVsRef\n")
     print(head(coverageTrimmedGlobal))
     threshold <- input$panelDataTotalCoverageThreshold
+    window.size <- input$panelDataTotalCoverageWindow
     plotAltVsRefPlotly(coverageTrimmedGlobal$refCount, 
                        coverageTrimmedGlobal$altCount,
-                       threshold)
+                       threshold, window.size)
   })
 
 
@@ -352,10 +365,11 @@ function(input, output, session) {
     head(plafTrimmedGlobal, 5)
 
     threshold <- input$panelDataTotalCoverageThreshold
+    window.size <- input$panelDataTotalCoverageWindow
     plotWSAFVsPLAFPlotly(plafTrimmedGlobal[,3], tmpobsWSAF, 
                          coverageTrimmedGlobal$refCount, 
                          coverageTrimmedGlobal$altCount,
-                         threshold)
+                         threshold, window.size)
   })
 
 
@@ -444,7 +458,8 @@ function(input, output, session) {
 
      deconvolutionIsCompleted <- TRUE
 
-     prop = deconvolutedGlobal$Proportions[dim(deconvolutedGlobal$Proportions)[1],]
+     prop = deconvolutedGlobal$Proportions[dim(
+       deconvolutedGlobal$Proportions)[1],]
      expWSAF = t(deconvolutedGlobal$Haps) %*% prop
      obsWSAF <- coverageTrimmedGlobal$altCount/(
        coverageTrimmedGlobal$refCount + coverageTrimmedGlobal$altCount)
@@ -489,7 +504,9 @@ function(input, output, session) {
        ### wsaf.list
        idx = which(coverageTrimmedGlobal$CHROM == chroms[chromi])
        wsaf.list[[as.character(chroms[chromi])]] = data.frame(
-         pos = coverageTrimmedGlobal$POS[idx], obsWSAF = obsWSAF[idx], expWSAF = expWSAF[idx])
+         pos = coverageTrimmedGlobal$POS[idx], 
+         obsWSAF = obsWSAF[idx], 
+         expWSAF = expWSAF[idx])
        ### gene.list
        idx2 = which(gene$V1 == chroms[chromi])
        gene = gene[idx2, ]
@@ -513,6 +530,8 @@ function(input, output, session) {
      ### Add checkboxinput
      checkBoxGene <- "Gene" %in% input$panelSequenceDeconWSAFVsPOSShades
      checkBoxExon <- "Exon" %in% input$panelSequenceDeconWSAFVsPOSShades
+     
+     
      
      ### Show gene zone when selected
      zone <- geneDrugZone %>%
@@ -547,7 +566,8 @@ function(input, output, session) {
       return(NULL)
     }
     deconvolutionIsCompleted <- TRUE
-    prop = deconvolutedGlobal$Proportions[dim(deconvolutedGlobal$Proportions)[1],]
+    prop = deconvolutedGlobal$Proportions[dim(
+      deconvolutedGlobal$Proportions)[1],]
     expWSAF = t(deconvolutedGlobal$Haps) %*% prop
     obsWSAF <- coverageTrimmedGlobal$altCount/(coverageTrimmedGlobal$refCount +
                                                  coverageTrimmedGlobal$altCount)

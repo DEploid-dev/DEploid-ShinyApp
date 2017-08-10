@@ -23,7 +23,7 @@
 #' plotAltVsRefPlotly(PG0390CoverageV$refCount, PG0390CoverageV$altCount)
 #'
 
-plotAltVsRefPlotly <- function (ref, alt, threshold, window.size = 10){
+plotAltVsRefPlotly <- function (ref, alt, threshold, window.size){
   refvsalt = data.frame(ref, alt)
   ratios <- ref/(ref + alt + 0.0000001)
   # tmpRange <- 1.1 * mean(max(alt), max(ref))
@@ -44,13 +44,14 @@ plotAltVsRefPlotly <- function (ref, alt, threshold, window.size = 10){
   plot_ly(data = refvsalt, x = ~ref, y = ~alt, 
           type = "scatter", mode = "markers", name = "normal",
           color = ~ ratios, colors=c("#de2d26", "#2b8cbe"), alpha = 0.8,
-          marker = list(size = 3, line = list(color = "black", width = 0.3),
+          marker = list(size = 3, 
+                        # line = list(color = "black", width = 0.3),
                         colorbar = list(title = legend.name)),
           showlegend = F,
           text = paste("RefCount: ", ref, " ;  ", "AltCount: ", alt)) %>%
     add_trace(x = ~ref.out, y = ~alt.out, name = "outlier",
               type = "scatter", mode = "markers", symbol = I("x"),
-              marker = list(size = 6, color = "black"), showlegend = F) %>%
+              marker = list(size = 4, color = "black"), showlegend = F) %>%
     layout(margin = list(l = 65, r = 25, b = 50, t = 80, pad = 0),
            title = "Alt vs Ref", font = list(size = 18, colot = "black"),
            legend = list(font = list(size = 5)),
@@ -168,7 +169,7 @@ plotHistWSAFPlotly <- function (obsWSAF){
 #'
 
 plotWSAFVsPLAFPlotly <- function (plaf, obsWSAF, ref, alt,
-                                  threshold, window.size = 10){
+                                  threshold, window.size){
   totalDepth = ref + alt
   x = 1:length(totalDepth)
   # range(totalDepth)
