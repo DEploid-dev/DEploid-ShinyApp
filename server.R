@@ -531,20 +531,24 @@ function(input, output, session) {
      checkBoxGene <- "Gene" %in% input$panelSequenceDeconWSAFVsPOSShades
      checkBoxExon <- "Exon" %in% input$panelSequenceDeconWSAFVsPOSShades
      
-     
-     
      ### Show gene zone when selected
      zone <- geneDrugZone %>%
        filter(species == input$inputSample)
-     for (i in input$panelSequenceDeconWSAFVsPOSGene) {
-       zone <- geneDrugZone %>%
-         filter(gene == input$panelSequenceDeconWSAFVsPOSGene) %>%
-         filter(CHROM == input$inputZone)
-       pos5 = zone$start
-       pos6 = zone$end
-       zone.list[[as.character(paste(input$panelSequenceDeconWSAFVsPOSGene, 
-               input$inputZone, sep = ":"))]] = data.frame(pos5, pos6)
+     if (input$panelSequenceDeconWSAFVsPOSControlGene == FALSE){
+       zone <- input$inputCHROMUI
+       type3 <- type
+     } else {
+       for (i in input$panelSequenceDeconWSAFVsPOSGene) {
+         zone <- geneDrugZone %>%
+           filter(gene == input$panelSequenceDeconWSAFVsPOSGene) %>%
+           filter(CHROM == input$inputZone)
+         pos5 = zone$start
+         pos6 = zone$end
+         zone.list[[as.character(paste(input$panelSequenceDeconWSAFVsPOSGene, 
+                                       input$inputZone, sep = ":"))]] = data.frame(pos5, pos6)
+       }
      }
+
      ### type2
      type2 <- as.character(paste(input$panelSequenceDeconWSAFVsPOSGene, 
                                  input$inputZone, sep = ":"))
