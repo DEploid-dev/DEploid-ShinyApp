@@ -1,4 +1,4 @@
-rm(list=ls())
+  rm(list=ls())
 library(quantmod)
 library(RCurl)
 
@@ -14,9 +14,9 @@ rancoor <- read.csv("data/randomCoordinates.csv")
 cencoor <- read.csv("data/centerCoordinates.csv")
 urlfile <- read.csv("data/fetchPLAFUrls.csv")
 geneDrugZone <- read.csv("data/geneDrugZone.csv")
-pvgff <- read.delim("data/PlasmoDB-33_PvivaxSal1.gff", 
+pvgff <- read.delim("data/PlasmoDB-33_PvivaxSal1.gff",
                     header=F, comment.char="#")
-pfgff <- read.delim("data/PlasmoDB-33_Pfalciparum3D7.gff", 
+pfgff <- read.delim("data/PlasmoDB-33_Pfalciparum3D7.gff",
                     header=F, comment.char="#")
 
 coverageUntrimmedGlobal = NULL
@@ -79,11 +79,11 @@ letsTrimPlafVcf <- function (coverageVCF, plafFile) {
                          refCount = coverageTrim2$refCount)
   # obsWSAFtmp <- alttmp/(reftmp + alttmp)
 
-  write.table(plafTrim2, file = "tmpPLAF.txt", 
+  write.table(plafTrim2, file = "tmpPLAF.txt",
               sep = "\t", quote = F, row.names = F)
-  write.table(altTrim2, file = "tmpALT.txt", 
+  write.table(altTrim2, file = "tmpALT.txt",
               sep = "\t", quote = F, row.names = F)
-  write.table(refTrim2, file = "tmpREF.txt", 
+  write.table(refTrim2, file = "tmpREF.txt",
               sep = "\t", quote = F, row.names = F)
 
   isBothPlafVcfTrimmed <<- TRUE
@@ -111,32 +111,32 @@ function(input, output, session) {
     # Depending on input$input_type, we'll generate a different
     # UI component and send it to the client.
     switch(input$inputSample,
-           "Plasmodium Falciparum" = 
+           "Plasmodium Falciparum" =
              selectInput(
                "inputOrigin", "Where was the sample collected?",
                c("Malawi" = "af1_1", "Congo" = "af1_2",
                  "Ghana (Kassena)" = "af2",
                  "Nigeria" = "af3_1", "Senegal" = "af3_2", "Mali" = "af3_3",
-                 "Gambia" = "af4_1", "Guinea" = "af4_2", 
+                 "Gambia" = "af4_1", "Guinea" = "af4_2",
                  "Ghana (Kintampo)" = "af4_3",
-                 "Cambodia (Pursat)" = "as5_1", "Cambodia (Pailin)" = "as5_2", 
+                 "Cambodia (Pursat)" = "as5_1", "Cambodia (Pailin)" = "as5_2",
                  "Thailand (Sisakhet)" = "as5_3",
-                 "Vietnam" = "as6_1", "Laos" = "as6_2", 
-                 "Cambodia (Ratanakiri)" = "as6_3", 
+                 "Vietnam" = "as6_1", "Laos" = "as6_2",
+                 "Cambodia (Ratanakiri)" = "as6_3",
                  "Cambodia (Preah Vihear)" = "as6_4",
-                 "Bangladesh" = "as7_1", "Myanmar" = "as7_2", 
+                 "Bangladesh" = "as7_1", "Myanmar" = "as7_2",
                  "Thailand (Mae Sot)" = "as7_3", "Thailand (Ranong)" = "as7_4",
                  "Lab" = "lab")),
 
-           "Plasmodium Vivax" = 
+           "Plasmodium Vivax" =
              selectInput(
                "inputOrigin", "Where is it coming from?",
                c("Thailand" = "pv1",
-                 "Indonesia" = "pv2_1", "Malaysia" = "pv2_2", 
+                 "Indonesia" = "pv2_1", "Malaysia" = "pv2_2",
                  "Papua New Guinea" = "pv2_3",
                  "Cambodia" = "pv3_1", "Vietnam" = "pv3_2", "Laos" = "pv3_3",
-                 "Myanmar (Burma)" = "pv4_1", "China" = "pv4_2", 
-                 "Madagascar" = "pv4_3", "Sri Lanka" = "pv4_4", 
+                 "Myanmar (Burma)" = "pv4_1", "China" = "pv4_2",
+                 "Madagascar" = "pv4_3", "Sri Lanka" = "pv4_4",
                  "Brazil" = "pv4_5", "India" = "pv4_6")))
   })
 
@@ -166,11 +166,11 @@ function(input, output, session) {
     y = c()
     for (i in 1:nrow(rancoortmp)) {
       set.seed(321)
-      xtmp = runif(rancoortmp$sample.size[i],rancoortmp$lats.min[i], 
+      xtmp = runif(rancoortmp$sample.size[i],rancoortmp$lats.min[i],
                    rancoortmp$lats.max[i])
       x = append(x, xtmp)
       set.seed(123)
-      ytmp = runif(rancoortmp$sample.size[i],rancoortmp$longs.min[i], 
+      ytmp = runif(rancoortmp$sample.size[i],rancoortmp$longs.min[i],
                    rancoortmp$longs.max[i])
       y = append(y, ytmp)
     }
@@ -179,7 +179,7 @@ function(input, output, session) {
 
     leaflet(df) %>%
       addProviderTiles(providers$Esri.NatGeoWorldMap) %>%
-      addCircleMarkers(radius = 1.7, color = "#ff0048", 
+      addCircleMarkers(radius = 1.7, color = "#ff0048",
                        stroke = FALSE, fillOpacity = 0.7) %>%
       addMarkers(lng = p1, lat = p2, popup = "Origin") %>%
       addCircleMarkers(lng = p1, lat = p2, radius = 18, color = "blue")
@@ -217,7 +217,7 @@ function(input, output, session) {
     plafUntrimmedGlobal <<- read.table(textConnection(myfile), header=T)
   })
 
-  
+
   fetchVCF <- reactive({
     if (is.null(input$inputVCFfile)){
       cat("Log: no VCF, cann't fetch\n")
@@ -260,10 +260,20 @@ function(input, output, session) {
     print(head(coverageTrimmedGlobal))
     threshold <- input$panelDataTotalCoverageThreshold
     window.size <- input$panelDataTotalCoverageWindow
-    return(plot.total.coverage.dygraphs(coverageTrimmedGlobal$refCount, 
+
+    totalDepth = coverageTrimmedGlobal$refCount + coverageTrimmedGlobal$altCount
+    x = 1:length(totalDepth)
+    # range(totalDepth)
+    tmpQ = quantile(totalDepth, threshold)
+    tmpIdx = which((totalDepth > tmpQ ))
+    potentialOutliers = fun.find.more(tmpIdx, window.size)
+    tmp = data.frame(x, totalDepth)
+
+    return(plot.total.coverage.dygraphs(coverageTrimmedGlobal$refCount,
                                         coverageTrimmedGlobal$altCount,
-                                        coverageTrimmedGlobal, 
-                                        threshold, window.size))
+                                        coverageTrimmedGlobal,
+                                        threshold, window.size,
+                                        potentialOutliers, tmp))
   })
 
 
@@ -292,11 +302,21 @@ function(input, output, session) {
 
     cat ("log: panelDataAltVsRef\n")
     print(head(coverageTrimmedGlobal))
+
+    ### find out outliers
     threshold <- input$panelDataTotalCoverageThreshold
     window.size <- input$panelDataTotalCoverageWindow
-    plotAltVsRefPlotly(coverageTrimmedGlobal$refCount, 
+
+    totalDepth = coverageTrimmedGlobal$refCount + coverageTrimmedGlobal$altCount
+    x = 1:length(totalDepth)
+    # range(totalDepth)
+    tmpQ = quantile(totalDepth, threshold)
+    tmpIdx = which((totalDepth > tmpQ))
+    potentialOutliers = fun.find.more(tmpIdx, window.size)
+
+    plotAltVsRefPlotly(coverageTrimmedGlobal$refCount,
                        coverageTrimmedGlobal$altCount,
-                       threshold, window.size)
+                       threshold, window.size, potentialOutliers)
   })
 
 
@@ -366,10 +386,18 @@ function(input, output, session) {
 
     threshold <- input$panelDataTotalCoverageThreshold
     window.size <- input$panelDataTotalCoverageWindow
-    plotWSAFVsPLAFPlotly(plafTrimmedGlobal[,3], tmpobsWSAF, 
-                         coverageTrimmedGlobal$refCount, 
+
+    totalDepth = coverageTrimmedGlobal$refCount + coverageTrimmedGlobal$altCount
+    x = 1:length(totalDepth)
+    # range(totalDepth)
+    tmpQ = quantile(totalDepth, threshold)
+    tmpIdx = which((totalDepth > tmpQ ))
+    potentialOutliers = fun.find.more(tmpIdx, window.size)
+
+    plotWSAFVsPLAFPlotly(plafTrimmedGlobal[,3], tmpobsWSAF,
+                         coverageTrimmedGlobal$refCount,
                          coverageTrimmedGlobal$altCount,
-                         threshold, window.size)
+                         threshold, window.size, potentialOutliers)
   })
 
 
@@ -379,71 +407,71 @@ function(input, output, session) {
 #      return()
 #    }
 
-#  deconvolutedGlobal <<- dEploid(paste("-ref", "tmpREF.txt", 
-#                                       "-alt", "tmpALT.txt", 
+#  deconvolutedGlobal <<- dEploid(paste("-ref", "tmpREF.txt",
+#                                       "-alt", "tmpALT.txt",
 #                                       "-plaf", "tmpPLAF.txt", "-noPanel"))
 #    vcfFile <- input$inputVCFfile$datapath
 #    coverageUntrimmedGlobal <<- extractCoverageFromVcf(vcfFile)
 #  })
 
-  
+
   output$inputCHROMUI <- renderUI({
     if (is.null(input$inputSample)){
       return()}
     vcfCHROMlist <- as.vector(unique(coverageTrimmedGlobal$CHROM))
     switch(input$inputSample,
-           "Plasmodium Falciparum" = selectInput("inputCHROM", 
-                                                 h5("Choose a CHROMOSOME"), 
+           "Plasmodium Falciparum" = selectInput("inputCHROM",
+                                                 h5("Choose a CHROMOSOME"),
                                                  vcfCHROMlist),
-           
-           "Plasmodium Vivax" = selectInput("inputCHROM", 
-                                            h5("Choose a CHROMOSOME"), 
+
+           "Plasmodium Vivax" = selectInput("inputCHROM",
+                                            h5("Choose a CHROMOSOME"),
                                             vcfCHROMlist))
   })
-  
+
 
   output$inputGeneUI <- renderUI({
     if (is.null(input$inputSample)){
       return()}
     CRTlist <- as.vector(unique(geneDrugZone$CHROM[
-      geneDrugZone$gene == "CRT" & 
+      geneDrugZone$gene == "CRT" &
         geneDrugZone$species %in% input$inputSample]))
     DHFRlist <- as.vector(unique(geneDrugZone$CHROM[
-      geneDrugZone$gene == "DHFR" & 
+      geneDrugZone$gene == "DHFR" &
         geneDrugZone$species %in% input$inputSample]))
-                                                      
+
     DHPSlist <- as.vector(unique(geneDrugZone$CHROM[
-      geneDrugZone$gene == "DHPS" & 
+      geneDrugZone$gene == "DHPS" &
         geneDrugZone$species %in% input$inputSample]))
-                                                      
+
     Kelchlist <- as.vector(unique(geneDrugZone$CHROM[
-      geneDrugZone$gene == "Kelch" & 
+      geneDrugZone$gene == "Kelch" &
         geneDrugZone$species %in% input$inputSample]))
-                                                       
+
     MDRlist <- as.vector(unique(geneDrugZone$CHROM[
-      geneDrugZone$gene == "MDR1" & 
+      geneDrugZone$gene == "MDR1" &
         geneDrugZone$species %in% input$inputSample]))
-                                                     
+
     Plasmepsinlist <- as.vector(unique(geneDrugZone$CHROM[
       geneDrugZone$gene == "Plasmepsin2&3" &
         geneDrugZone$species %in% input$inputSample]))
     switch(input$panelSequenceDeconWSAFVsPOSGene,
-           "CRT" = selectInput("inputZone", 
+           "CRT" = selectInput("inputZone",
                                h5("Choose a CHROMOSOME"), CRTlist),
-           "DHFR" = selectInput("inputZone", 
+           "DHFR" = selectInput("inputZone",
                                 h5("Choose a CHROMOSOME"), DHFRlist),
-           "DHPS" = selectInput("inputZone", 
+           "DHPS" = selectInput("inputZone",
                                 h5("Choose a CHROMOSOME"), DHPSlist),
-           "Kelch" = selectInput("inputZone", 
+           "Kelch" = selectInput("inputZone",
                                  h5("Choose a CHROMOSOME"), Kelchlist),
-           "MDR1" = selectInput("inputZone", 
+           "MDR1" = selectInput("inputZone",
                                 h5("Choose a CHROMOSOME"), MDRlist),
-           "Plasmepsin2&3" = selectInput("inputZone", 
-                                         h5("Choose a CHROMOSOME"), 
+           "Plasmepsin2&3" = selectInput("inputZone",
+                                         h5("Choose a CHROMOSOME"),
                                          Plasmepsinlist))
   })
 
-  
+
   output$panelSequenceDeconWSAFVsPOS <- renderDygraph ({
     if (is.null(input$inputVCFfile)){
       validate(
@@ -463,7 +491,7 @@ function(input, output, session) {
      expWSAF = t(deconvolutedGlobal$Haps) %*% prop
      obsWSAF <- coverageTrimmedGlobal$altCount/(
        coverageTrimmedGlobal$refCount + coverageTrimmedGlobal$altCount)
-    
+
      vcfCHROMlist <- as.vector(unique(coverageTrimmedGlobal$CHROM))
      chroms = unique(coverageTrimmedGlobal$CHROM)
 
@@ -472,14 +500,15 @@ function(input, output, session) {
      exon.list = list()
      zone.list = list()
 
-     for(i in input$inputCHROM){
+
+#     for(i in input$inputCHROM){
        type = input$inputCHROM
-     }
-     
+#     }
+
      if (is.null(type)){
        return(NULL)
      }
-     
+
      for (chromi in 1:length(chroms)){
        if (input$inputSample == "Plasmodium Falciparum"){
          gene <- pfgff %>%
@@ -504,8 +533,8 @@ function(input, output, session) {
        ### wsaf.list
        idx = which(coverageTrimmedGlobal$CHROM == chroms[chromi])
        wsaf.list[[as.character(chroms[chromi])]] = data.frame(
-         pos = coverageTrimmedGlobal$POS[idx], 
-         obsWSAF = obsWSAF[idx], 
+         pos = coverageTrimmedGlobal$POS[idx],
+         obsWSAF = obsWSAF[idx],
          expWSAF = expWSAF[idx])
        ### gene.list
        idx2 = which(gene$V1 == chroms[chromi])
@@ -522,7 +551,7 @@ function(input, output, session) {
        exon.list[[as.character(chroms[chromi])]] = data.frame(
          pos3, pos4)
      }
-      
+
      if (is.null(input$inputVCFfile)){
        return (NULL)
      }
@@ -530,7 +559,7 @@ function(input, output, session) {
      ### Add checkboxinput
      checkBoxGene <- "Gene" %in% input$panelSequenceDeconWSAFVsPOSShades
      checkBoxExon <- "Exon" %in% input$panelSequenceDeconWSAFVsPOSShades
-     
+
      ### Show gene zone when selected
      zone <- geneDrugZone %>%
        filter(species == input$inputSample)
@@ -544,19 +573,19 @@ function(input, output, session) {
            filter(CHROM == input$inputZone)
          pos5 = zone$start
          pos6 = zone$end
-         zone.list[[as.character(paste(input$panelSequenceDeconWSAFVsPOSGene, 
+         zone.list[[as.character(paste(input$panelSequenceDeconWSAFVsPOSGene,
                                        input$inputZone, sep = ":"))]] = data.frame(pos5, pos6)
        }
      }
 
      ### type2
-     type2 <- as.character(paste(input$panelSequenceDeconWSAFVsPOSGene, 
+     type2 <- as.character(paste(input$panelSequenceDeconWSAFVsPOSGene,
                                  input$inputZone, sep = ":"))
      type3 <- as.character(input$inputZone)
-     
+
      ### plot
      plotWSAFVsPOSDygraphs(wsaf.list[[type]], gene.list[[type]],
-       exon.list[[type]], checkBoxGene, checkBoxExon, 
+       exon.list[[type]], checkBoxGene, checkBoxExon,
        input$panelSequenceDeconWSAFVsPOSControlGene, zone.list[[type2]],
        wsaf.list[[type3]])
   })
@@ -589,8 +618,8 @@ function(input, output, session) {
     prop$x = c(1:nrow(prop))
     plotProportionsPlotly(prop, pnum)
   })
-  
-  
+
+
   output$panelMCMCLLK <- renderPlotly({
     if (is.null(deconvolutedGlobal)){
       return(NULL)
@@ -618,9 +647,12 @@ function(input, output, session) {
 
     letsTrimPlafVcf(coverageUntrimmedGlobal, plafUntrimmedGlobal)
 
-    deconvolutedGlobal <<- dEploid(paste("-ref", "tmpREF.txt", 
-                                         "-alt", "tmpALT.txt", 
-                                         "-plaf", "tmpPLAF.txt", 
+    
+    
+    
+    deconvolutedGlobal <<- dEploid(paste("-ref", "tmpREF.txt",
+                                         "-alt", "tmpALT.txt",
+                                         "-plaf", "tmpPLAF.txt",
                                          "-noPanel", "-nSample 100 -rate 5"))
     vcfFile <- input$inputVCFfile$datapath
     coverageUntrimmedGlobal <<- extractCoverageFromVcf(vcfFile)
@@ -640,7 +672,7 @@ function(input, output, session) {
       paste("haplotypes.txt", sep = "")
     },
     content = function(file) {
-      write.table(t(deconvolutedGlobal$Haps), file, sep = "\t", 
+      write.table(t(deconvolutedGlobal$Haps), file, sep = "\t",
                   col.names = T, row.names = F, quote = F)
     }
   )

@@ -60,18 +60,18 @@ fluidPage(
             ),
             tabPanel("Allele read counts", value = "p3",
               fluidRow(column(2),
-                column(6, align = "center", plotlyOutput("panelDataAltVsRef")))
+                column(8, plotlyOutput("panelDataAltVsRef"))
+              )
 #              htmlOutput("panelDataExplainTotalCoverage"),
             ),
             tabPanel("WSAF VS PLAF", value = "p4",
-              fluidRow(column(3),
-                column(5, align = "center",
-                  plotlyOutput("panelDataWSAFVsPLAF")))
+              fluidRow(column(2),
+                column(6, plotlyOutput("panelDataWSAFVsPLAF")))
 #              htmlOutput("panelDataExplainWSAFVsPLAF")
             ),
             tabPanel("WSAF Histogram", value = "p3",
-              fluidRow(column(3),
-                column(5, align = "center", plotlyOutput("panelDataHistWSAF")))
+              fluidRow(column(2),
+                column(6, plotlyOutput("panelDataHistWSAF")))
 #              htmlOutput("panelDataExplainHistWSAF"),
             )
           )

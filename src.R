@@ -73,17 +73,10 @@ fun.find.more <- function (outliers.idx, window.size){
   return(unique(idx.out))
 }
 
-plot.total.coverage.dygraphs <- function(ref, alt, coverage, threshold, window.size){
-  # potentialOutliers = fun.find.more(outliers.idx, window.size)
-  totalDepth = ref + alt
-  x = 1:length(totalDepth)
-  # range(totalDepth)
-  tmpQ = quantile(totalDepth, threshold)
-  tmpIdx = which((totalDepth > tmpQ ))
-  potentialOutliers = fun.find.more(tmpIdx, window.size)
-  
-  tmp = data.frame(x, totalDepth)
-  tmp$outliers = ifelse(rownames(tmp) %in% potentialOutliers, totalDepth, NA)
+plot.total.coverage.dygraphs <- function(ref, alt, coverage,
+                                         threshold, window.size,
+                                         potentialOutliers, tmp){
+  tmp$outliers = ifelse(rownames(tmp) %in% potentialOutliers, tmp$totalDepth, NA)
   chromgroup = coverage %>%
     group_by(CHROM) %>%
     summarise(count = n())
@@ -94,10 +87,12 @@ plot.total.coverage.dygraphs <- function(ref, alt, coverage, threshold, window.s
   shadenum <- length(pos1)
   d0 <- dygraph(tmp, xlab = "SNP Index", ylab="Coverage Depth",
                 main = "Coverage across the sequence")  %>%
-    dySeries("totalDepth", drawPoints = TRUE, strokeWidth = 0, color = 'black', pointSize = 1)  %>%
-    dySeries("outliers", drawPoints = TRUE, strokeWidth = 0, color = 'red', pointSize = 1) %>%
+    dySeries("totalDepth", drawPoints = TRUE, strokeWidth = 0,
+             color = 'black', pointSize = 1)  %>%
+    dySeries("outliers", drawPoints = TRUE, strokeWidth = 0,
+             color = 'red', pointSize = 1) %>%
     dyRangeSelector(dateWindow = c(1, max(tmp$x))) %>%
-    dyLimit(as.numeric(tmpQ), color = "red")
+    dyLimit(as.numeric(quantile(tmp$totalDepth, threshold)), color = "red")
   for (i in 1: shadenum) {
     d0 <- d0 %>%
       dyShading(from = pos1[i]-1, to = pos2[i], color = "#dae0e8")
@@ -230,7 +225,7 @@ plot.total.coverage.dygraphs <- function(ref, alt, coverage, threshold, window.s
 #     dyRangeSelector(dateWindow = c(1, max(wsaf$pos)))
 # }
 plotWSAFVsPOSDygraphs <- function (wsaf, gene, exon,
-                                   checkBoxGene, checkBoxExon, 
+                                   checkBoxGene, checkBoxExon,
                                    control, zone, wsaf2){
 
   if (control == FALSE) {
@@ -267,7 +262,7 @@ plotWSAFVsPOSDygraphs <- function (wsaf, gene, exon,
       }
     }
   }
-  
+
   if (control == TRUE) {
     d1 <- dygraph(wsaf2, xlab = "Positions", ylab="WSAF", main = "")  %>%
       dySeries('obsWSAF', drawPoints = TRUE, strokeWidth = 0, color = 'red', pointSize = 3)  %>%
@@ -315,7 +310,7 @@ plotWSAFVsPOSDygraphs <- function (wsaf, gene, exon,
 
 
 
- 
+
 
 
 
