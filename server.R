@@ -1,4 +1,4 @@
-  rm(list=ls())
+rm(list=ls())
 library(quantmod)
 library(RCurl)
 
@@ -6,12 +6,12 @@ library(RCurl)
 options(shiny.maxRequestSize=100*1024^2)
 
 
-# source("plaf.get.R")
 source("src.R")
-source("dEploidPlotly.R")
 
 rancoor <- read.csv("data/randomCoordinates.csv")
 cencoor <- read.csv("data/centerCoordinates.csv")
+originlist <- cencoor$ID
+
 urlfile <- read.csv("data/fetchPLAFUrls.csv")
 geneDrugZone <- read.csv("data/geneDrugZone.csv")
 pvgff <- read.delim("data/PlasmoDB-33_PvivaxSal1.gff",
@@ -23,77 +23,11 @@ coverageUntrimmedGlobal = NULL
 coverageTrimmedGlobal = NULL
 plafUntrimmedGlobal = NULL
 plafTrimmedGlobal = NULL
-
 deconvolutedGlobal = NULL
 
 
-#emptyVcfReminder <- function(){
-#  plot(c(0,1),c(0,1),type="n", xlab = "", ylab = "", bty = "n", xaxt = "n", yaxt = "n")
-#  text(.5, .5, labels = "Please provide a VCF file in the \"Sample infos\" page.", cex = 3)
-#}
 
 
-#trimmingReminder <- function(){
-#  plot(c(0,1),c(0,1),type="n", xlab = "", ylab = "", bty = "n", xaxt = "n", yaxt = "n")
-#  text(.5, .5, labels = "Working hard on the data.", cex = 3)
-#}
-
-
-#loadingReminder <- function(){
-#  plot(c(0,1),c(0,1),type="n", xlab = "", ylab = "", bty = "n", xaxt = "n", yaxt = "n")
-#  text(.5, .5, labels = "Loading ...", cex = 3)
-#}
-
-
-letsTrimPlafVcf <- function (coverageVCF, plafFile) {
-  cat("Log: trim VCF and plaf")
-  coverageVCF$MATCH <- paste(coverageVCF$CHROM, coverageVCF$POS, sep = "-")
-  plafFile$MATCH <- paste(plafFile$CHROM, plafFile$POS, sep = "-")
-  ### assertion: take a look at r-package: assertthat
-
-  # Two stage of trimming
-  #  1. trim them so they have the same sites
-  #  2. trim off sites where REF+ALT<5 and PLAF == 0
-
-  ### Trim1
-  # get index of plaf
-  plafIndex <- which(plafFile$MATCH %in% coverageVCF$MATCH)
-  plafFileTrim1 <- plafFile[plafIndex, ]
-  # get index of coverage
-  coverageIndex <- which(coverageVCF$MATCH %in% plafFile$MATCH)
-  coverageTrim1 <- coverageVCF[coverageIndex, ]
-
-  trimIdx = which((plafFileTrim1$PLAF != 0) &
-                        (coverageTrim1$refCount + coverageTrim1$altCount >= 5))
-  ### Trim2
-  plafTrim2 <- plafFileTrim1[trimIdx,]
-  coverageTrim2 <- coverageTrim1[trimIdx,]
-
-  ### write files
-  plafTrim2[["MATCH"]] <- NULL
-  altTrim2 <- data.frame(CHROM = coverageTrim2$CHROM,
-                         POS = coverageTrim2$POS,
-                         altCount = coverageTrim2$altCount)
-  refTrim2 <- data.frame(CHROM = coverageTrim2$CHROM,
-                         POS = coverageTrim2$POS,
-                         refCount = coverageTrim2$refCount)
-  # obsWSAFtmp <- alttmp/(reftmp + alttmp)
-
-  write.table(plafTrim2, file = "tmpPLAF.txt",
-              sep = "\t", quote = F, row.names = F)
-  write.table(altTrim2, file = "tmpALT.txt",
-              sep = "\t", quote = F, row.names = F)
-  write.table(refTrim2, file = "tmpREF.txt",
-              sep = "\t", quote = F, row.names = F)
-
-  isBothPlafVcfTrimmed <<- TRUE
-  coverageTrimmedGlobal <<- extractCoverageFromTxt("tmpREF.txt", "tmpALT.txt")
-  plafTrimmedGlobal <<- plafTrim2
-  return (NULL)
-}
-
-
-originlist <- cencoor$ID
 
 
 isBothPlafVcfTrimmed = FALSE
@@ -646,9 +580,9 @@ function(input, output, session) {
 
     letsTrimPlafVcf(coverageUntrimmedGlobal, plafUntrimmedGlobal)
 
-    
-    
-    
+
+
+
     deconvolutedGlobal <<- dEploid(paste("-ref", "tmpREF.txt",
                                          "-alt", "tmpALT.txt",
                                          "-plaf", "tmpPLAF.txt",

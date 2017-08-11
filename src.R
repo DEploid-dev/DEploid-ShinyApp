@@ -462,5 +462,51 @@ plotLLKPlotly <- function (llk, llkEvent){
 }
 
 
+letsTrimPlafVcf <- function (coverageVCF, plafFile) {
+  cat("Log: trim VCF and plaf")
+  coverageVCF$MATCH <- paste(coverageVCF$CHROM, coverageVCF$POS, sep = "-")
+  plafFile$MATCH <- paste(plafFile$CHROM, plafFile$POS, sep = "-")
+  ### assertion: take a look at r-package: assertthat
+
+  # Two stage of trimming
+  #  1. trim them so they have the same sites
+  #  2. trim off sites where REF+ALT<5 and PLAF == 0
+
+  ### Trim1
+  # get index of plaf
+  plafIndex <- which(plafFile$MATCH %in% coverageVCF$MATCH)
+  plafFileTrim1 <- plafFile[plafIndex, ]
+  # get index of coverage
+  coverageIndex <- which(coverageVCF$MATCH %in% plafFile$MATCH)
+  coverageTrim1 <- coverageVCF[coverageIndex, ]
+
+  trimIdx = which((plafFileTrim1$PLAF != 0) &
+                        (coverageTrim1$refCount + coverageTrim1$altCount >= 5))
+  ### Trim2
+  plafTrim2 <- plafFileTrim1[trimIdx,]
+  coverageTrim2 <- coverageTrim1[trimIdx,]
+
+  ### write files
+  plafTrim2[["MATCH"]] <- NULL
+  altTrim2 <- data.frame(CHROM = coverageTrim2$CHROM,
+                         POS = coverageTrim2$POS,
+                         altCount = coverageTrim2$altCount)
+  refTrim2 <- data.frame(CHROM = coverageTrim2$CHROM,
+                         POS = coverageTrim2$POS,
+                         refCount = coverageTrim2$refCount)
+  # obsWSAFtmp <- alttmp/(reftmp + alttmp)
+
+  write.table(plafTrim2, file = "tmpPLAF.txt",
+              sep = "\t", quote = F, row.names = F)
+  write.table(altTrim2, file = "tmpALT.txt",
+              sep = "\t", quote = F, row.names = F)
+  write.table(refTrim2, file = "tmpREF.txt",
+              sep = "\t", quote = F, row.names = F)
+
+  isBothPlafVcfTrimmed <<- TRUE
+  coverageTrimmedGlobal <<- extractCoverageFromTxt("tmpREF.txt", "tmpALT.txt")
+  plafTrimmedGlobal <<- plafTrim2
+  return (NULL)
+}
 
 
