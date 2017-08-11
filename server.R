@@ -313,10 +313,9 @@ function(input, output, session) {
     tmpQ = quantile(totalDepth, threshold)
     tmpIdx = which((totalDepth > tmpQ))
     potentialOutliers = fun.find.more(tmpIdx, window.size)
-
     plotAltVsRefPlotly(coverageTrimmedGlobal$refCount,
                        coverageTrimmedGlobal$altCount,
-                       threshold, window.size, potentialOutliers)
+                       potentialOutliers = potentialOutliers)
   })
 
 
@@ -397,7 +396,7 @@ function(input, output, session) {
     plotWSAFVsPLAFPlotly(plafTrimmedGlobal[,3], tmpobsWSAF,
                          coverageTrimmedGlobal$refCount,
                          coverageTrimmedGlobal$altCount,
-                         threshold, window.size, potentialOutliers)
+                         potentialOutliers = potentialOutliers)
   })
 
 
