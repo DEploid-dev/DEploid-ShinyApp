@@ -496,15 +496,15 @@ letsTrimPlafVcf <- function (coverageVCF, plafFile) {
                          refCount = coverageTrim2$refCount)
   # obsWSAFtmp <- alttmp/(reftmp + alttmp)
 
-  write.table(plafTrim2, file = "tmpPLAF.txt",
+  write.table(plafTrim2, file = "/var/tmp/tmpPLAF.txt",
               sep = "\t", quote = F, row.names = F)
-  write.table(altTrim2, file = "tmpALT.txt",
+  write.table(altTrim2, file = "/var/tmp/tmpALT.txt",
               sep = "\t", quote = F, row.names = F)
-  write.table(refTrim2, file = "tmpREF.txt",
+  write.table(refTrim2, file = "/var/tmp/tmpREF.txt",
               sep = "\t", quote = F, row.names = F)
 
   isBothPlafVcfTrimmed <<- TRUE
-  coverageTrimmedGlobal <<- extractCoverageFromTxt("tmpREF.txt", "tmpALT.txt")
+  coverageTrimmedGlobal <<- extractCoverageFromTxt("/var/tmp/tmpREF.txt", "/var/tmp/tmpALT.txt")
   plafTrimmedGlobal <<- plafTrim2
   return (NULL)
 }

@@ -583,9 +583,9 @@ function(input, output, session) {
 
 
 
-    deconvolutedGlobal <<- dEploid(paste("-ref", "tmpREF.txt",
-                                         "-alt", "tmpALT.txt",
-                                         "-plaf", "tmpPLAF.txt",
+    deconvolutedGlobal <<- dEploid(paste("-ref", "/var/tmp/tmpREF.txt",
+                                         "-alt", "/var/tmp/tmpALT.txt",
+                                         "-plaf", "/var/tmp/tmpPLAF.txt",
                                          "-noPanel", "-nSample 100 -rate 5"))
     vcfFile <- input$inputVCFfile$datapath
     coverageUntrimmedGlobal <<- extractCoverageFromVcf(vcfFile)
@@ -602,7 +602,7 @@ function(input, output, session) {
 
   output$downloadHaplotypes <- downloadHandler(
     filename = function() {
-      paste("haplotypes.txt", sep = "")
+      paste("/var/tmp/haplotypes.txt", sep = "")
     },
     content = function(file) {
       write.table(t(deconvolutedGlobal$Haps), file, sep = "\t",
