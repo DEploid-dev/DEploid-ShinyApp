@@ -1,6 +1,7 @@
 rm(list=ls())
 library(quantmod)
 library(RCurl)
+library(DEploid)
 
 # allow maximum vcf upload to 100mb
 options(shiny.maxRequestSize=100*1024^2)
@@ -10,7 +11,7 @@ source("src.R")
 
 rancoor <- read.csv("data/randomCoordinates.csv")
 cencoor <- read.csv("data/centerCoordinates.csv")
-originlist <- cencoor$ID
+#originlist <- cencoor$ID
 
 urlfile <- read.csv("data/fetchPLAFUrls.csv")
 geneDrugZone <- read.csv("data/geneDrugZone.csv")
@@ -19,19 +20,25 @@ pvgff <- read.delim("data/PlasmoDB-33_PvivaxSal1.gff",
 pfgff <- read.delim("data/PlasmoDB-33_Pfalciparum3D7.gff",
                     header=F, comment.char="#")
 
+# Raw data
 coverageUntrimmedGlobal = NULL
-coverageTrimmedGlobal = NULL
 plafUntrimmedGlobal = NULL
+# Trim data
+coverageTrimmedGlobal = NULL
 plafTrimmedGlobal = NULL
+# Filter data
+coverageFilteredGlobal = NULL
+plafFilteredGlobal = NULL
 deconvolutedGlobal = NULL
 
 
 
 
 
-
 isBothPlafVcfTrimmed = FALSE
-deconvolutionIsCompleted = FALSE
+#deconvolutionIsCompleted = FALSE
+
+
 
 
 
@@ -85,7 +92,7 @@ function(input, output, session) {
 
     if (! is.null(input$inputOrigin)){
       coor.level = str_sub(input$inputOrigin, 1, 3)
-      p = which(originlist == input$inputOrigin)
+      p = which(cencoor$ID == input$inputOrigin)
     } else {
       leaflet() %>%
         addProviderTiles(providers$Esri.NatGeoWorldMap)
@@ -120,52 +127,6 @@ function(input, output, session) {
   })
 
 
-  fetchPLAF <- reactive({
-    if (is.null(input$inputOrigin)){
-      cat("Log: no input, cann't fetch\n")
-      return()
-    }
-
-    cat("Log: fetching PLAF\n")
-
-    # since is it's new data, need to trim, and rework with the data again
-    isBothPlafVcfTrimmed <<- FALSE
-
-    urls <- as.vector(urlfile$URL)
-    p = which(originlist == input$inputOrigin)
-    positionlist <- c(1,1,
-                      2,
-                      3,3,3,
-                      4,4,4,
-                      5,5,5,
-                      6,6,6,6,
-                      7,7,7,7,
-                      8,
-                      9,9,9,
-                      10,10,10,
-                      11,11,11,11,
-                      12)
-    urls.position = positionlist[p]
-    url_content = urls[urls.position]
-    myfile <- getURL(url_content)
-    plafUntrimmedGlobal <<- read.table(textConnection(myfile), header=T)
-  })
-
-
-  fetchVCF <- reactive({
-    if (is.null(input$inputVCFfile)){
-      cat("Log: no VCF, cann't fetch\n")
-      return()
-    }
-
-    cat("Log: fetching VCF\n")
-
-    # since is it's new data, need to trim, and rework with the data again
-    isBothPlafVcfTrimmed <<- FALSE
-
-    vcfFile <- input$inputVCFfile$datapath
-    coverageUntrimmedGlobal <<- extractCoverageFromVcf(vcfFile)
-  })
 
 
 
@@ -406,16 +367,12 @@ function(input, output, session) {
 
 
   output$panelSequenceDeconWSAFVsPOS <- renderDygraph ({
-    if (is.null(input$inputVCFfile)){
+    if (is.null(deconvolutedGlobal)){
       validate(
-        need(input$inputVCFfile != "", "Please provide a VCF file")
+        need(!is.null(deconvolutedGlobal), "Has not yet been deconvolved!")
       )
       return(NULL)
-     }
-#     deconvolute()
-     if (is.null(deconvolutedGlobal)){
-       return(NULL)
-     }
+    }
 
      deconvolutionIsCompleted <- TRUE
 
@@ -525,13 +482,14 @@ function(input, output, session) {
 
 
   output$panelSequenceDeconObsVsExpWSAF <- renderPlotly({
-    if (is.null(input$inputVCFfile)){
+    if (is.null(deconvolutedGlobal)){
       validate(
-        need(input$inputVCFfile != "", "Please provide a VCF file")
+        need(!is.null(deconvolutedGlobal), "Has not yet been deconvolved!")
       )
       return(NULL)
     }
-    deconvolutionIsCompleted <- TRUE
+
+#    deconvolutionIsCompleted <- TRUE
     prop = deconvolutedGlobal$Proportions[dim(
       deconvolutedGlobal$Proportions)[1],]
     expWSAF = t(deconvolutedGlobal$Haps) %*% prop
@@ -543,9 +501,12 @@ function(input, output, session) {
 
   output$panelMCMCProportions <- renderPlotly({
     if (is.null(deconvolutedGlobal)){
+      validate(
+        need(!is.null(deconvolutedGlobal), "Has not yet been deconvolved!")
+      )
       return(NULL)
     }
-    deconvolutionIsCompleted <- TRUE
+
     prop = as.data.frame(deconvolutedGlobal$Proportions)
     pnum = as.numeric(ncol(prop))
     prop$x = c(1:nrow(prop))
@@ -555,16 +516,34 @@ function(input, output, session) {
 
   output$panelMCMCLLK <- renderPlotly({
     if (is.null(deconvolutedGlobal)){
+      validate(
+        need(!is.null(deconvolutedGlobal), "Has not yet been deconvolved!")
+      )
       return(NULL)
     }
-    deconvolutionIsCompleted <- TRUE
-    llk = deconvolutedGlobal$llks
-    llkEvent = deconvolutedGlobal$llksStates
-    plotLLKPlotly(llk, llkEvent)
+
+    plotLLKPlotly(deconvolutedGlobal$llks, deconvolutedGlobal$llksStates)
   })
 
 
-  observeEvent(input$do, {
+  observeEvent(input$prepData, {
+    if (is.null(input$inputVCFfile)){
+      return (NULL)
+    }
+
+    progress <- Progress$new(session, min=1, max=15)
+    on.exit(progress$close())
+
+    progress$set(message = "Preparing data",
+                 detail = "this may take a few mins ...")
+
+    fetchPLAF()
+    fetchVCF()
+    trimPlafVcf()
+  })
+
+
+  observeEvent(input$deconvData, {
     if (is.null(input$inputVCFfile)){
       return (NULL)
     }
@@ -575,40 +554,34 @@ function(input, output, session) {
     progress$set(message = "Deconvolution in progress, ",
                  detail = "this may take a few mins ...")
 
-    fetchPLAF()
-    fetchVCF()
-
-    letsTrimPlafVcf(coverageUntrimmedGlobal, plafUntrimmedGlobal)
-
-
-
-
-    deconvolutedGlobal <<- dEploid(paste("-ref", "/var/tmp/tmpREF.txt",
-                                         "-alt", "/var/tmp/tmpALT.txt",
-                                         "-plaf", "/var/tmp/tmpPLAF.txt",
+    deconvolutedGlobal <<- dEploid(paste("-ref", "/tmp/tmpREF.txt",
+                                         "-alt", "/tmp/tmpALT.txt",
+                                         "-plaf", "/tmp/tmpPLAF.txt",
                                          "-noPanel", "-nSample 100 -rate 5"))
-    vcfFile <- input$inputVCFfile$datapath
-    coverageUntrimmedGlobal <<- extractCoverageFromVcf(vcfFile)
+#    vcfFile <- input$inputVCFfile$datapath
+#    coverageUntrimmedGlobal <<- extractCoverageFromVcf(vcfFile)
   })
 
 
-#  observe({
-#    if (is.null(deconvolutedGlobal) | (is.null(input$inputVCFfile))){
-#      shinyjs::disable("downloadHaplotypes")
-#    } else {
-#      shinyjs::enable("downloadHaplotypes")
-#    }
-#  })
+  observe({
+    if (is.null(deconvolutedGlobal)){
+      shinyjs::disable("downloadHaplotypes")
+    } else {
+      shinyjs::enable("downloadHaplotypes")
+    }
+  })
+
 
   output$downloadHaplotypes <- downloadHandler(
     filename = function() {
-      paste("/var/tmp/haplotypes.txt", sep = "")
+      paste("/tmp/haplotypes.txt", sep = "")
     },
     content = function(file) {
       write.table(t(deconvolutedGlobal$Haps), file, sep = "\t",
                   col.names = T, row.names = F, quote = F)
     }
   )
+
 
   ####################### Explanation boxes #########################
 
@@ -625,6 +598,7 @@ function(input, output, session) {
     HTML(paste("", "The total coverage is computed as the sum of reference and alternative allele counts at every site. Our experience is that heterozygous sites with high counts for both reference allele and alternative allele can cause over-fitting.",
                sep="<br/>"))
   })
+
 
   output$panelDataExplainAltVsRef <- renderText({
     if (is.null(input$inputVCFfile)){
@@ -664,35 +638,141 @@ function(input, output, session) {
     HTML("Allele frequencies within sample across all 14 chromosomes. Expected and observed WSAF are marked in blue and red respectively.")
   })
 
+  ####################### Data processing #######################
+
+  fetchPLAF <- reactive({
+    if (is.null(input$inputOrigin)){
+      cat("Log: no input, cann't fetch\n")
+      return()
+    }
+
+    cat("Log: fetching PLAF\n")
+
+    # since is it's new data, need to trim, and rework with the data again
+    isBothPlafVcfTrimmed <<- FALSE
+
+    urls <- as.vector(urlfile$URL)
+    p = which(cencoor$ID == input$inputOrigin)
+    positionlist <- c(1,1,
+                      2,
+                      3,3,3,
+                      4,4,4,
+                      5,5,5,
+                      6,6,6,6,
+                      7,7,7,7,
+                      8,
+                      9,9,9,
+                      10,10,10,
+                      11,11,11,11,
+                      12)
+    urls.position = positionlist[p]
+    url_content = urls[urls.position]
+    myfile <- getURL(url_content)
+    plafUntrimmedGlobal <<- read.table(textConnection(myfile), header=T)
+  })
+
+
+  fetchVCF <- reactive({
+    if (is.null(input$inputVCFfile)){
+      cat("Log: no VCF, cann't fetch\n")
+      return()
+    }
+
+    cat("Log: fetching VCF\n")
+
+    # since is it's new data, need to trim, and rework with the data again
+    isBothPlafVcfTrimmed <<- FALSE
+
+    vcfFile <- input$inputVCFfile$datapath
+    coverageUntrimmedGlobal <<- extractCoverageFromVcf(vcfFile)
+  })
+
+
+  trimPlafVcf <- reactive({
+    cat("Log: trim VCF and plaf")
+    coverageUntrimmedGlobal$MATCH <- paste(coverageUntrimmedGlobal$CHROM,
+        coverageUntrimmedGlobal$POS, sep = "-")
+    plafUntrimmedGlobal$MATCH <- paste(plafUntrimmedGlobal$CHROM,
+        plafUntrimmedGlobal$POS, sep = "-")
+    ### assertion: take a look at r-package: assertthat
+
+    # Two stage of trimming
+    #  1. trim them so they have the same sites
+    #  2. trim off sites where REF+ALT<5 and PLAF == 0
+
+    ### Trim1
+    # get index of plaf
+    plafIndex <- which(plafUntrimmedGlobal$MATCH %in%
+                       coverageUntrimmedGlobal$MATCH)
+    plafFileTrim1 <- plafUntrimmedGlobal[plafIndex, ]
+    # get index of coverage
+    coverageIndex <- which(coverageUntrimmedGlobal$MATCH %in%
+                           plafUntrimmedGlobal$MATCH)
+    coverageTrim1 <- coverageUntrimmedGlobal[coverageIndex, ]
+
+    trimIdx = which((plafFileTrim1$PLAF != 0) &
+                        (coverageTrim1$refCount + coverageTrim1$altCount >= 5))
+    ### Trim2
+    plafTrim2 <- plafFileTrim1[trimIdx,]
+    coverageTrim2 <- coverageTrim1[trimIdx,]
+
+    ### write files
+    plafTrim2[["MATCH"]] <- NULL
+    altTrim2 <- data.frame(CHROM = coverageTrim2$CHROM,
+                           POS = coverageTrim2$POS,
+                           altCount = coverageTrim2$altCount)
+    refTrim2 <- data.frame(CHROM = coverageTrim2$CHROM,
+                           POS = coverageTrim2$POS,
+                           refCount = coverageTrim2$refCount)
+    # obsWSAFtmp <- alttmp/(reftmp + alttmp)
+
+    write.table(plafTrim2, file = "/tmp/tmpPLAF.txt",
+                sep = "\t", quote = F, row.names = F)
+    write.table(altTrim2, file = "/tmp/tmpALT.txt",
+                sep = "\t", quote = F, row.names = F)
+    write.table(refTrim2, file = "/tmp/tmpREF.txt",
+                sep = "\t", quote = F, row.names = F)
+
+    isBothPlafVcfTrimmed <<- TRUE
+    coverageTrimmedGlobal <<- extractCoverageFromTxt("/tmp/tmpREF.txt",
+        "/tmp/tmpALT.txt")
+    plafTrimmedGlobal <<- plafTrim2
+  })
+
+
   ############# Require input data or patience ######################
 
-  output$serverDataState <- renderText({
-    if (is.null(input$inputVCFfile)){
-      return (NULL)
-    } else if (!isBothPlafVcfTrimmed){
-      HTML("Loading ... ")
-    } else {
-      return (NULL)
-    }
-  })
-
-  output$severDeconvolutionState <- renderText({
-    if (deconvolutionIsCompleted){
-      return (NULL)
-    } else {
+#  output$serverDataState <- renderText({
+#    if (is.null(input$inputVCFfile)){
+#      return (NULL)
+#    } else if (!isBothPlafVcfTrimmed){
 #      HTML("Loading ... ")
-    }
-  })
+#    } else {
+#      return (NULL)
+#    }
+#  })
 
-  output$severMcMcState <- renderText({
-    if (deconvolutionIsCompleted){
-      return (NULL)
-    } else {
-#      HTML("Loading ... ")
-    }
-  })
+
+#  output$severDeconvolutionState <- renderText({
+#    if (deconvolutionIsCompleted){
+#      return (NULL)
+#    } else {
+##      HTML("Loading ... ")
+#    }
+#  })
+
+
+#  output$severMcMcState <- renderText({
+#    if (deconvolutionIsCompleted){
+#      return (NULL)
+#    } else {
+##      HTML("Loading ... ")
+#    }
+#  })
+
 
   ############# Documentation ######################
+
   output$citeMe <- renderText({
     HTML(paste(toBibtex(citation(package="DEploid")), collapse="\n"))
   })

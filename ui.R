@@ -27,11 +27,8 @@ fluidPage(
           hr(),
           fileInput("inputVCFfile", "Choose VCF file",
                    accept = c("text", "ref", "txt")),
-          actionButton("do", "DEploid"),
-          hr(),
-          HTML("<font color=\"blue\">TODO: advanced parameter turning.</font>"),
-          hr(),
-          htmlOutput("panelSampleInfoExplainSample")
+          actionButton("prepData", "Preparing data")
+#          htmlOutput("panelSampleInfoExplainSample")
         ),
         mainPanel(width = 9,
           shinyjs::useShinyjs(),
@@ -44,13 +41,21 @@ fluidPage(
     tabPanel("Sequence exploration",
       sidebarLayout(
         sidebarPanel(width = 3,
-          HTML("<font color=\"blue\">TODO: interactive buttons.</font>"),
           sliderInput("panelDataTotalCoverageThreshold",
                       label = h4("Choose probability threshold for outliers: "),
                       min = 0.9, max = 1, value = 0.995),
           sliderInput("panelDataTotalCoverageWindow",
                       label = h4("Choose a window size for outlier: "),
-                      min = 0, max = 50, value = 10)
+                      min = 0, max = 50, value = 10),
+          checkboxInput("advanceDEploidParameters",
+                        label = h5("Advance parameters"), value = FALSE),
+          conditionalPanel(
+            condition = "input.advanceDEploidParameters == true",
+            fluidRow(
+              HTML("working progress ...")
+            )
+          ),
+          actionButton("deconvData", "Deconvolution")
         ),
         mainPanel(width = 9,
           shinyjs::useShinyjs(),
@@ -102,7 +107,6 @@ fluidPage(
                                      selected = NULL)),
               column(7, uiOutput("inputGeneUI"))
           )
-  # actionButton("panelSequenceDeconWSAFVsPOSDisableGene", "Disable zoom in.")
         )),
         mainPanel(width = 9,
           shinyjs::useShinyjs(),
@@ -114,7 +118,6 @@ fluidPage(
               fluidRow(column(3), column(5, align = "center",
                 plotlyOutput("panelSequenceDeconObsVsExpWSAF")))),
             tabPanel("MCMC diagnostic",
-              htmlOutput("severMcMcState"),
               tabsetPanel(id = "mcmc",
                 tabPanel("Proportions",
                          fluidRow(column(12, align = "center",
@@ -134,7 +137,6 @@ fluidPage(
     ),
 
     ############ tabPanel 4
-    ############ tabPanel 5
     navbarMenu("Documentation",
       tabPanel("Sample Infos"),
       tabPanel("Sequence Exploration"),
