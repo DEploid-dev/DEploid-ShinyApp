@@ -1,10 +1,10 @@
-rm(list=ls())
+rm(list = ls())
 library(quantmod)
 library(RCurl)
 library(DEploid)
 
 # allow maximum vcf upload to 100mb
-options(shiny.maxRequestSize=100*1024^2)
+options(shiny.maxRequestSize = 100 * 1024^2)
 
 
 source("src.R")
@@ -16,39 +16,34 @@ cencoor <- read.csv("data/centerCoordinates.csv")
 urlfile <- read.csv("data/fetchPLAFUrls.csv")
 geneDrugZone <- read.csv("data/geneDrugZone.csv")
 pvgff <- read.delim("data/PlasmoDB-33_PvivaxSal1.gff",
-                    header=F, comment.char="#")
+                    header = F, comment.char = "#")
 pfgff <- read.delim("data/PlasmoDB-33_Pfalciparum3D7.gff",
-                    header=F, comment.char="#")
+                    header = F, comment.char = "#")
+relativePath <- "/tmp/"
+isBothPlafVcfTrimmed <- FALSE
 
 # Raw data
-coverageUntrimmedGlobal = NULL
-plafUntrimmedGlobal = NULL
+coverageUntrimmedGlobal <- NULL
+plafUntrimmedGlobal <- NULL
 # Trim data
-coverageTrimmedGlobal = NULL
-plafTrimmedGlobal = NULL
+coverageTrimmedGlobal <- NULL
+plafTrimmedGlobal <- NULL
 # Filter data
-coverageFilteredGlobal = NULL
-plafFilteredGlobal = NULL
-deconvolutedGlobal = NULL
-
-
-
-
-
-isBothPlafVcfTrimmed = FALSE
-#deconvolutionIsCompleted = FALSE
-
-
-
+myPotentialOutliers <- NULL
+coverageFilteredGlobal <- NULL
+plafFilteredGlobal <- NULL
+deconvolutedGlobal <- NULL
+#downLoadable <- FALSE
 
 
 function(input, output, session) {
 
   ########## tabPanel 1. Sample Info
-
   output$inputOriginUI <- renderUI({
     if (is.null(input$inputSample)){
-      return()}
+      return()
+    }
+
     # Depending on input$input_type, we'll generate a different
     # UI component and send it to the client.
     switch(input$inputSample,
@@ -83,8 +78,8 @@ function(input, output, session) {
 
 
   output$panelSampleInfoMap <- renderLeaflet({
-    lats = cencoor$lats
-    longs = cencoor$longs
+    lats <- cencoor$lats
+    longs <- cencoor$longs
 
     # SET DEFAULT MAP TO af1 group
     coor.level = "af1"
@@ -127,23 +122,6 @@ function(input, output, session) {
   })
 
 
-
-
-
-  output$panelDataCoverageTable <-renderTable({
-
-    if (is.null(input$inputVCFfile)){
-      return(NULL)
-    }
-
-    if ( is.null(coverageUntrimmedGlobal) ){
-      return (NULL)
-    }
-
-    return(head(coverageUntrimmedGlobal, n = 5))
-  })
-
-
   output$panelDataTotalCoverage <- renderDygraph({
     if (is.null(input$inputVCFfile)){
       validate(
@@ -153,22 +131,20 @@ function(input, output, session) {
     }
     cat ("log: panelDataTotalCoverage\n")
     print(head(coverageTrimmedGlobal))
+
+    findPotentialOutLiers()
     threshold <- input$panelDataTotalCoverageThreshold
     window.size <- input$panelDataTotalCoverageWindow
 
     totalDepth = coverageTrimmedGlobal$refCount + coverageTrimmedGlobal$altCount
     x = 1:length(totalDepth)
-    # range(totalDepth)
-    tmpQ = quantile(totalDepth, threshold)
-    tmpIdx = which((totalDepth > tmpQ ))
-    potentialOutliers = fun.find.more(tmpIdx, window.size)
     tmp = data.frame(x, totalDepth)
 
     return(plot.total.coverage.dygraphs(coverageTrimmedGlobal$refCount,
                                         coverageTrimmedGlobal$altCount,
                                         coverageTrimmedGlobal,
                                         threshold, window.size,
-                                        potentialOutliers, tmp))
+                                        myPotentialOutliers, tmp))
   })
 
 
@@ -199,18 +175,20 @@ function(input, output, session) {
     print(head(coverageTrimmedGlobal))
 
     ### find out outliers
-    threshold <- input$panelDataTotalCoverageThreshold
-    window.size <- input$panelDataTotalCoverageWindow
+#    threshold <- input$panelDataTotalCoverageThreshold
+#    window.size <- input$panelDataTotalCoverageWindow
 
-    totalDepth = coverageTrimmedGlobal$refCount + coverageTrimmedGlobal$altCount
-    x = 1:length(totalDepth)
-    # range(totalDepth)
-    tmpQ = quantile(totalDepth, threshold)
-    tmpIdx = which((totalDepth > tmpQ))
-    potentialOutliers = fun.find.more(tmpIdx, window.size)
+#    totalDepth = coverageTrimmedGlobal$refCount + coverageTrimmedGlobal$altCount
+#    x = 1:length(totalDepth)
+#    # range(totalDepth)
+#    tmpQ = quantile(totalDepth, threshold)
+#    tmpIdx = which((totalDepth > tmpQ))
+#    potentialOutliers = fun.find.more(tmpIdx, window.size)
+    findPotentialOutLiers()
+
     plotAltVsRefPlotly(coverageTrimmedGlobal$refCount,
                        coverageTrimmedGlobal$altCount,
-                       potentialOutliers = potentialOutliers)
+                       potentialOutliers = myPotentialOutliers)
   })
 
 
@@ -275,38 +253,16 @@ function(input, output, session) {
     cat ("log: panelDataWSAFVsPLAF\n")
 
     tmpobsWSAF <- coverageTrimmedGlobal$altCount/(
-      coverageTrimmedGlobal$refCount + coverageTrimmedGlobal$altCount)
+        coverageTrimmedGlobal$refCount + coverageTrimmedGlobal$altCount)
     head(plafTrimmedGlobal, 5)
 
-    threshold <- input$panelDataTotalCoverageThreshold
-    window.size <- input$panelDataTotalCoverageWindow
-
-    totalDepth = coverageTrimmedGlobal$refCount + coverageTrimmedGlobal$altCount
-    x = 1:length(totalDepth)
-    # range(totalDepth)
-    tmpQ = quantile(totalDepth, threshold)
-    tmpIdx = which((totalDepth > tmpQ ))
-    potentialOutliers = fun.find.more(tmpIdx, window.size)
+    findPotentialOutLiers()
 
     plotWSAFVsPLAFPlotly(plafTrimmedGlobal[,3], tmpobsWSAF,
                          coverageTrimmedGlobal$refCount,
                          coverageTrimmedGlobal$altCount,
-                         potentialOutliers = potentialOutliers)
+                         potentialOutliers = myPotentialOutliers)
   })
-
-
-#  deconvolute <- reactive({
-#    if (is.null(input$inputVCFfile)){
-#      cat("Log: no VCF, cann't deconvolute\n")
-#      return()
-#    }
-
-#  deconvolutedGlobal <<- dEploid(paste("-ref", "tmpREF.txt",
-#                                       "-alt", "tmpALT.txt",
-#                                       "-plaf", "tmpPLAF.txt", "-noPanel"))
-#    vcfFile <- input$inputVCFfile$datapath
-#    coverageUntrimmedGlobal <<- extractCoverageFromVcf(vcfFile)
-#  })
 
 
   output$inputCHROMUI <- renderUI({
@@ -379,11 +335,12 @@ function(input, output, session) {
      prop = deconvolutedGlobal$Proportions[dim(
        deconvolutedGlobal$Proportions)[1],]
      expWSAF = t(deconvolutedGlobal$Haps) %*% prop
-     obsWSAF <- coverageTrimmedGlobal$altCount/(
-       coverageTrimmedGlobal$refCount + coverageTrimmedGlobal$altCount)
 
-     vcfCHROMlist <- as.vector(unique(coverageTrimmedGlobal$CHROM))
-     chroms = unique(coverageTrimmedGlobal$CHROM)
+    obsWSAF <- coverageFilteredGlobal$altCount /
+             (coverageFilteredGlobal$refCount + coverageFilteredGlobal$altCount)
+
+     vcfCHROMlist <- as.vector(unique(coverageFilteredGlobal$CHROM))
+     chroms = unique(coverageFilteredGlobal$CHROM)
 
      wsaf.list = list()
      gene.list = list()
@@ -421,9 +378,9 @@ function(input, output, session) {
            droplevels()
        }
        ### wsaf.list
-       idx = which(coverageTrimmedGlobal$CHROM == chroms[chromi])
+       idx = which(coverageFilteredGlobal$CHROM == chroms[chromi])
        wsaf.list[[as.character(chroms[chromi])]] = data.frame(
-         pos = coverageTrimmedGlobal$POS[idx],
+         pos = coverageFilteredGlobal$POS[idx],
          obsWSAF = obsWSAF[idx],
          expWSAF = expWSAF[idx])
        ### gene.list
@@ -489,12 +446,13 @@ function(input, output, session) {
       return(NULL)
     }
 
-#    deconvolutionIsCompleted <- TRUE
     prop = deconvolutedGlobal$Proportions[dim(
       deconvolutedGlobal$Proportions)[1],]
-    expWSAF = t(deconvolutedGlobal$Haps) %*% prop
-    obsWSAF <- coverageTrimmedGlobal$altCount/(coverageTrimmedGlobal$refCount +
-                                                 coverageTrimmedGlobal$altCount)
+    expWSAF <- t(deconvolutedGlobal$Haps) %*% prop
+
+    obsWSAF <- coverageFilteredGlobal$altCount /
+             (coverageFilteredGlobal$refCount + coverageFilteredGlobal$altCount)
+
     plotObsExpWSAFPlotly(obsWSAF, expWSAF)
   })
 
@@ -544,9 +502,14 @@ function(input, output, session) {
 
 
   observeEvent(input$deconvData, {
+#    downLoadable <<- FALSE
     if (is.null(input$inputVCFfile)){
       return (NULL)
     }
+
+    filterPotentialOutLiers()
+
+    cat("Log: Filter out potential outliers\n")
 
     progress <- Progress$new(session, min=1, max=15)
     on.exit(progress$close())
@@ -554,31 +517,33 @@ function(input, output, session) {
     progress$set(message = "Deconvolution in progress, ",
                  detail = "this may take a few mins ...")
 
-    deconvolutedGlobal <<- dEploid(paste("-ref", "/tmp/tmpREF.txt",
-                                         "-alt", "/tmp/tmpALT.txt",
-                                         "-plaf", "/tmp/tmpPLAF.txt",
-                                         "-noPanel", "-nSample 100 -rate 5"))
-#    vcfFile <- input$inputVCFfile$datapath
-#    coverageUntrimmedGlobal <<- extractCoverageFromVcf(vcfFile)
+    deconvolutedGlobal <<- dEploid(paste(
+        "-ref", paste(relativePath, "tmpFilteredREF.txt", sep = ""),
+        "-alt", paste(relativePath, "tmpFilteredALT.txt", sep = ""),
+        "-plaf", paste(relativePath, "tmpFilteredPLAF.txt", sep = ""),
+        "-noPanel", "-nSample 100 -rate 5"))
+#    downLoadable <<- TRUE
   })
 
 
-  observe({
-    if (is.null(deconvolutedGlobal)){
-      shinyjs::disable("downloadHaplotypes")
-    } else {
-      shinyjs::enable("downloadHaplotypes")
-    }
-  })
+#  observe({
+#    if (downLoadable == FALSE){
+#      shinyjs::disable("downloadHaplotypes")
+#    } else {
+#      shinyjs::enable("downloadHaplotypes")
+#    }
+#  })
 
 
   output$downloadHaplotypes <- downloadHandler(
     filename = function() {
-      paste("/tmp/haplotypes.txt", sep = "")
+      paste("haplotypes.txt", sep = "")
     },
     content = function(file) {
-      write.table(t(deconvolutedGlobal$Haps), file, sep = "\t",
-                  col.names = T, row.names = F, quote = F)
+      write.table(data.frame(CHROM = coverageFilteredGlobal$CHROM,
+                             POS = coverageFilteredGlobal$POS,
+                             t(deconvolutedGlobal$Haps)), file, sep = "\t",
+                             col.names = T, row.names = F, quote = F)
     }
   )
 
@@ -638,6 +603,7 @@ function(input, output, session) {
     HTML("Allele frequencies within sample across all 14 chromosomes. Expected and observed WSAF are marked in blue and red respectively.")
   })
 
+
   ####################### Data processing #######################
 
   fetchPLAF <- reactive({
@@ -653,20 +619,20 @@ function(input, output, session) {
 
     urls <- as.vector(urlfile$URL)
     p = which(cencoor$ID == input$inputOrigin)
-    positionlist <- c(1,1,
+    positionlist <- c(1, 1,
                       2,
-                      3,3,3,
-                      4,4,4,
-                      5,5,5,
-                      6,6,6,6,
-                      7,7,7,7,
+                      3, 3, 3,
+                      4, 4, 4,
+                      5, 5, 5,
+                      6, 6, 6, 6,
+                      7, 7, 7, 7,
                       8,
-                      9,9,9,
-                      10,10,10,
-                      11,11,11,11,
+                      9, 9, 9,
+                      10, 10, 10,
+                      11, 11, 11, 11,
                       12)
-    urls.position = positionlist[p]
-    url_content = urls[urls.position]
+    urls.position <- positionlist[p]
+    url_content <- urls[urls.position]
     myfile <- getURL(url_content)
     plafUntrimmedGlobal <<- read.table(textConnection(myfile), header=T)
   })
@@ -689,7 +655,7 @@ function(input, output, session) {
 
 
   trimPlafVcf <- reactive({
-    cat("Log: trim VCF and plaf")
+    cat("Log: trim VCF and plaf\n")
     coverageUntrimmedGlobal$MATCH <- paste(coverageUntrimmedGlobal$CHROM,
         coverageUntrimmedGlobal$POS, sep = "-")
     plafUntrimmedGlobal$MATCH <- paste(plafUntrimmedGlobal$CHROM,
@@ -724,23 +690,62 @@ function(input, output, session) {
     refTrim2 <- data.frame(CHROM = coverageTrim2$CHROM,
                            POS = coverageTrim2$POS,
                            refCount = coverageTrim2$refCount)
-    # obsWSAFtmp <- alttmp/(reftmp + alttmp)
 
-    write.table(plafTrim2, file = "/tmp/tmpPLAF.txt",
+    write.table(plafTrim2, file = paste(relativePath, "tmpPLAF.txt", sep = ""),
                 sep = "\t", quote = F, row.names = F)
-    write.table(altTrim2, file = "/tmp/tmpALT.txt",
+    write.table(altTrim2, file = paste(relativePath, "tmpALT.txt", sep = ""),
                 sep = "\t", quote = F, row.names = F)
-    write.table(refTrim2, file = "/tmp/tmpREF.txt",
+    write.table(refTrim2, file = paste(relativePath, "tmpREF.txt", sep = ""),
                 sep = "\t", quote = F, row.names = F)
 
     isBothPlafVcfTrimmed <<- TRUE
-    coverageTrimmedGlobal <<- extractCoverageFromTxt("/tmp/tmpREF.txt",
-        "/tmp/tmpALT.txt")
+    coverageTrimmedGlobal <<- extractCoverageFromTxt(
+                                paste(relativePath, "tmpREF.txt", sep = ""),
+                                paste(relativePath, "tmpALT.txt", sep = ""))
     plafTrimmedGlobal <<- plafTrim2
   })
 
 
-  ############# Require input data or patience ######################
+  filterPotentialOutLiers <- reactive({
+    write.table(plafTrimmedGlobal[-myPotentialOutliers,],
+        file = paste(relativePath, "tmpFilteredPLAF.txt", sep = ""),
+        sep = "\t", quote = F, row.names = F)
+    plafFilteredGlobal <<- plafTrimmedGlobal[-myPotentialOutliers,]
+
+    coverageFilteredGlobal <<- coverageTrimmedGlobal[-myPotentialOutliers,]
+    altTrim2 <- data.frame(CHROM = coverageFilteredGlobal$CHROM,
+                           POS = coverageFilteredGlobal$POS,
+                           altCount = coverageFilteredGlobal$altCount)
+    refTrim2 <- data.frame(CHROM = coverageFilteredGlobal$CHROM,
+                           POS = coverageFilteredGlobal$POS,
+                           refCount = coverageFilteredGlobal$refCount)
+    write.table(altTrim2, file = paste(relativePath, "tmpFilteredALT.txt", sep = ""),
+                sep = "\t", quote = F, row.names = F)
+    write.table(refTrim2, file = paste(relativePath, "tmpFilteredREF.txt", sep = ""),
+                sep = "\t", quote = F, row.names = F)
+  })
+
+
+  findPotentialOutLiers <- reactive({
+    threshold <- input$panelDataTotalCoverageThreshold
+    window.size <- input$panelDataTotalCoverageWindow
+
+    totalDepth = coverageTrimmedGlobal$refCount + coverageTrimmedGlobal$altCount
+    x = 1:length(totalDepth)
+#    range(totalDepth)
+    tmpQ = quantile(totalDepth, threshold)
+    tmpIdx = which((totalDepth > tmpQ ))
+    myPotentialOutliers <<- fun.find.more(tmpIdx, window.size)
+  })
+
+  ############# Documentation ######################
+
+  output$citeMe <- renderText({
+    HTML(paste(toBibtex(citation(package = "DEploid")), collapse = "\n"))
+  })
+
+
+  ############# obsolete ######################
 
 #  output$serverDataState <- renderText({
 #    if (is.null(input$inputVCFfile)){
@@ -770,12 +775,15 @@ function(input, output, session) {
 #    }
 #  })
 
+#  output$panelDataCoverageTable <-renderTable({
+#    if (is.null(input$inputVCFfile)){
+#      return(NULL)
+#    }
 
-  ############# Documentation ######################
+#    if ( is.null(coverageUntrimmedGlobal) ){
+#      return (NULL)
+#    }
 
-  output$citeMe <- renderText({
-    HTML(paste(toBibtex(citation(package="DEploid")), collapse="\n"))
-  })
-
+#    return(head(coverageUntrimmedGlobal, n = 5))
+#  })
 }
-

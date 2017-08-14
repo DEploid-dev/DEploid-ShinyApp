@@ -42,10 +42,10 @@ fluidPage(
       sidebarLayout(
         sidebarPanel(width = 3,
           sliderInput("panelDataTotalCoverageThreshold",
-                      label = h4("Choose probability threshold for outliers: "),
+                      label = h4("Total coverage quantile threshold: "),
                       min = 0.9, max = 1, value = 0.995),
           sliderInput("panelDataTotalCoverageWindow",
-                      label = h4("Choose a window size for outlier: "),
+                      label = h4("Window size for filtering: "),
                       min = 0, max = 50, value = 10),
           checkboxInput("advanceDEploidParameters",
                         label = h5("Advance parameters"), value = FALSE),
