@@ -138,9 +138,9 @@ fluidPage(
 
     ############ tabPanel 4
     navbarMenu("Documentation",
-      tabPanel("Sample Infos"),
-      tabPanel("Sequence Exploration"),
-      tabPanel("Sequence Deconvolution"),
+      tabPanel("Sample Infos", htmlOutput("infoPage")),
+      tabPanel("Sequence Exploration", htmlOutput("dataPage")),
+      tabPanel("Sequence Deconvolution", htmlOutput("dEploidPage")),
       tabPanel("Cite me", verbatimTextOutput("citeMe"))
     )
 

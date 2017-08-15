@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<title></title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+<link href="data:text/css;charset=utf-8,%0Abody%7B%0Afont%2Dfamily%3A%20Helvetica%3B%0Afont%2Dsize%3A%2012pt%3B%0A%7D%0A" rel="stylesheet" type="text/css" />
+
+</head>
+
+<body>
+
+<style type="text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+<div class="fluid-row" id="header">
+
+</div>
+
+
+<p style="text-align:justify"><code class="docutils literal"><span class="pre">DEploid-ShinyApp</span></code> is a user-friendly web interface for <code class="docutils literal"><span class="pre">DEploid</span></code>, which is designed for deconvoluting mixed genomes with unknown proportions. Traditional &#8216;phasing&#8217; programs are limited to diploid organisms. Our method modifies Li and Stephen’s algorithm <a class="reference internal" href="#li2003" id="id1">[Li2003]</a> with Markov chain Monte Carlo (MCMC) approaches, and builds a generic framework that allows haplotype searches in a multiple infection setting.</p>
+<p style="text-align:justify"><code class="docutils literal"><span class="pre">DEploid</span></code> is primarily developed as part of the <a class="reference external" href="https://www.malariagen.net/projects/parasite/pf3k">Pf3k</a> project, which is a global collaboration using the latest sequencing technologies to provide a high-resolution view of natural variation in the malaria parasite <em>Plasmodium falciparum</em>. Parasite DNA are extracted from patient blood sample, which often contains more than one parasite strain, with unknown proportions. <code class="docutils literal"><span class="pre">DEploid</span></code> is used for deconvoluting mixed haplotypes, and reporting the mixture proportions from each sample. In this documentation, we show deconvolution process can be completed by a few button clicks.</p>
+
+Following the indicated steps, user can specify the parasite species and its origin. DEploid-ShinyApp require user to provide a VCF file for a single sample. Assume all variants are PASS in the QUAL column, the VCF file also reqires the AD field. We use local genetic information (extracted from samples shown in the map) as a background to deconvolute the new sequence.
+
+<p>
+  <img src="screenShot1_ed.png" alt="screenshot1" title="Screenshots" style="max-width:100%;">
+</p>
+
+
+
+
+
+<table class="docutils citation" frame="void" id="li2003" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[Li2003]</a></td><td>Li, N. and M. Stephens (2003). Modeling linkage disequilibrium and identifying recombination hotspots using single-nucleotide polymorphism data. <em>Genetics</em> 165(4), 2213–2233.</td></tr>
+</tbody>
+</table>
+
+</div>
+
+<!--
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+-->
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<!--
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+-->
+
+
+</body>
+</html>

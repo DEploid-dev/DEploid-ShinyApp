@@ -738,10 +738,29 @@ function(input, output, session) {
     myPotentialOutliers <<- fun.find.more(tmpIdx, window.size)
   })
 
+
   ############# Documentation ######################
 
   output$citeMe <- renderText({
     HTML(paste(toBibtex(citation(package = "DEploid")), collapse = "\n"))
+  })
+
+
+  output$infoPage <- renderUI({
+    tags$iframe(src = "infoPage.html",
+      style="width:100%;",  frameborder="0" ,height = "2800px")
+  })
+
+
+  output$dataPage <- renderUI({
+    tags$iframe(src = "dataPage.html",
+      style="width:100%;",  frameborder="0" ,height = "2800px")
+  })
+
+
+  output$dEploidPage <- renderUI({
+    tags$iframe(src = "dEploidPage.html",
+      style="width:100%;",  frameborder="0" ,height = "2800px")
   })
 
 

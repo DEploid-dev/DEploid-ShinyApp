@@ -4,7 +4,7 @@
 
 DEploid-ShinyApp is an interactive web interface for [DEploid](https://github.com/mcveanlab/DEploid) (also available in [R](cran.r-project.org/package=DEploid)). DEploid is designed for deconvoluting mixed genomes with unknown proportions. DEploid-ShinyApp provides a user friendly interface to interact the deconvoluted haplotypes with specific population groups, and look up for existing drug resistance mutations and etc.
 
-![logo](https://github.com/shajoezhu/DEploid-ShinyApp/raw/master/www/screenShot.png "Screenshots")
+![logo](https://github.com/shajoezhu/DEploid-ShinyApp/raw/master/www/screenShot1.png "Screenshots")
 
 Installation
 ------------
